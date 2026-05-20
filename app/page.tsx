@@ -16,7 +16,8 @@ import {
 import { Nav } from "@/components/Nav";
 import { CheckupTrigger } from "@/components/CheckupTrigger";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
+import Link from "next/link";
 
 export default function HomePage() {
   return (
@@ -26,7 +27,7 @@ export default function HomePage() {
       <Stats />
       <Insight />
       <ExecutiveRooms />
-      <Pricing />
+      <PricingTeaser />
       <Institutional />
       <CaseStudies />
       <About />
@@ -276,135 +277,17 @@ function ExecutiveRooms() {
 }
 
 // ============================================================
-// PRICING — 6 tiers
+// PRICING TEASER — quick CTA, links to dedicated /pricing page
 // ============================================================
-const PLANS = [
-  {
-    name: "Free Diagnostic",
-    label: "Start here",
-    price: "Free",
-    period: "",
-    description:
-      "For founders who want to understand what is really blocking business growth before paying for support.",
-    bestFor: "Founders seeking clarity",
-    cta: "Take the Free Check-Up",
-    isCheckup: true,
-    features: [
-      "Growth Readiness Score",
-      "Business archetype",
-      "Basic diagnosis",
-      "Recommended next step",
-      "Email summary of results",
-    ],
-  },
-  {
-    name: "Founder OS Starter",
-    label: "Self-guided structure",
-    price: "KES 5,000",
-    period: "/ month",
-    description:
-      "For early-stage founders who need simple structure, practical tools, and AI-guided business support.",
-    bestFor: "Hustlers and early Operators",
-    cta: "Start with Starter",
-    ctaHref:
-      "mailto:hello@cfopartners.fund?subject=Founder%20OS%20Starter%20enrolment",
-    features: [
-      "AI business assistants (CFO + COO Rooms)",
-      "Basic finance and operations templates",
-      "Monthly founder checklist",
-      "Saved diagnostic results",
-      "Basic reports",
-      "Recommended monthly actions",
-    ],
-  },
-  {
-    name: "Founder OS Growth",
-    label: "Most useful for growing businesses",
-    price: "KES 15,000",
-    period: "/ month",
-    description:
-      "For founders with revenue who need stronger systems, better reporting, and bankability readiness.",
-    bestFor: "Operators and Stabilizers",
-    cta: "Choose Growth",
-    ctaHref:
-      "mailto:hello@cfopartners.fund?subject=Founder%20OS%20Growth%20enrolment",
-    highlighted: true,
-    features: [
-      "All AI Executive Assistants (all 6 rooms)",
-      "Full business template library",
-      "Monthly business review report",
-      "Bankability Score",
-      "Growth action plan",
-      "Quarterly diagnostic refresh",
-      "Community access",
-      "Monthly group review session",
-    ],
-  },
-  {
-    name: "Business Readiness Review",
-    label: "Expert interpretation",
-    price: "KES 35,000",
-    period: " one-time",
-    description:
-      "For founders who want an expert to review their diagnostic results and translate them into a practical action plan.",
-    bestFor: "Founders ready for expert guidance",
-    cta: "Book a Review",
-    ctaHref:
-      "mailto:hello@cfopartners.fund?subject=Business%20Readiness%20Review%20enquiry",
-    features: [
-      "Diagnostic review",
-      "Expert strategy call",
-      "Business readiness report",
-      "30-day action plan",
-      "Recommended support path",
-      "Capital readiness view",
-    ],
-  },
-  {
-    name: "Business Build Sprint",
-    label: "Guided implementation",
-    price: "From KES 75,000",
-    period: " one-time",
-    description:
-      "A 4-week guided implementation sprint to fix the foundations: money, records, systems, reporting, and execution rhythm.",
-    bestFor: "Founders ready to implement",
-    cta: "Join the Sprint",
-    ctaHref:
-      "mailto:hello@cfopartners.fund?subject=Business%20Build%20Sprint%20enrolment",
-    features: [
-      "4-week guided implementation",
-      "Weekly accountability sessions",
-      "Finance and operations setup",
-      "Expert review",
-      "Business structure toolkit",
-      "90-day growth roadmap",
-      "Group and private options available",
-    ],
-  },
-  {
-    name: "Virtual Executive Bench",
-    label: "Premium support",
-    price: "From KES 195,000",
-    period: " / month",
-    description:
-      "For growing companies that need senior finance, operations, growth, and strategic support without hiring a full executive team.",
-    bestFor: "Scalers and growth-stage SMEs",
-    cta: "Apply for Executive Support",
-    ctaHref:
-      "mailto:hello@cfopartners.fund?subject=Virtual%20Executive%20Bench%20enquiry",
-    features: [
-      "Virtual CFO / COO / Growth support",
-      "Monthly management reporting",
-      "Strategic advisory",
-      "Founder review calls",
-      "Investor or bank readiness",
-      "Board-style reporting",
-      "Integrated Executive Bench from KES 350,000/month",
-    ],
-  },
-];
-
-function Pricing() {
+function PricingTeaser() {
+  const tiers = [
+    { name: "Free Diagnostic", price: "Free" },
+    { name: "Founder OS Starter", price: "KES 5K/mo" },
+    { name: "Founder OS Growth", price: "KES 15K/mo", recommended: true },
+    { name: "Business Readiness Review", price: "KES 35K" },
+    { name: "Business Build Sprint", price: "From KES 75K" },
+    { name: "Virtual Executive Bench", price: "From KES 195K/mo" },
+  ];
   return (
     <section id="pricing" className="bg-bg-alt py-[90px]">
       <div className="mx-auto max-w-[1180px] px-6">
@@ -414,94 +297,47 @@ function Pricing() {
         <h2 className="mb-5 max-w-[820px]">
           Choose the level of support your business needs next.
         </h2>
-        <p className="mb-[60px] max-w-[760px] text-[1.1rem] text-ink-2">
-          Start with a free diagnosis. Then move into the tools, expert
-          guidance, implementation support, or executive bench your business
-          needs to become structured, bankable, fundable, and scalable.
+        <p className="mb-10 max-w-[760px] text-[1.1rem] text-ink-2">
+          Six tiers, mapped to where you stand today — from a free diagnostic
+          to a full virtual executive bench. Plus a Portfolio Intelligence
+          Platform for institutions.
         </p>
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {PLANS.map((plan) => (
-            <PricingCard key={plan.name} plan={plan} />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function PricingCard({ plan }: { plan: (typeof PLANS)[number] }) {
-  return (
-    <Card
-      className={`relative flex h-full flex-col rounded-3xl ${
-        plan.highlighted
-          ? "border-2 border-ink shadow-2xl"
-          : "border-line shadow-sm"
-      }`}
-    >
-      {plan.highlighted && (
-        <div className="absolute -top-4 left-6 rounded-full bg-ink px-4 py-2 text-[0.72rem] font-semibold uppercase tracking-[0.06em] text-white">
-          Recommended
-        </div>
-      )}
-      <CardContent className="flex h-full flex-col p-7 pt-7">
-        <div className="mb-5">
-          <p className="mb-3 text-[0.85rem] font-medium text-ink-3">
-            {plan.label}
-          </p>
-          <h3 className="text-[1.5rem] font-bold tracking-tight text-ink">
-            {plan.name}
-          </h3>
-          <p className="mt-3 min-h-[80px] text-[0.9rem] leading-6 text-ink-2">
-            {plan.description}
-          </p>
-        </div>
-        <div className="mb-5">
-          <div className="flex items-end gap-1">
-            <span className="font-serif text-[1.9rem] font-semibold tracking-tight text-ink">
-              {plan.price}
-            </span>
-            {plan.period && (
-              <span className="pb-1 text-[0.9rem] text-ink-3">
-                {plan.period}
-              </span>
-            )}
-          </div>
-          <p className="mt-2 text-[0.85rem] font-medium text-ink-2">
-            Best for: {plan.bestFor}
-          </p>
-        </div>
-        {plan.isCheckup ? (
-          <CheckupTrigger
-            variant={plan.highlighted ? "primary" : "outline"}
-            className="mb-6 w-full"
-          >
-            {plan.cta} <ArrowRight className="h-4 w-4" />
-          </CheckupTrigger>
-        ) : (
-          <Button
-            asChild
-            variant={plan.highlighted ? "default" : "outline"}
-            size="lg"
-            className="mb-6 w-full"
-          >
-            <a href={plan.ctaHref}>
-              {plan.cta} <ArrowRight className="h-4 w-4" />
-            </a>
-          </Button>
-        )}
-        <div className="mt-auto space-y-3">
-          {plan.features.map((feature) => (
+        <div className="mb-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {tiers.map((t) => (
             <div
-              key={feature}
-              className="flex gap-3 text-[0.88rem] leading-5 text-ink-2"
+              key={t.name}
+              className={`flex items-center justify-between rounded-card border bg-white px-5 py-4 ${
+                t.recommended ? "border-2 border-ink" : "border-line"
+              }`}
             >
-              <Check className="mt-0.5 h-4 w-4 flex-none text-accent" />
-              <span>{feature}</span>
+              <div>
+                <div className="font-semibold text-ink">{t.name}</div>
+                {t.recommended && (
+                  <div className="text-[0.7rem] font-semibold uppercase tracking-[0.06em] text-accent-2">
+                    Recommended
+                  </div>
+                )}
+              </div>
+              <div className="font-serif text-[1.1rem] font-semibold text-ink">
+                {t.price}
+              </div>
             </div>
           ))}
         </div>
-      </CardContent>
-    </Card>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/pricing"
+            className="inline-flex items-center gap-2 rounded-full bg-ink px-7 py-4 text-base font-semibold text-white transition-all hover:bg-ink-2 hover:-translate-y-0.5 hover:shadow-card"
+          >
+            See full pricing
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+          <CheckupTrigger variant="outline" className="px-7 py-4 text-base">
+            Take the free diagnostic
+          </CheckupTrigger>
+        </div>
+      </div>
+    </section>
   );
 }
 

@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Fraunces } from "next/font/google";
 import "./globals.css";
-import { CheckupProvider } from "@/components/CheckupProvider";
-import { CheckupModal } from "@/components/CheckupModal";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -45,12 +43,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
-      <body>
-        <CheckupProvider>
-          {children}
-          <CheckupModal />
-        </CheckupProvider>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

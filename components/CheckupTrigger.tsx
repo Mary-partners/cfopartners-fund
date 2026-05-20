@@ -1,6 +1,4 @@
-"use client";
-
-import { useCheckup } from "./CheckupProvider";
+import { DIAGNOSTIC_URL } from "@/lib/links";
 
 interface Props {
   children: React.ReactNode;
@@ -18,19 +16,25 @@ const variantStyles: Record<NonNullable<Props["variant"]>, string> = {
   ghost: "bg-transparent text-ink-2 hover:text-ink",
 };
 
+/**
+ * Primary CTA across the site. Sends visitors to the live Business Growth
+ * Check-Up hosted on Notion (the canonical diagnostic that generates real
+ * submission data). Opens in a new tab so visitors don't lose the marketing
+ * page.
+ */
 export function CheckupTrigger({
   children,
   className = "",
   variant = "primary",
 }: Props) {
-  const { open } = useCheckup();
   return (
-    <button
-      type="button"
-      onClick={open}
+    <a
+      href={DIAGNOSTIC_URL}
+      target="_blank"
+      rel="noopener noreferrer"
       className={`inline-flex items-center justify-center gap-2 rounded-full px-[22px] py-[14px] text-[0.95rem] font-semibold transition-all duration-150 ${variantStyles[variant]} ${className}`}
     >
       {children}
-    </button>
+    </a>
   );
 }
