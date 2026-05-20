@@ -359,37 +359,37 @@ export const ARCHETYPES: Archetype[] = [
     key: "Hustler",
     min: 0,
     max: 50,
-    tier: "Bankable Foundation",
-    tierPrice: "KES 12,500 · 4 weeks",
+    tier: "Founder OS Starter",
+    tierPrice: "KES 5,000 / month",
     blurb:
-      "You're building from the ground up. The first job isn't growth — it's making the business bankable. Separate personal and business money, register with KRA, and get records that an outsider can read. That's the unlock.",
+      "You're building from the ground up. Start in the CFO and Operations Rooms with Founder OS Starter — AI-guided business assistants, simple finance and operations templates, and a monthly founder checklist that puts the basic structure in place. Separate money, set up records, get bankable.",
   },
   {
     key: "Operator",
     min: 51,
     max: 90,
-    tier: "Founder Cohort",
-    tierPrice: "KES 150,000 · 8 weeks",
+    tier: "Founder OS Growth",
+    tierPrice: "KES 15,000 / month",
     blurb:
-      "You have a business that works — but it works because you do. The next step is installing the systems and discipline that let it run without depending on you for every decision.",
+      "Your business works because you do. Founder OS Growth unlocks all AI Executive Assistants — CFO, COO, Growth, Risk, Board — plus monthly business review reports, the Bankability Score, and quarterly diagnostic refreshes. Install the systems that let the business run without you.",
   },
   {
     key: "Stabilizer",
     min: 91,
     max: 120,
-    tier: "Strategic Diagnostic",
-    tierPrice: "KES 580,000 · 6 weeks",
+    tier: "Business Build Sprint",
+    tierPrice: "From KES 75,000 one-time",
     blurb:
-      "You've built something real. Now it's time to make it investor-ready and strategically clear — financial pack, board reporting, and a 90-day execution roadmap that gets you to the next stage.",
+      "You've built something real. The Business Build Sprint is a 4-week guided implementation that fixes the foundations — money, records, systems, reporting, and execution rhythm — with weekly accountability and an expert review. Output: a 90-day growth roadmap and the structure to scale on.",
   },
   {
     key: "Scaler",
     min: 121,
     max: 150,
-    tier: "Virtual CFO Bench",
-    tierPrice: "From KES 195,000/mo",
+    tier: "Virtual Executive Bench",
+    tierPrice: "From KES 195,000 / month",
     blurb:
-      "You're scaling. What you need now is an embedded fractional CFO with an AI-powered platform behind them — running monthly board reporting, supporting your capital raise, and giving you the strategic partnership a Series-stage business demands.",
+      "You're scaling. The Virtual Executive Bench gives you embedded Virtual CFO, COO, and Growth support — monthly management reporting, strategic advisory, investor and bank readiness, board-style reporting. The executive team you'd otherwise need to hire, available as a fractional service.",
   },
 ];
 
