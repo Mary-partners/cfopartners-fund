@@ -18,22 +18,23 @@ const fraunces = Fraunces({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.cfopartners.fund"),
-  title: "CFO Partners — The Virtual C-Suite for African Founders",
+  title:
+    "CFO Partners — AI-powered executive support for African businesses",
   description:
-    "Human strategist. AI-powered platform. M-Pesa-native. KRA-fluent. CFO Partners installs the systems, financial visibility, and growth discipline African businesses need to scale — without taking on capital they're not ready for.",
+    "Your business needs more than advice — it needs an executive system. CFO Partners gives African founders AI-powered executive assistants, practical business tools, diagnostics, and expert support in one platform. Start with the free Business Growth Check-Up.",
   openGraph: {
-    title: "CFO Partners — The Virtual C-Suite for African Founders",
+    title: "CFO Partners — Executive support for African businesses",
     description:
-      "Take the free Business Growth Check-Up. 10 minutes. 6 pillars. Get your archetype and tier match.",
+      "Seven Executive Rooms. AI assistants for CFO, COO, CMO, CRO, Board and more. Free Business Growth Check-Up in 10 minutes.",
     url: "https://www.cfopartners.fund",
     siteName: "CFO Partners",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "CFO Partners — The Virtual C-Suite for African Founders",
+    title: "CFO Partners — Executive support for African businesses",
     description:
-      "Take the free Business Growth Check-Up. 10 minutes. 6 pillars. Get your archetype and tier match.",
+      "Seven Executive Rooms. AI assistants for CFO, COO, CMO, CRO, Board and more. Free Business Growth Check-Up in 10 minutes.",
   },
 };
 

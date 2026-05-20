@@ -3,9 +3,9 @@
 import { CheckupTrigger } from "./CheckupTrigger";
 
 const links = [
-  { href: "#suite", label: "The Suite" },
-  { href: "#disciplines", label: "5 Disciplines" },
-  { href: "#case-studies", label: "Case Studies" },
+  { href: "#rooms", label: "Executive Rooms" },
+  { href: "#pricing", label: "Pricing" },
+  { href: "#institutional", label: "For Institutions" },
   { href: "#about", label: "About" },
 ];
 
