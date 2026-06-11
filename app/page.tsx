@@ -18,6 +18,7 @@ import { CheckupTrigger } from "@/components/CheckupTrigger";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
+import { ROOMS } from "@/lib/rooms";
 
 export default function HomePage() {
   return (
@@ -154,77 +155,17 @@ function Insight() {
 }
 
 // ============================================================
-// EXECUTIVE ROOMS — the 7 rooms
+// EXECUTIVE ROOMS — pulled from lib/rooms.ts (single source of truth)
 // ============================================================
-const ROOMS = [
-  {
-    name: "The CEO Room",
-    role: "Strategy & Direction",
-    assistant: "CEO Advisor",
-    icon: Compass,
-    blurb:
-      "Clarify your business model, goals, priorities, and growth path. Pressure-test strategic decisions before you commit.",
-    prompt:
-      "Based on my diagnostic results, what are the top 3 strategic decisions I need to make this quarter?",
-  },
-  {
-    name: "The CFO Room",
-    role: "Finance & Bankability",
-    assistant: "Virtual CFO",
-    icon: LineChart,
-    blurb:
-      "Revenue, costs, cash flow, margins, founder salary discipline, investor and loan readiness. Our strongest wedge — and where most founders should start.",
-    prompt: "Am I ready to borrow money, and what would a lender worry about?",
-    highlighted: true,
-  },
-  {
-    name: "The COO Room",
-    role: "Operations & Systems",
-    assistant: "Operations Architect",
-    icon: Wrench,
-    blurb:
-      "Workflows, team roles, SOPs, delivery systems, weekly operating rhythm, internal controls, execution discipline.",
-    prompt:
-      "Create a simple operating system for my business based on my team size and revenue stage.",
-  },
-  {
-    name: "The CMO Room",
-    role: "Sales, Marketing & Growth",
-    assistant: "Growth Strategist",
-    icon: Megaphone,
-    blurb:
-      "Customer segmentation, sales scripts, offer design, lead generation, content strategy, customer retention.",
-    prompt: "Help me create a 30-day customer acquisition plan for my business.",
-  },
-  {
-    name: "The CRO Room",
-    role: "Risk, Compliance & Resilience",
-    assistant: "Risk Advisor",
-    icon: ShieldCheck,
-    blurb:
-      "KRA basics, registration, customer concentration risk, cash flow risk, debt risk, governance basics, business continuity.",
-    prompt:
-      "What are the biggest risks in my business based on my current diagnostic score?",
-  },
-  {
-    name: "The Board Room",
-    role: "Governance & Decision Support",
-    assistant: "Board Advisor",
-    icon: Briefcase,
-    blurb:
-      "Monthly board-style reports, decision memos, investor updates, partner updates, KPI tracking. Board-level thinking before you have a formal board.",
-    prompt: "Prepare a one-page board update from my monthly business data.",
-  },
-  {
-    name: "The Expert Marketplace",
-    role: "Human Escalation",
-    assistant: "Vetted practitioners",
-    icon: Users,
-    blurb:
-      "When AI isn't enough: tax, accounting cleanup, legal, fundraising, credit readiness, strategy workshops, operational implementation. The Sndbx model, rebuilt digitally.",
-    prompt: "Book a 45-minute session with a vetted CFO, accountant, or strategist.",
-  },
-];
+const ROOM_ICON_MAP: Record<string, typeof Compass> = {
+  compass: Compass,
+  "line-chart": LineChart,
+  wrench: Wrench,
+  megaphone: Megaphone,
+  "shield-check": ShieldCheck,
+  briefcase: Briefcase,
+  users: Users,
+};
 
 function ExecutiveRooms() {
   return (
@@ -237,37 +178,46 @@ function ExecutiveRooms() {
           Seven Executive Rooms. One digital business support house.
         </h2>
         <p className="mb-[60px] max-w-[760px] text-[1.1rem] text-ink-2">
-          Each room pairs an AI executive assistant with the tools, templates,
-          and human experts you need for that function. Step into the room your
-          business needs next — guided by your diagnostic.
+          Each room pairs an AI executive assistant with named tools, templates,
+          and human experts. Step into the room your business needs next —
+          guided by your diagnostic.
         </p>
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
           {ROOMS.map((r) => {
-            const Icon = r.icon;
+            const Icon = ROOM_ICON_MAP[r.iconKey] ?? Compass;
             return (
-              <Card
-                key={r.name}
-                className={`flex h-full flex-col p-7 transition-all hover:-translate-y-0.5 hover:shadow-card ${
-                  r.highlighted ? "border-2 border-accent" : ""
-                }`}
+              <Link
+                key={r.slug}
+                href={`/rooms/${r.slug}`}
+                className="group block"
               >
-                <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-gold-soft text-accent-2">
-                  <Icon className="h-5 w-5" />
-                </div>
-                <span className="mb-1 text-[0.78rem] font-semibold uppercase tracking-[0.06em] text-accent-2">
-                  {r.role}
-                </span>
-                <h3 className="mb-2 text-[1.2rem]">{r.name}</h3>
-                <p className="mb-4 text-[0.95rem] text-ink-2">{r.blurb}</p>
-                <div className="mt-auto rounded-xl border border-line bg-bg-alt p-4">
-                  <div className="mb-1 flex items-center gap-2 text-[0.75rem] font-semibold uppercase tracking-[0.06em] text-ink-3">
-                    <Brain className="h-3.5 w-3.5" /> AI: {r.assistant}
+                <Card
+                  className={`flex h-full flex-col p-7 transition-all group-hover:-translate-y-0.5 group-hover:shadow-card ${
+                    r.highlighted ? "border-2 border-accent" : ""
+                  }`}
+                >
+                  <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-gold-soft text-accent-2">
+                    <Icon className="h-5 w-5" />
                   </div>
-                  <p className="m-0 font-serif text-[0.95rem] italic leading-snug text-ink">
-                    &ldquo;{r.prompt}&rdquo;
-                  </p>
-                </div>
-              </Card>
+                  <span className="mb-1 text-[0.78rem] font-semibold uppercase tracking-[0.06em] text-accent-2">
+                    {r.role}
+                  </span>
+                  <h3 className="mb-2 text-[1.2rem]">{r.name}</h3>
+                  <p className="mb-4 text-[0.95rem] text-ink-2">{r.blurb}</p>
+                  <div className="rounded-xl border border-line bg-bg-alt p-4">
+                    <div className="mb-1 flex items-center gap-2 text-[0.75rem] font-semibold uppercase tracking-[0.06em] text-ink-3">
+                      <Brain className="h-3.5 w-3.5" /> AI: {r.assistant}
+                    </div>
+                    <p className="m-0 font-serif text-[0.95rem] italic leading-snug text-ink">
+                      &ldquo;{r.prompt}&rdquo;
+                    </p>
+                  </div>
+                  <span className="mt-5 inline-flex items-center gap-1 text-[0.85rem] font-semibold text-accent-2 group-hover:text-accent">
+                    {r.tools.length} tools inside
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </span>
+                </Card>
+              </Link>
             );
           })}
         </div>
