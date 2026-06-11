@@ -4,8 +4,9 @@ import { CheckupTrigger } from "./CheckupTrigger";
 const links = [
   { href: "/#rooms", label: "Executive Rooms" },
   { href: "/pricing", label: "Pricing" },
+  { href: "/blog", label: "Journal" },
   { href: "/#institutional", label: "For Institutions" },
-  { href: "/#about", label: "About" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export function Nav() {
@@ -18,12 +19,12 @@ export function Nav() {
         >
           CFO<span className="text-accent">Partners</span>
         </Link>
-        <div className="flex items-center gap-7">
+        <div className="flex items-center gap-6">
           {links.map((l) => (
             <Link
               key={l.href}
               href={l.href}
-              className="hidden text-[0.95rem] font-medium text-ink-2 transition-colors hover:text-ink sm:inline-block"
+              className="hidden text-[0.9rem] font-medium text-ink-2 transition-colors hover:text-ink lg:inline-block"
             >
               {l.label}
             </Link>

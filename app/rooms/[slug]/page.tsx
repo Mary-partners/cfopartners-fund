@@ -16,11 +16,11 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Nav } from "@/components/Nav";
+import { Footer } from "@/components/Footer";
 import { CheckupTrigger } from "@/components/CheckupTrigger";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ROOMS, allRoomSlugs, roomFor, type TierLabel } from "@/lib/rooms";
-import { mailto } from "@/lib/links";
 
 export function generateStaticParams() {
   return allRoomSlugs().map((slug) => ({ slug }));
@@ -232,21 +232,7 @@ export default function RoomPage({ params }: { params: { slug: string } }) {
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="border-t border-line bg-bg-alt py-10 text-[0.88rem] text-ink-3">
-        <div className="mx-auto flex max-w-[1180px] flex-wrap justify-between gap-3 px-6">
-          <span>
-            © {new Date().getFullYear()} CFO Innovation Partners. All rights
-            reserved.
-          </span>
-          <Link
-            href={mailto(`${room.name} — enquiry`)}
-            className="text-ink-3 hover:text-ink"
-          >
-            hello@cfopartners.fund
-          </Link>
-        </div>
-      </footer>
+      <Footer />
     </main>
   );
 }
