@@ -8,7 +8,7 @@ import { BlogCover } from "@/components/BlogCover";
 import { POSTS } from "@/lib/blog";
 
 export const metadata: Metadata = {
-  title: "Journal — CFO Partners",
+  title: "Journal | CFO Partners",
   description:
     "Diagnostic insights, cohort findings, and the operating beliefs behind the CFO Innovation Partners model. Published as we learn them.",
 };

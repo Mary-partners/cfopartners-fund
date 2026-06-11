@@ -20,6 +20,11 @@ import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { CheckupTrigger } from "@/components/CheckupTrigger";
+import { Reveal } from "@/components/Reveal";
+import { Counter } from "@/components/Counter";
+import { SectorChart } from "@/components/SectorChart";
+import { FAQ } from "@/components/FAQ";
+import { RoomFinder } from "@/components/RoomFinder";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ROOMS } from "@/lib/rooms";
@@ -29,6 +34,10 @@ import {
   ADVISORY_MODEL,
   CASE_STUDIES,
   MARKET_INSIGHTS,
+  TRACK_RECORD,
+  CHALLENGE_STATS,
+  RESULTS_TABLE,
+  SECTORS_SERVED,
 } from "@/lib/impact";
 import { POSTS } from "@/lib/blog";
 import { BlogCover } from "@/components/BlogCover";
@@ -45,15 +54,20 @@ export default function HomePage() {
       <Nav />
       <Hero />
       <CoreBelief />
+      <Challenge />
       <Stats />
       <AdvisoryModel />
       <ExecutiveRooms />
+      <FinderSection />
       <Insight />
+      <CohortSection />
       <PricingTeaser />
+      <Results />
       <Institutional />
       <CaseStudies />
       <RunByExperts />
       <JournalTeaser />
+      <FAQSection />
       <ContactSection />
       <Footer />
     </>
@@ -61,7 +75,7 @@ export default function HomePage() {
 }
 
 // ============================================================
-// HERO — balanced 2-column with impact card on right
+// HERO: balanced 2-column with impact card on right
 // ============================================================
 function Hero() {
   return (
@@ -81,9 +95,9 @@ function Hero() {
             </h1>
             <p className="mb-8 text-[1.1rem] text-ink-2">
               Most African founders are forced to act as CEO, CFO, COO, CMO,
-              salesperson, accountant, and strategist — all at once. CFO
+              salesperson, accountant, and strategist all at once. CFO
               Partners gives you AI-powered executive assistants, practical
-              business tools, diagnostics, and expert support in one platform —
+              business tools, diagnostics, and expert support in one platform,
               so you can build a business that is structured, bankable,
               fundable, and scalable.
             </p>
@@ -108,7 +122,7 @@ function Hero() {
             </p>
           </div>
 
-          {/* Right-side impact card — balances the hero */}
+          {/* Right-side impact card balances the hero */}
           <HeroImpactCard />
         </div>
       </div>
@@ -124,7 +138,7 @@ function HeroImpactCard() {
         Q2 2026 Impact · CFOIP Cohort
       </div>
       <h3 className="mb-6 font-serif text-[1.3rem] leading-tight">
-        Diagnostic-led pipeline. Real founders. Measurable change.
+        A diagnostic-led pipeline with measurable founder outcomes.
       </h3>
       <div className="grid grid-cols-2 gap-5">
         {HEADLINE_STATS.map((s) => (
@@ -197,7 +211,7 @@ function Stats() {
           {HEADLINE_STATS.map((s) => (
             <div key={s.label}>
               <div className="font-serif text-[clamp(2rem,4vw,2.8rem)] font-semibold leading-none text-ink">
-                {s.num}
+                <Counter value={s.num} />
               </div>
               <div className="mt-2 text-[0.95rem] font-medium text-ink-2">
                 {s.label}
@@ -214,7 +228,7 @@ function Stats() {
 }
 
 // ============================================================
-// ADVISORY MODEL — 6 steps
+// ADVISORY MODEL: 6 steps
 // ============================================================
 function AdvisoryModel() {
   return (
@@ -279,7 +293,7 @@ function ExecutiveRooms() {
         <p className="mb-[60px] max-w-[760px] text-[1.1rem] text-ink-2">
           Each room pairs an AI executive assistant with named tools,
           templates, and human experts. Step into the room your business needs
-          next — guided by your diagnostic.
+          next, guided by your diagnostic.
         </p>
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
           {ROOMS.map((r) => {
@@ -348,13 +362,13 @@ function Insight() {
           </div>
           <Card className="border-0 bg-white/5 p-6 backdrop-blur">
             <div className="mb-2 text-[0.75rem] font-semibold uppercase tracking-[0.08em] text-accent">
-              The wedge
+              What the data shows
             </div>
             <p className="m-0 font-serif text-[1.3rem] leading-[1.35] text-white">
               &ldquo;Capital cannot fix what structure has not built yet.&rdquo;
             </p>
             <p className="mt-4 text-[0.85rem] text-slate-400">
-              — A finding from the CFO Partners diagnostic cohort, Q2 2026
+              A finding from the CFO Partners diagnostic cohort, Q2 2026
             </p>
           </Card>
         </div>
@@ -402,7 +416,7 @@ function PricingTeaser() {
               Choose the level of support your business needs next.
             </h2>
             <p className="m-0 max-w-[640px] text-[1.1rem] text-ink-2">
-              Six tiers, mapped to where you stand today — from a free
+              Six tiers, mapped to where you stand today, from a free
               diagnostic to a full virtual executive bench. Plus a Portfolio
               Intelligence Platform for institutions.
             </p>
@@ -501,7 +515,7 @@ function Institutional() {
             </div>
             <Button asChild size="lg" className="mt-7 w-full" variant="default">
               <a
-                href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Portfolio Intelligence Platform — Institutional enquiry")}`}
+                href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Portfolio Intelligence Platform: Institutional enquiry")}`}
               >
                 Request Institutional Pricing
                 <ArrowRight className="h-4 w-4" />
@@ -530,7 +544,7 @@ function FeaturePill({
 }
 
 // ============================================================
-// CASE STUDIES — real Q2 2026 vignettes
+// CASE STUDIES: real Q2 2026 vignettes
 // ============================================================
 function CaseStudies() {
   return (
@@ -539,10 +553,10 @@ function CaseStudies() {
         <span className="mb-3 inline-block text-[0.8rem] font-semibold uppercase tracking-[0.1em] text-accent-2">
           Most significant change · Q2 2026
         </span>
-        <h2 className="mb-5 max-w-[780px]">Real founders. Real change.</h2>
+        <h2 className="mb-5 max-w-[780px]">Founder outcomes from the Q2 2026 cohort.</h2>
         <p className="mb-[60px] max-w-[720px] text-[1.1rem] text-ink-2">
           Three vignettes from the Q2 2026 MEL report. Each demonstrates a
-          different pathway — founder, institutional, and systems — through the
+          different pathway (founder, institutional, and systems) through the
           firm.
         </p>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -578,7 +592,7 @@ function CaseStudies() {
 }
 
 // ============================================================
-// RUN BY EXPERTS — replaces the Mary bio
+// RUN BY EXPERTS
 // ============================================================
 function RunByExperts() {
   const experts = [
@@ -615,7 +629,7 @@ function RunByExperts() {
             <p className="m-0 max-w-[620px] text-[1.1rem] text-ink-2">
               CFO Partners is a multi-disciplinary team of finance, operations,
               strategy, and governance practitioners with deep experience
-              inside fast-growth African businesses. We do not just consult —
+              inside fast-growth African businesses. We do not just consult.
               we diagnose, design, and execute alongside the founders we serve.
             </p>
           </div>
@@ -664,7 +678,7 @@ function JournalTeaser() {
             </h2>
             <p className="m-0 max-w-[620px] text-[1.05rem] text-ink-2">
               Diagnostic insights, cohort findings, and the operating beliefs
-              behind the model — published as we learn them.
+              behind the model, published as we learn them.
             </p>
           </div>
           <div className="flex justify-end">
@@ -722,7 +736,7 @@ function ContactSection() {
               There is a route from here to a structured engagement.
             </h2>
             <p className="mb-8 max-w-[560px] text-[1.05rem] text-slate-300">
-              Take the diagnostic. Book a review. Or write directly — we read
+              Take the diagnostic. Book a review. Or write directly. We read
               every founder email and reply within two working days.
             </p>
             <div className="flex flex-wrap gap-3">
@@ -767,6 +781,202 @@ function ContactSection() {
             </div>
           </Card>
         </div>
+      </div>
+    </section>
+  );
+}
+
+
+// ============================================================
+// CHALLENGE: the problem we exist to solve
+// ============================================================
+function Challenge() {
+  return (
+    <section className="py-[90px]">
+      <div className="mx-auto max-w-[1180px] px-6">
+        <Reveal>
+          <span className="mb-3 inline-block text-[0.8rem] font-semibold uppercase tracking-[0.1em] text-accent-2">
+            The problem we exist to solve
+          </span>
+          <h2 className="mb-5 max-w-[820px]">
+            Most promising businesses fail on structure, not on ambition.
+          </h2>
+        </Reveal>
+        <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {CHALLENGE_STATS.map((s, i) => (
+            <Reveal key={s.label} delay={i * 100}>
+              <Card className="h-full p-7">
+                <div className="mb-3 font-serif text-[2.6rem] font-semibold leading-none text-accent-2">
+                  <Counter value={s.num} />
+                </div>
+                <p className="m-0 text-[0.95rem] leading-6 text-ink-2">
+                  {s.label}
+                </p>
+              </Card>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ============================================================
+// FINDER: interactive room selector
+// ============================================================
+function FinderSection() {
+  return (
+    <section className="py-[90px]">
+      <div className="mx-auto max-w-[1180px] px-6">
+        <div className="grid items-center gap-12 lg:grid-cols-[1fr_1.1fr]">
+          <Reveal>
+            <span className="mb-3 inline-block text-[0.8rem] font-semibold uppercase tracking-[0.1em] text-accent-2">
+              Try it now
+            </span>
+            <h2 className="mb-5">Not sure which room to start in?</h2>
+            <p className="mb-4 text-[1.1rem] text-ink-2">
+              Answer three quick questions and we will point you at the
+              Executive Room where your business has the most to gain. It takes
+              less than a minute and nothing is recorded.
+            </p>
+            <p className="m-0 text-[0.95rem] text-ink-3">
+              For the full picture, the free Business Growth Check-Up scores
+              your business across six pillars and gives you a written
+              recommendation.
+            </p>
+          </Reveal>
+          <Reveal delay={150}>
+            <RoomFinder />
+          </Reveal>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ============================================================
+// COHORT: who we served in Q2 2026 (animated sector chart)
+// ============================================================
+function CohortSection() {
+  return (
+    <section className="bg-bg-alt py-[90px]">
+      <div className="mx-auto max-w-[1180px] px-6">
+        <div className="grid items-start gap-12 lg:grid-cols-[1fr_1.3fr]">
+          <Reveal>
+            <span className="mb-3 inline-block text-[0.8rem] font-semibold uppercase tracking-[0.1em] text-accent-2">
+              Who we serve
+            </span>
+            <h2 className="mb-5">
+              Eleven sectors in the Q2 2026 cohort.
+            </h2>
+            <p className="mb-6 text-[1.05rem] text-ink-2">
+              Agribusiness leads the cohort, followed by tech and retail. The
+              spread matters: the diagnostic works across sectors because it
+              measures structure, not industry knowledge.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {SECTORS_SERVED.map((s) => (
+                <span
+                  key={s}
+                  className="rounded-full border border-line bg-white px-3.5 py-1.5 text-[0.82rem] font-medium text-ink-2"
+                >
+                  {s}
+                </span>
+              ))}
+            </div>
+          </Reveal>
+          <Reveal delay={150}>
+            <Card className="p-7">
+              <div className="mb-5 text-[0.78rem] font-semibold uppercase tracking-[0.08em] text-ink-3">
+                Q2 2026 cohort by sector
+              </div>
+              <SectorChart />
+            </Card>
+          </Reveal>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ============================================================
+// RESULTS: before and after working with us
+// ============================================================
+function Results() {
+  return (
+    <section className="py-[90px]">
+      <div className="mx-auto max-w-[1180px] px-6">
+        <Reveal>
+          <span className="mb-3 inline-block text-[0.8rem] font-semibold uppercase tracking-[0.1em] text-accent-2">
+            Proven results
+          </span>
+          <h2 className="mb-5 max-w-[780px]">
+            What changes when the structure goes in.
+          </h2>
+        </Reveal>
+        <Reveal delay={100}>
+          <div className="mt-8 overflow-hidden rounded-card border border-line bg-white">
+            <div className="grid grid-cols-3 border-b border-line bg-bg-alt px-6 py-4 text-[0.78rem] font-semibold uppercase tracking-[0.06em] text-ink-3">
+              <span>Metric</span>
+              <span>Before</span>
+              <span className="text-accent-2">With CFO Partners</span>
+            </div>
+            {RESULTS_TABLE.map((row) => (
+              <div
+                key={row.metric}
+                className="grid grid-cols-3 items-center border-b border-line px-6 py-5 last:border-0"
+              >
+                <span className="pr-3 text-[0.95rem] font-semibold text-ink">
+                  {row.metric}
+                </span>
+                <span className="pr-3 text-[0.92rem] text-ink-3">
+                  {row.before}
+                </span>
+                <span className="text-[0.95rem] font-semibold text-accent-2">
+                  {row.after}
+                </span>
+              </div>
+            ))}
+          </div>
+        </Reveal>
+        <Reveal delay={200}>
+          <div className="mt-10 grid grid-cols-2 gap-y-8 text-center sm:grid-cols-4">
+            {TRACK_RECORD.map((s) => (
+              <div key={s.label}>
+                <div className="font-serif text-[clamp(1.8rem,3.5vw,2.4rem)] font-semibold leading-none text-ink">
+                  <Counter value={s.num} />
+                </div>
+                <div className="mt-2 text-[0.9rem] text-ink-2">{s.label}</div>
+                {s.note && (
+                  <div className="mt-0.5 text-[0.75rem] text-ink-3">
+                    {s.note}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+// ============================================================
+// FAQ
+// ============================================================
+function FAQSection() {
+  return (
+    <section id="faq" className="bg-bg-alt py-[90px]">
+      <div className="mx-auto max-w-[920px] px-6">
+        <Reveal>
+          <span className="mb-3 inline-block text-[0.8rem] font-semibold uppercase tracking-[0.1em] text-accent-2">
+            Common questions
+          </span>
+          <h2 className="mb-10">Answers before you ask.</h2>
+        </Reveal>
+        <Reveal delay={100}>
+          <FAQ />
+        </Reveal>
       </div>
     </section>
   );

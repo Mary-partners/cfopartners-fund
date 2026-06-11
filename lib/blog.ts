@@ -1,5 +1,5 @@
 /**
- * Blog posts — built from CFOIP strategic insights, Q2 2026 cohort data,
+ * Blog posts built from CFOIP strategic insights, Q2 2026 cohort data,
  * and the published MEL report. Each post has a branded SVG mock image
  * (no external assets) and structured body content.
  */
@@ -31,7 +31,7 @@ export const POSTS: BlogPost[] = [
     title:
       "The capital misdiagnosis: why African founders are wrong about what is blocking growth",
     excerpt:
-      "Our diagnostic data is clear. When founders blame capital, the real blocker is almost always structure — bank accounts, records, registration, customer concentration. Capital cannot fix what structure has not built yet.",
+      "Our diagnostic data is clear. When founders blame capital, the real blocker is almost always structure: bank accounts, records, registration, customer concentration. Capital cannot fix what structure has not built yet.",
     category: "Diagnostic Insight",
     date: "2026-06-10",
     readTime: "6 min read",
@@ -41,7 +41,7 @@ export const POSTS: BlogPost[] = [
     body: [
       {
         type: "p",
-        text: "We have been running the Business Growth Check-Up with founders across East Africa for two quarters. A consistent pattern keeps emerging in the responses: when founders are asked what is holding the business back, they name money. But when we look at the structure underneath — bank accounts, sales records, tax registration, customer concentration — the real blocker is almost never capital.",
+        text: "We have been running the Business Growth Check-Up with founders across East Africa for two quarters. A consistent pattern keeps emerging in the responses. When founders are asked what is holding the business back, they name money. But when we look at the structure underneath, at bank accounts, sales records, tax registration, and customer concentration, the real blocker is almost never capital.",
       },
       {
         type: "quote",
@@ -70,7 +70,7 @@ export const POSTS: BlogPost[] = [
       },
       {
         type: "p",
-        text: "A capital deployment vehicle calibrated to founders who think they need money — when what they actually need is structure — will under-perform. The CFO Partners diagnostic surfaces the binding constraint before the capital conversation begins, which is why our diagnostic-to-paid conversion sits at 16 per cent against a market benchmark of 8 to 12 per cent.",
+        text: "A capital deployment vehicle calibrated to founders who think they need money, when what they actually need is structure, will under-perform. The CFO Partners diagnostic surfaces the binding constraint before the capital conversation begins, which is why our diagnostic-to-paid conversion sits at 16 per cent against a market benchmark of 8 to 12 per cent.",
       },
       {
         type: "p",
@@ -83,7 +83,7 @@ export const POSTS: BlogPost[] = [
     title:
       "44% women-led: what the Kenyan credit book got wrong about SME readiness",
     excerpt:
-      "Our Q2 2026 cohort is 44% women-led — against a Kenyan commercial bank SME benchmark of around 17%. Women founders are scoring higher than men on Revenue Clarity, Cost Structure, and Operations. The risk profile of a capital vehicle routed through this pipeline would look materially different.",
+      "Our Q2 2026 cohort is 44% women-led, against a Kenyan commercial bank SME benchmark of around 17%. Women founders are scoring higher than men on Revenue Clarity, Cost Structure, and Operations. The risk profile of a capital vehicle routed through this pipeline would look materially different.",
     category: "Cohort Data",
     date: "2026-06-08",
     readTime: "5 min read",
@@ -102,7 +102,7 @@ export const POSTS: BlogPost[] = [
       },
       {
         type: "p",
-        text: "Against a published Kenyan commercial bank SME book benchmark of approximately 17 per cent women-led penetration, the CFOIP pipeline is over-indexing women founders by a factor of more than two and a half. This is not the result of a targeting strategy. It is the result of the diagnostic itself — a structured, low-friction, evidence-led instrument that women founders are choosing to engage with.",
+        text: "Against a published Kenyan commercial bank SME book benchmark of approximately 17 per cent women-led penetration, the CFOIP pipeline is over-indexing women founders by a factor of more than two and a half. This is not the result of a targeting strategy. It is the result of the diagnostic itself: a structured, low-friction, evidence-led instrument that women founders are choosing to engage with.",
       },
       {
         type: "h2",
@@ -115,14 +115,14 @@ export const POSTS: BlogPost[] = [
       {
         type: "list",
         items: [
-          "Pillar 1 — Revenue Clarity",
-          "Pillar 2 — Cost Structure",
-          "Pillar 4 — Operations and Systems",
+          "Pillar 1: Revenue Clarity",
+          "Pillar 2: Cost Structure",
+          "Pillar 4: Operations and Systems",
         ],
       },
       {
         type: "p",
-        text: "Several of the cohort's strongest businesses by score are women-led — including the highest-scoring Scaler-trajectory founder in the cohort. Geographic spread within the women-led segment includes both urban (Nairobi) and peri-urban (Kilifi, rural Kenya) founders.",
+        text: "Several of the cohort's strongest businesses by score are women-led, including the highest-scoring Scaler-trajectory founder in the cohort. Geographic spread within the women-led segment includes both urban (Nairobi) and peri-urban (Kilifi, rural Kenya) founders.",
       },
       {
         type: "h2",
@@ -135,7 +135,7 @@ export const POSTS: BlogPost[] = [
       },
       {
         type: "p",
-        text: "This is what we mean when we say diagnostic-led pipeline construction produces a different distribution than open-market origination. The pipeline does not have to be built around demographic targets — the diagnostic does the segmentation work upstream.",
+        text: "This is what we mean when we say diagnostic-led pipeline construction produces a different distribution than open-market origination. The pipeline does not have to be built around demographic targets. The diagnostic does the segmentation work upstream.",
       },
     ],
   },
@@ -144,7 +144,7 @@ export const POSTS: BlogPost[] = [
     title:
       "Three pathways from diagnostic to growth: founder, institutional, systems",
     excerpt:
-      "Founder, institutional, and systems pathways operate on different timelines and require different MEL methodologies. Here is how we measure what we are actually doing — and why every diagnostic activates one of the three.",
+      "Founder, institutional, and systems pathways operate on different timelines and require different MEL methodologies. Here is how we measure what we are actually doing, and why every diagnostic activates one of the three.",
     category: "Theory of Change",
     date: "2026-06-05",
     readTime: "7 min read",
@@ -158,7 +158,7 @@ export const POSTS: BlogPost[] = [
       },
       {
         type: "h2",
-        text: "Pathway A — the founder",
+        text: "Pathway A: the founder",
       },
       {
         type: "p",
@@ -170,7 +170,7 @@ export const POSTS: BlogPost[] = [
       },
       {
         type: "h2",
-        text: "Pathway B — the institution",
+        text: "Pathway B: the institution",
       },
       {
         type: "p",
@@ -182,7 +182,7 @@ export const POSTS: BlogPost[] = [
       },
       {
         type: "h2",
-        text: "Pathway C — the system",
+        text: "Pathway C: the system",
       },
       {
         type: "p",
@@ -190,7 +190,7 @@ export const POSTS: BlogPost[] = [
       },
       {
         type: "p",
-        text: "Pathway C is the longest-running and the hardest to attribute. It is also where the 44% women-led finding belongs — a piece of cohort intelligence that, once visible to the ecosystem, changes how other actors design SME support.",
+        text: "Pathway C is the longest-running and the hardest to attribute. It is also where the 44% women-led finding belongs: a piece of cohort intelligence that, once visible to the ecosystem, changes how other actors design SME support.",
       },
       {
         type: "quote",
@@ -204,7 +204,7 @@ export const POSTS: BlogPost[] = [
     title:
       "Customer concentration: the risk founders normalise until it kills the business",
     excerpt:
-      "A diversified manufacturer in our cohort scored 117 of 150 as a Scaler. The diagnostic still surfaced two unlocks the founder had not named — including one structural risk that quietly kills more African SMEs than anything else.",
+      "A diversified manufacturer in our cohort scored 117 of 150 as a Scaler. The diagnostic still surfaced two gaps the founder had not named, including one structural risk that quietly kills more African SMEs than anything else.",
     category: "Founder Story",
     date: "2026-06-02",
     readTime: "5 min read",
@@ -228,7 +228,7 @@ export const POSTS: BlogPost[] = [
         type: "list",
         items: [
           "No customer relationship management system. At her revenue scale and diversification level, this is the single largest source of revenue leakage waiting to happen.",
-          "An unfiled tax position that — left another quarter — would have blocked her from any institutional credit conversation.",
+          "An unfiled tax position that, left another quarter, would have blocked her from any institutional credit conversation.",
         ],
       },
       {
@@ -241,7 +241,7 @@ export const POSTS: BlogPost[] = [
       },
       {
         type: "p",
-        text: "Customer concentration is the risk most African SME founders normalise. Until they cannot. The Scaler-trajectory founders we see most often are not blind to it — they have diversified. But the related risks — CRM discipline, tax position, supplier dependency — quietly compound underneath them. A structured diagnostic surfaces these before the capital conversation. Capital does not solve them.",
+        text: "Customer concentration is the risk most African SME founders normalise until it is too late. The Scaler-trajectory founders we see most often are not blind to it; they have diversified. But the related risks, such as CRM discipline, tax position, and supplier dependency, quietly compound underneath them. A structured diagnostic surfaces these before the capital conversation. Capital does not solve them.",
       },
       {
         type: "quote",
@@ -294,7 +294,7 @@ export const POSTS: BlogPost[] = [
       },
       {
         type: "p",
-        text: "The conversion data confirms the demand. 16 per cent of completed diagnostics convert into paid engagement, against an 8 to 12 per cent benchmark for comparable entrants. The 100 per cent routing rate confirms the model is calibrated — every diagnostic ends with a named next step.",
+        text: "The conversion data confirms the demand. 16 per cent of completed diagnostics convert into paid engagement, against an 8 to 12 per cent benchmark for comparable entrants. The 100 per cent routing rate confirms the model is calibrated, because every diagnostic ends with a named next step.",
       },
       {
         type: "quote",
@@ -334,7 +334,7 @@ export const POSTS: BlogPost[] = [
       },
       {
         type: "p",
-        text: "Scale-ups are founder-dependent, under-governed, and short of senior decision support. Growth at this stage compounds dysfunction unless leadership rhythm, board-style governance, and execution discipline have been installed first. We deliver this through fractional CFO support, the Virtual Board, and Strategy Committee — not through generic training.",
+        text: "Scale-ups are founder-dependent, under-governed, and short of senior decision support. Growth at this stage compounds dysfunction unless leadership rhythm, board-style governance, and execution discipline have been installed first. We deliver this through fractional CFO support, the Virtual Board, and the Strategy Committee rather than through generic training.",
       },
       {
         type: "h2",
@@ -342,7 +342,7 @@ export const POSTS: BlogPost[] = [
       },
       {
         type: "p",
-        text: "We do not start with a product. We start with the business reality. Every engagement begins with a structured diagnostic — Business Growth Check-Up for early and growing founders, Scale-Up Business Assessment for established businesses — and the support is calibrated to the binding constraint surfaced by the data, not to a pre-packaged offering.",
+        text: "We do not start with a product. We start with the business reality. Every engagement begins with a structured diagnostic: the Business Growth Check-Up for early and growing founders, or the Scale-Up Business Assessment for established businesses. The support is calibrated to the binding constraint surfaced by the data, not to a pre-packaged offering.",
       },
       {
         type: "quote",

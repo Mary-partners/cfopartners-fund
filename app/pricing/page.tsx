@@ -16,9 +16,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { mailto } from "@/lib/links";
 
 export const metadata: Metadata = {
-  title: "Pricing — CFO Partners",
+  title: "Pricing | CFO Partners",
   description:
-    "Pricing built for founders, growing SMEs, and institutional partners. Start free, then choose tools, expert guidance, implementation support, or executive bench — whatever your business needs next.",
+    "Pricing built for founders, growing SMEs, and institutional partners. Start free, then choose the tools, expert guidance, implementation support, or executive bench your business needs next.",
 };
 
 interface Plan {
@@ -256,7 +256,7 @@ export default function PricingPage() {
             <Button asChild size="lg" className="mt-7 w-full">
               <a
                 href={mailto(
-                  "Portfolio Intelligence Platform — Institutional enquiry",
+                  "Portfolio Intelligence Platform: Institutional enquiry",
                 )}
               >
                 Request Institutional Pricing

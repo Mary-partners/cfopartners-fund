@@ -21,11 +21,14 @@ import {
   CONTACT_PHONE_TEL,
   OFFICE_ADDRESS,
   LINKEDIN_URL,
+  INSTAGRAM_URL,
+  FACEBOOK_URL,
+  WHATSAPP_URL,
   mailto,
 } from "@/lib/links";
 
 export const metadata: Metadata = {
-  title: "Contact — CFO Partners",
+  title: "Contact | CFO Partners",
   description:
     "Get in touch with CFO Innovation Partners. Diagnostic-led advisory and execution support for founders, SMEs, scale-ups, and institutional partners across East Africa.",
 };
@@ -87,7 +90,7 @@ export default function ContactPage() {
                 relationship.
               </h1>
               <p className="mb-6 text-[1.1rem] text-ink-2">
-                We read every founder, scale-up, and institutional enquiry —
+                We read every founder, scale-up, and institutional enquiry
                 and reply within two working days.
               </p>
               <div className="flex flex-wrap gap-3">
@@ -128,15 +131,41 @@ export default function ContactPage() {
                     {OFFICE_ADDRESS.country}
                   </span>
                 </ContactRow>
-                <ContactRow icon={Linkedin} label="LinkedIn">
-                  <a
-                    href={LINKEDIN_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-semibold text-ink hover:text-accent-2"
-                  >
-                    linkedin.com/company/cfo-partners
-                  </a>
+                <ContactRow icon={Linkedin} label="Social">
+                  <span className="flex flex-wrap gap-x-3 gap-y-1">
+                    <a
+                      href={LINKEDIN_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-semibold text-ink hover:text-accent-2"
+                    >
+                      LinkedIn
+                    </a>
+                    <a
+                      href={INSTAGRAM_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-semibold text-ink hover:text-accent-2"
+                    >
+                      Instagram
+                    </a>
+                    <a
+                      href={FACEBOOK_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-semibold text-ink hover:text-accent-2"
+                    >
+                      Facebook
+                    </a>
+                    <a
+                      href={WHATSAPP_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-semibold text-ink hover:text-accent-2"
+                    >
+                      WhatsApp
+                    </a>
+                  </span>
                 </ContactRow>
               </div>
               <div className="mt-6 border-t border-line pt-5">
@@ -144,7 +173,7 @@ export default function ContactPage() {
                   Office hours
                 </div>
                 <p className="m-0 text-[0.88rem] text-ink-2">
-                  Monday to Friday · 09:00 — 18:00 EAT
+                  Monday to Friday, 09:00 to 18:00 EAT
                 </p>
               </div>
             </Card>
@@ -163,7 +192,7 @@ export default function ContactPage() {
           </h2>
           <p className="mb-12 max-w-[720px] text-[1.1rem] text-ink-2">
             CFO Partners serves four audiences with different needs and
-            different rhythms. Use the path that fits — every route ends with a
+            different rhythms. Use the path that fits. Every route ends with a
             real human reply.
           </p>
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -217,7 +246,7 @@ export default function ContactPage() {
               </h2>
               <p className="mb-6 text-[1.05rem] text-ink-2">
                 Our office sits inside Watermark Business Park along Karen Road
-                — a quiet, professional setting designed for the kind of
+                a quiet, professional setting designed for the kind of
                 structured working sessions our advisory model relies on.
               </p>
               <Button asChild>

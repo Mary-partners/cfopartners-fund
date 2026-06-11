@@ -1,11 +1,13 @@
 import Link from "next/link";
-import { Mail, Phone, MapPin, Linkedin } from "lucide-react";
+import { Mail, Phone, MapPin, Linkedin, Instagram, Facebook } from "lucide-react";
 import {
   CONTACT_EMAIL,
   CONTACT_PHONE,
   CONTACT_PHONE_TEL,
   OFFICE_ADDRESS,
   LINKEDIN_URL,
+  INSTAGRAM_URL,
+  FACEBOOK_URL,
 } from "@/lib/links";
 
 export function Footer() {
@@ -80,14 +82,35 @@ export function Footer() {
             </h4>
             <FLink href="/#team">Our team</FLink>
             <FLink href="/contact">Contact</FLink>
-            <a
-              href={LINKEDIN_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 py-1 text-[0.9rem] text-ink-3 hover:text-ink"
-            >
-              <Linkedin className="h-3.5 w-3.5" /> LinkedIn
-            </a>
+            <div className="mt-2 flex items-center gap-3">
+              <a
+                href={LINKEDIN_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="CFO Partners on LinkedIn"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-white text-ink-2 transition-colors hover:border-accent hover:text-accent-2"
+              >
+                <Linkedin className="h-4 w-4" />
+              </a>
+              <a
+                href={INSTAGRAM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="CFO Partners on Instagram"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-white text-ink-2 transition-colors hover:border-accent hover:text-accent-2"
+              >
+                <Instagram className="h-4 w-4" />
+              </a>
+              <a
+                href={FACEBOOK_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="CFO Partners on Facebook"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-white text-ink-2 transition-colors hover:border-accent hover:text-accent-2"
+              >
+                <Facebook className="h-4 w-4" />
+              </a>
+            </div>
           </div>
         </div>
 

@@ -1,5 +1,5 @@
 /**
- * Executive Rooms — the seven business functions that make up the
+ * Executive Rooms: the seven business functions that make up the
  * CFO Partners platform. Each room pairs an AI assistant with named
  * tools (templates, calculators, checklists) and an escalation path
  * to human experts when needed.
@@ -52,7 +52,7 @@ export const ROOMS: Room[] = [
     blurb:
       "Clarify your business model, goals, priorities, and growth path. Pressure-test strategic decisions before you commit.",
     longBlurb:
-      "Every serious business needs a thinking partner — someone to pressure-test the strategy, question the numbers, name the priorities. Large companies have CEOs and boards. Most African founders have themselves. The CEO Room gives you a structured way to think like a CEO when you don't have one.",
+      "Every serious business needs a thinking partner. Someone to pressure-test the strategy, question the numbers, and name the priorities. Large companies have CEOs and boards. Most African founders carry this alone. The CEO Room gives you a structured way to think through the decisions that matter.",
     prompt:
       "Based on my diagnostic results, what are the top 3 strategic decisions I need to make this quarter?",
     helps: [
@@ -66,7 +66,7 @@ export const ROOMS: Room[] = [
       {
         name: "Business Model Canvas (Africa edition)",
         description:
-          "Map your value proposition, customers, channels, costs, and revenue streams — adapted for African market realities.",
+          "Map your value proposition, customers, channels, costs, and revenue streams, adapted for African market realities.",
         tier: "Starter",
       },
       {
@@ -97,9 +97,9 @@ export const ROOMS: Room[] = [
     assistant: "Virtual CFO",
     iconKey: "line-chart",
     blurb:
-      "Revenue, costs, cash flow, margins, founder salary discipline, investor and loan readiness. Our strongest wedge — and where most founders should start.",
+      "Revenue, costs, cash flow, margins, founder salary discipline, and investor and loan readiness. This is where most founders should start.",
     longBlurb:
-      "The CFO Room is where most African founders should start. Our diagnostic data is clear: when founders blame capital, the real blocker is almost always financial structure. Separate money. Track revenue. Pay yourself a real salary. Pass the Bankability Score. Then — and only then — does capital become the right conversation.",
+      "The CFO Room is where most African founders should start. Our diagnostic data shows that when founders blame capital, the real blocker is almost always financial structure. Separate your money, track your revenue, pay yourself a consistent salary, and pass the Bankability Score. Once that foundation is in place, capital becomes the right conversation.",
     prompt:
       "Am I ready to borrow money, and what would a lender worry about?",
     helps: [
@@ -114,7 +114,7 @@ export const ROOMS: Room[] = [
       {
         name: "Cash Flow Tracker",
         description:
-          "Weekly cash in / cash out / runway view — designed for businesses on M-Pesa, bank, and till accounts.",
+          "A weekly view of cash in, cash out, and runway, designed for businesses running on M-Pesa, bank, and till accounts.",
         tier: "Starter",
       },
       {
@@ -132,7 +132,7 @@ export const ROOMS: Room[] = [
       {
         name: "KRA Filing Checklist",
         description:
-          "Month-by-month checklist for VAT, PAYE, and annual returns — never miss a filing, never pay a penalty.",
+          "A month-by-month checklist for VAT, PAYE, and annual returns so you never miss a filing or pay a penalty.",
         tier: "Free",
       },
     ],
@@ -148,7 +148,7 @@ export const ROOMS: Room[] = [
     blurb:
       "Workflows, team roles, SOPs, delivery systems, weekly operating rhythm, internal controls, execution discipline.",
     longBlurb:
-      "If your business only works when you're in it, you don't have a business — you have a job. The COO Room installs the systems and rhythms that let the business run without depending on you for every decision. SOPs, weekly check-ins, role clarity, internal controls — the boring stuff that quietly compounds.",
+      "If your business only works when you are in the room, you have a job rather than a business. The COO Room installs the systems and rhythms that let the business run without depending on you for every decision: SOPs, weekly check-ins, role clarity, and internal controls. Small disciplines that compound over time.",
     prompt:
       "Create a simple operating system for my business based on my team size and revenue stage.",
     helps: [
@@ -175,7 +175,7 @@ export const ROOMS: Room[] = [
       {
         name: "Team Role Clarity Sheet",
         description:
-          "Define who owns what, who decides what, and who is consulted — for every key area of the business.",
+          "Define who owns what, who decides what, and who is consulted for every key area of the business.",
         tier: "Starter",
       },
       {
@@ -196,7 +196,7 @@ export const ROOMS: Room[] = [
     blurb:
       "Customer segmentation, sales scripts, offer design, lead generation, content strategy, customer retention.",
     longBlurb:
-      "Most early-stage African businesses don't have a marketing problem — they have an offer problem, a positioning problem, or a customer concentration problem. The CMO Room helps you diagnose which one you actually have, then gives you the tools to fix it.",
+      "Most early-stage African businesses do not have a marketing problem. They have an offer problem, a positioning problem, or a customer concentration problem. The CMO Room helps you work out which one you actually have, then gives you the tools to fix it.",
     prompt:
       "Help me create a 30-day customer acquisition plan for my business.",
     helps: [
@@ -244,7 +244,7 @@ export const ROOMS: Room[] = [
     blurb:
       "KRA basics, registration, customer concentration risk, cash flow risk, debt risk, governance basics, business continuity.",
     longBlurb:
-      "The biggest risks in an African SME are almost never the ones founders worry about. It's not the macro economy — it's the one customer who owes you 60% of your revenue. It's not currency — it's that your business isn't actually registered. The CRO Room makes the invisible risks visible.",
+      "The biggest risks in an African SME are rarely the ones founders worry about. The real danger is usually closer to home: the one customer who owes you 60% of your revenue, or the registration that was never completed. The CRO Room makes these invisible risks visible.",
     prompt:
       "What are the biggest risks in my business based on my current diagnostic score?",
     helps: [
@@ -265,13 +265,13 @@ export const ROOMS: Room[] = [
       {
         name: "Customer Concentration Tracker",
         description:
-          "Visualise what % of revenue comes from your top 1, 3, and 5 customers — and what happens if you lose them.",
+          "See what share of revenue comes from your top 1, 3, and 5 customers, and what happens if you lose them.",
         tier: "Starter",
       },
       {
         name: "Compliance Checklist",
         description:
-          "KRA PIN, business registration, NSSF, NHIF, business permit — confirm you're current on everything.",
+          "KRA PIN, business registration, NSSF, NHIF, and business permit. Confirm you are current on everything.",
         tier: "Free",
       },
       {
@@ -340,7 +340,7 @@ export const ROOMS: Room[] = [
     blurb:
       "When AI isn't enough: tax, accounting cleanup, legal, fundraising, credit readiness, strategy workshops, operational implementation. The Sndbx model, rebuilt digitally.",
     longBlurb:
-      "AI handles the first layer. But sometimes you need a real human — a tax advisor to clean up three years of filings, a lawyer to draft a shareholders' agreement, a senior CFO to walk you through your first capital raise. The Expert Marketplace gives you direct booking access to vetted East African practitioners, with CFO Partners standing behind every recommendation.",
+      "AI handles the first layer. Sometimes you need a real human: a tax advisor to clean up three years of filings, a lawyer to draft a shareholders' agreement, or a senior CFO to walk you through your first capital raise. The Expert Marketplace gives you direct booking access to vetted East African practitioners, and CFO Partners stands behind every recommendation.",
     prompt:
       "Book a 45-minute session with a vetted CFO, accountant, or strategist.",
     helps: [
@@ -361,13 +361,13 @@ export const ROOMS: Room[] = [
       {
         name: "Legal & Compliance Expert",
         description:
-          "Contracts, IP protection, shareholders' agreements, employment law — booked by the hour or the engagement.",
+          "Contracts, IP protection, shareholders' agreements, and employment law, booked by the hour or by the engagement.",
         tier: "Expert",
       },
       {
         name: "Fundraising Advisor",
         description:
-          "Senior practitioners who've raised from DFIs, banks, and angels in East Africa — pitch coaching and intros.",
+          "Senior practitioners who have raised from DFIs, banks, and angels in East Africa. Pitch coaching and introductions.",
         tier: "Expert",
       },
       {

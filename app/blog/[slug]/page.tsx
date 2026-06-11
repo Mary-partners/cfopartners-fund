@@ -20,9 +20,9 @@ export function generateMetadata({
   params: { slug: string };
 }): Metadata {
   const post = postFor(params.slug);
-  if (!post) return { title: "Post not found — CFO Partners" };
+  if (!post) return { title: "Post not found | CFO Partners" };
   return {
-    title: `${post.title} — CFO Partners`,
+    title: `${post.title} | CFO Partners`,
     description: post.excerpt,
   };
 }
@@ -150,7 +150,7 @@ function Block({ block }: { block: BlockType }) {
           </p>
           {block.attribution && (
             <footer className="mt-3 text-[0.85rem] text-ink-3">
-              — {block.attribution}
+              {block.attribution}
             </footer>
           )}
         </blockquote>
