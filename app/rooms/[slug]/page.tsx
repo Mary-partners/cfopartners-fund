@@ -165,6 +165,15 @@ export default function RoomPage({ params }: { params: { slug: string } }) {
                   </span>
                 </div>
                 <p className="text-[0.95rem] text-ink-2">{tool.description}</p>
+                {tool.tier === "Free" && (
+                  <Link
+                    href="/resources"
+                    className="mt-4 inline-flex items-center gap-1 text-[0.88rem] font-semibold text-accent-2 hover:text-accent"
+                  >
+                    Download free
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                )}
               </Card>
             ))}
           </div>

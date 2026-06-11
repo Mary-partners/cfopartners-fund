@@ -5,6 +5,7 @@ const links = [
   { href: "/#rooms", label: "Executive Rooms" },
   { href: "/pricing", label: "Pricing" },
   { href: "/blog", label: "Journal" },
+  { href: "/resources", label: "Resources" },
   { href: "/#institutional", label: "For Institutions" },
   { href: "/contact", label: "Contact" },
 ];

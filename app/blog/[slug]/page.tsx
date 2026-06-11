@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Nav } from "@/components/Nav";
+import { NewsletterSignup } from "@/components/NewsletterSignup";
 import { Footer } from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -96,6 +97,21 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
             Take the free diagnostic
             <ArrowRight className="h-4 w-4" />
           </CheckupTrigger>
+        </div>
+      </section>
+
+      {/* NEWSLETTER */}
+      <section className="py-[50px]">
+        <div className="mx-auto max-w-[720px] px-6">
+          <div className="rounded-2xl border border-line bg-white p-7">
+            <h3 className="mb-1.5 text-[1.15rem]">
+              Get the next post by email
+            </h3>
+            <p className="mb-5 text-[0.92rem] text-ink-2">
+              One email a month: cohort findings and new free tools. No noise.
+            </p>
+            <NewsletterSignup source="blog-post" variant="light" />
+          </div>
         </div>
       </section>
 
