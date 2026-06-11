@@ -9,10 +9,11 @@ import {
   Users,
 } from "lucide-react";
 import { Nav } from "@/components/Nav";
+import { Footer } from "@/components/Footer";
 import { CheckupTrigger } from "@/components/CheckupTrigger";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { DIAGNOSTIC_URL, mailto } from "@/lib/links";
+import { mailto } from "@/lib/links";
 
 export const metadata: Metadata = {
   title: "Pricing — CFO Partners",
@@ -288,6 +289,8 @@ export default function PricingPage() {
           </CheckupTrigger>
         </div>
       </section>
+
+      <Footer />
     </main>
   );
 }
