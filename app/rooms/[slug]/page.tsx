@@ -32,9 +32,9 @@ export function generateMetadata({
   params: { slug: string };
 }): Metadata {
   const room = roomFor(params.slug);
-  if (!room) return { title: "Room not found — CFO Partners" };
+  if (!room) return { title: "Room not found | CFO Partners" };
   return {
-    title: `${room.name} — CFO Partners`,
+    title: `${room.name} | CFO Partners`,
     description: `${room.role}. ${room.blurb}`,
   };
 }
@@ -111,7 +111,7 @@ export default function RoomPage({ params }: { params: { slug: string } }) {
                 <Link href="/pricing" className="text-accent-2 hover:text-accent">
                   Founder OS Growth
                 </Link>{" "}
-                — unlocks all six AI executive assistants.
+                which unlocks all six AI executive assistants.
               </p>
               <div className="mt-6 border-t border-line pt-5">
                 <div className="mb-3 text-[0.78rem] font-semibold uppercase tracking-[0.08em] text-ink-3">
@@ -147,7 +147,7 @@ export default function RoomPage({ params }: { params: { slug: string } }) {
           </h2>
           <p className="mb-[60px] max-w-[720px] text-[1.1rem] text-ink-2">
             {room.slug === "experts"
-              ? "Each expert is vetted by CFO Partners. Book by the hour or by the engagement — we stand behind every recommendation."
+              ? "Each expert is vetted by CFO Partners. Book by the hour or by the engagement. We stand behind every recommendation."
               : "Templates, calculators, and checklists designed for the realities of running a business in East Africa. Built to be used on Tuesday morning, not filed in a folder."}
           </p>
           <div className="grid gap-5 md:grid-cols-2">

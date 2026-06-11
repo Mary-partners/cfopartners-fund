@@ -1,5 +1,5 @@
 /**
- * CFO Innovation Partners — Q2 2026 impact data.
+ * CFO Innovation Partners Q2 2026 impact data.
  * Source: CFOIP Monitoring, Evaluation and Impact Report Q2 2026.
  * All figures audited against published FY 2026 targets.
  */
@@ -130,7 +130,7 @@ export interface CaseStudy {
 
 /**
  * Real vignettes from the Q2 2026 MEL report. Anonymised by sector
- * + classification — every detail is from a live engagement.
+ * + classification. Every detail is from a live engagement.
  */
 export const CASE_STUDIES: CaseStudy[] = [
   {
@@ -167,7 +167,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     outcome:
       "Founder replied to the advisory letter with substantive feedback, including the absence of a profitability question and a revenue band that capped below her actual position. CFOIP committed to a diagnostic upgrade and is scoping a custom advisory engagement.",
     pathway: "C",
-    pathwayLabel: "Adaptive management — instrument refinement",
+    pathwayLabel: "Adaptive management: instrument refinement",
   },
 ];
 
@@ -202,4 +202,66 @@ export const FIVE_SEGMENTS = [
     description:
       "Need stronger SME pipeline, better-prepared businesses, evidence-backed enterprise support, and capital readiness improvement.",
   },
+];
+
+/**
+ * Track record since 2024. Carried over from the original
+ * cfopartners.fund site; figures predate the Q2 2026 cohort.
+ */
+export const TRACK_RECORD: ImpactStat[] = [
+  { num: "50+", label: "Companies served", note: "since 2024" },
+  { num: "1,000+", label: "Founders trained" },
+  { num: "$50M+", label: "Capital raised by clients" },
+  { num: "92%", label: "Client retention" },
+];
+
+/**
+ * The problem we exist to solve. Startup failure statistics from the
+ * original site's research base.
+ */
+export const CHALLENGE_STATS: ImpactStat[] = [
+  { num: "89%", label: "of early-stage startups cannot afford a CFO" },
+  { num: "74%", label: "never raise beyond their first round" },
+  { num: "65%", label: "of funding rounds fail on inadequate documentation" },
+  { num: "82%", label: "of founders lack cash runway visibility" },
+];
+
+/** Before and after working with CFO Partners. */
+export interface ResultRow {
+  metric: string;
+  before: string;
+  after: string;
+}
+
+export const RESULTS_TABLE: ResultRow[] = [
+  {
+    metric: "Fundraise close time",
+    before: "9 to 12 months",
+    after: "3 to 5 months",
+  },
+  {
+    metric: "Financial reporting",
+    before: "Manual, monthly",
+    after: "Automated, on time",
+  },
+  {
+    metric: "Cash visibility",
+    before: "2 to 4 weeks behind",
+    after: "Current week",
+  },
+];
+
+/** Sectors we have served across both operating periods. */
+export const SECTORS_SERVED: string[] = [
+  "Fintech",
+  "Agritech",
+  "Healthtech",
+  "Edtech",
+  "E-commerce",
+  "SaaS",
+  "Cleantech",
+  "Logistics",
+  "Manufacturing",
+  "Impact Ventures",
+  "Accelerators",
 ];
