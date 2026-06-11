@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NewsletterSignup } from "@/components/NewsletterSignup";
 import { Mail, Phone, MapPin, Linkedin, Instagram, Facebook } from "lucide-react";
 import {
   CONTACT_EMAIL,
@@ -62,6 +63,7 @@ export function Footer() {
             <FLink href="/#rooms">Executive Rooms</FLink>
             <FLink href="/pricing">Pricing</FLink>
             <FLink href="/blog">Journal</FLink>
+            <FLink href="/resources">Free Resources</FLink>
             <FLink href="/#institutional">For Institutions</FLink>
           </div>
 
@@ -114,7 +116,18 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 flex flex-wrap justify-between gap-3 border-t border-line pt-6">
+        <div className="mt-10 grid items-center gap-6 border-t border-line pt-8 md:grid-cols-[1fr_1.2fr]">
+          <div>
+            <h4 className="mb-1 text-[0.95rem] font-semibold text-ink">
+              The CFOIP Journal, by email
+            </h4>
+            <p className="m-0 text-[0.85rem] text-ink-3">
+              Cohort findings and new free tools, once a month.
+            </p>
+          </div>
+          <NewsletterSignup source="footer" variant="light" />
+        </div>
+        <div className="mt-8 flex flex-wrap justify-between gap-3 border-t border-line pt-6">
           <span>
             © {new Date().getFullYear()} CFO Innovation Partners. All rights
             reserved.

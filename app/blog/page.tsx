@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Nav } from "@/components/Nav";
+import { NewsletterSignup } from "@/components/NewsletterSignup";
 import { Footer } from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { BlogCover } from "@/components/BlogCover";
@@ -108,6 +109,20 @@ export default function BlogIndexPage() {
                 </Card>
               </Link>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* NEWSLETTER */}
+      <section className="bg-ink py-[70px] text-white">
+        <div className="mx-auto max-w-[820px] px-6 text-center">
+          <h2 className="mb-4 text-white">Read the next one in your inbox.</h2>
+          <p className="mx-auto mb-8 max-w-[560px] text-slate-300">
+            One email a month with what we are learning from the cohort, plus
+            every new free tool as it ships.
+          </p>
+          <div className="mx-auto max-w-[520px] text-left">
+            <NewsletterSignup source="blog-index" variant="dark" />
           </div>
         </div>
       </section>
