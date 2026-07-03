@@ -62,6 +62,7 @@ export function Footer() {
             </h4>
             <FLink href="/#services">Services</FLink>
             <FLink href="/#rooms">Executive Rooms</FLink>
+            <FLink href="/ai-automations">AI Automations</FLink>
             <FLink href="/pricing">Pricing</FLink>
             <FLink href="/blog">Journal</FLink>
             <FLink href="/resources">Free Resources</FLink>
