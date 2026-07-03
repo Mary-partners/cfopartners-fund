@@ -14,6 +14,7 @@ import { CheckupTrigger } from "@/components/CheckupTrigger";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { mailto } from "@/lib/links";
+import { TIERS, priceLine, type Tier } from "@/lib/pricing";
 
 export const metadata: Metadata = {
   title: "Pricing | CFO Partners",
@@ -21,140 +22,7 @@ export const metadata: Metadata = {
     "Pricing built for founders, growing SMEs, and institutional partners. Start free, then choose the tools, expert guidance, implementation support, or executive bench your business needs next.",
 };
 
-interface Plan {
-  name: string;
-  label: string;
-  price: string;
-  period: string;
-  description: string;
-  bestFor: string;
-  cta: string;
-  ctaHref?: string;
-  isCheckup?: boolean;
-  highlighted?: boolean;
-  features: string[];
-}
 
-const PLANS: Plan[] = [
-  {
-    name: "Free Diagnostic",
-    label: "Start here",
-    price: "Free",
-    period: "",
-    description:
-      "For founders who want to understand what is really blocking business growth before paying for support.",
-    bestFor: "Founders seeking clarity",
-    cta: "Take the Free Check-Up",
-    isCheckup: true,
-    features: [
-      "Growth Readiness Score",
-      "Business archetype",
-      "Basic diagnosis",
-      "Recommended next step",
-      "Email summary of results",
-    ],
-  },
-  {
-    name: "Founder OS Starter",
-    label: "Self-guided structure",
-    price: "KES 5,000",
-    period: "/ month",
-    description:
-      "For early-stage founders who need simple structure, practical tools, and AI-guided business support.",
-    bestFor: "Hustlers and early Operators",
-    cta: "Start with Starter",
-    ctaHref: mailto("Founder OS Starter enrolment"),
-    features: [
-      "AI business assistants",
-      "Basic finance and operations templates",
-      "Monthly founder checklist",
-      "Saved diagnostic results",
-      "Basic reports",
-      "Recommended monthly actions",
-    ],
-  },
-  {
-    name: "Founder OS Growth",
-    label: "Most useful for growing businesses",
-    price: "KES 15,000",
-    period: "/ month",
-    description:
-      "For founders with revenue who need stronger systems, better reporting, and bankability readiness.",
-    bestFor: "Operators and Stabilizers",
-    cta: "Choose Growth",
-    ctaHref: mailto("Founder OS Growth enrolment"),
-    highlighted: true,
-    features: [
-      "All AI executive assistants",
-      "Full business template library",
-      "Monthly business review report",
-      "Bankability Score",
-      "Growth action plan",
-      "Quarterly diagnostic refresh",
-      "Community access",
-      "Monthly group review session",
-    ],
-  },
-  {
-    name: "Business Readiness Review",
-    label: "Expert interpretation",
-    price: "KES 35,000",
-    period: " one-time",
-    description:
-      "For founders who want an expert to review their diagnostic results and translate them into a practical action plan.",
-    bestFor: "Founders ready for expert guidance",
-    cta: "Book a Review",
-    ctaHref: mailto("Business Readiness Review enquiry"),
-    features: [
-      "Diagnostic review",
-      "Expert strategy call",
-      "Business readiness report",
-      "30-day action plan",
-      "Recommended support path",
-      "Capital readiness view",
-    ],
-  },
-  {
-    name: "Business Build Sprint",
-    label: "Guided implementation",
-    price: "From KES 75,000",
-    period: " one-time",
-    description:
-      "A 4-week guided implementation sprint to fix the foundations: money, records, systems, reporting, and execution rhythm.",
-    bestFor: "Founders ready to implement",
-    cta: "Join the Sprint",
-    ctaHref: mailto("Business Build Sprint enrolment"),
-    features: [
-      "4-week guided implementation",
-      "Weekly accountability sessions",
-      "Finance and operations setup",
-      "Expert review",
-      "Business structure toolkit",
-      "90-day growth roadmap",
-      "Group and private options available",
-    ],
-  },
-  {
-    name: "Virtual Executive Bench",
-    label: "Premium support",
-    price: "From KES 195,000",
-    period: " / month",
-    description:
-      "For growing companies that need senior finance, operations, growth, and strategic support without hiring a full executive team.",
-    bestFor: "Scalers and growth-stage SMEs",
-    cta: "Apply for Executive Support",
-    ctaHref: mailto("Virtual Executive Bench enquiry"),
-    features: [
-      "Virtual CFO / COO / Growth support",
-      "Monthly management reporting",
-      "Strategic advisory",
-      "Founder review calls",
-      "Investor or bank readiness",
-      "Board-style reporting",
-      "Integrated Executive Bench from KES 350,000/month",
-    ],
-  },
-];
 
 const INSTITUTIONAL_FEATURES = [
   "Cohort diagnostics for accelerators and programs",
@@ -203,8 +71,8 @@ export default function PricingPage() {
 
         {/* PRICING GRID */}
         <div className="mt-16 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {PLANS.map((plan) => (
-            <PricingCard key={plan.name} plan={plan} />
+          {TIERS.map((plan) => (
+            <PricingCard key={plan.key} plan={plan} />
           ))}
         </div>
       </section>
@@ -295,7 +163,7 @@ export default function PricingPage() {
   );
 }
 
-function PricingCard({ plan }: { plan: Plan }) {
+function PricingCard({ plan }: { plan: Tier }) {
   return (
     <Card
       className={`relative flex h-full flex-col rounded-3xl bg-white ${
@@ -322,16 +190,33 @@ function PricingCard({ plan }: { plan: Plan }) {
           </p>
         </div>
         <div className="mb-5">
-          <div className="flex items-end gap-1">
-            <span className="font-serif text-[1.9rem] font-bold tracking-tight text-ink">
-              {plan.price}
-            </span>
-            {plan.period && (
-              <span className="pb-1 text-[0.9rem] text-ink-3">
-                {plan.period}
-              </span>
-            )}
-          </div>
+          {plan.priceUsd === null ? (
+            <div className="font-serif text-[1.9rem] font-bold tracking-tight text-ink">
+              {plan.priceKes}
+            </div>
+          ) : (
+            <div>
+              <div className="flex items-end gap-1.5">
+                {plan.fromPrice && (
+                  <span className="pb-1 text-[0.95rem] font-medium text-ink-3">
+                    From
+                  </span>
+                )}
+                <span className="font-serif text-[1.9rem] font-bold tracking-tight text-ink">
+                  KES {plan.priceKes}
+                </span>
+                {plan.period && (
+                  <span className="pb-1 text-[0.9rem] text-ink-3">
+                    {plan.period}
+                  </span>
+                )}
+              </div>
+              <div className="mt-0.5 text-[0.95rem] font-medium text-accent-2">
+                (USD {plan.priceUsd}
+                {plan.period === "/ month" ? " / month" : ""})
+              </div>
+            </div>
+          )}
           <p className="mt-2 text-[0.85rem] font-medium text-ink-2">
             Best for: {plan.bestFor}
           </p>
@@ -350,7 +235,7 @@ function PricingCard({ plan }: { plan: Plan }) {
             size="lg"
             className="mb-6 w-full"
           >
-            <a href={plan.ctaHref}>
+            <a href={mailto(`${plan.name} enquiry`)}>
               {plan.cta} <ArrowRight className="h-4 w-4" />
             </a>
           </Button>

@@ -29,6 +29,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ROOMS } from "@/lib/rooms";
 import { ServicesShowcase } from "@/components/ServicesShowcase";
+import { TIERS, priceCompact } from "@/lib/pricing";
 import {
   HEADLINE_STATS,
   CORE_BELIEF,
@@ -398,14 +399,11 @@ function Insight() {
 // PRICING TEASER
 // ============================================================
 function PricingTeaser() {
-  const tiers = [
-    { name: "Free Diagnostic", price: "Free" },
-    { name: "Founder OS Starter", price: "KES 5K/mo" },
-    { name: "Founder OS Growth", price: "KES 15K/mo", recommended: true },
-    { name: "Business Readiness Review", price: "KES 35K" },
-    { name: "Business Build Sprint", price: "From KES 75K" },
-    { name: "Virtual Executive Bench", price: "From KES 195K/mo" },
-  ];
+  const tiers = TIERS.map((t) => ({
+    name: t.name,
+    price: priceCompact(t),
+    recommended: t.highlighted,
+  }));
   return (
     <section id="pricing" className="py-[90px]">
       <div className="mx-auto max-w-[1180px] px-6">
