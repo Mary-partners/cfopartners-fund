@@ -6,7 +6,7 @@
  * Positioning: premium. Prices reflect senior practitioner time, the AI
  * platform, and measured outcomes, and sit in line with the regional
  * market for board-level advisory. USD figures are rounded price points,
- * not live conversions (approx. KES 130 per USD).
+ * not live conversions (KES 125 per USD).
  */
 
 export interface Tier {
@@ -51,7 +51,7 @@ export const TIERS: Tier[] = [
     name: "Founder OS Starter",
     label: "Self-guided structure",
     priceKes: "25,000",
-    priceUsd: "195",
+    priceUsd: "200",
     period: "/ month",
     description:
       "For early-stage founders who need simple structure, practical tools, and AI-guided business support.",
@@ -71,7 +71,7 @@ export const TIERS: Tier[] = [
     name: "Founder OS Growth",
     label: "Most useful for growing businesses",
     priceKes: "65,000",
-    priceUsd: "495",
+    priceUsd: "520",
     period: "/ month",
     description:
       "For founders with revenue who need stronger systems, better reporting, and bankability readiness.",
@@ -96,7 +96,7 @@ export const TIERS: Tier[] = [
     name: "Business Readiness Review",
     label: "Expert interpretation",
     priceKes: "125,000",
-    priceUsd: "950",
+    priceUsd: "1,000",
     period: " one-time",
     description:
       "For founders who want a senior practitioner to review their diagnostic results and translate them into a practical action plan.",
@@ -116,7 +116,7 @@ export const TIERS: Tier[] = [
     name: "Business Build Sprint",
     label: "Guided implementation",
     priceKes: "385,000",
-    priceUsd: "2,950",
+    priceUsd: "3,080",
     period: " one-time",
     fromPrice: true,
     description:
@@ -138,7 +138,7 @@ export const TIERS: Tier[] = [
     name: "Virtual Executive Bench",
     label: "Premium support",
     priceKes: "520,000",
-    priceUsd: "3,950",
+    priceUsd: "4,160",
     period: "/ month",
     fromPrice: true,
     description:
@@ -154,12 +154,12 @@ export const TIERS: Tier[] = [
       "Founder review calls",
       "Investor or bank readiness",
       "Board-style reporting",
-      "Integrated Executive Bench from KES 1,000,000 (USD 7,500)/month",
+      "Integrated Executive Bench from KES 1,000,000 (USD 8,000)/month",
     ],
   },
 ];
 
-/** "KES 65,000 (USD 495)" or "Free"; prefix "From " when fromPrice. */
+/** "KES 65,000 (USD 520)" or "Free"; prefix "From " when fromPrice. */
 export function priceLine(t: Tier): string {
   if (t.priceUsd === null) return t.priceKes;
   const base = `KES ${t.priceKes} (USD ${t.priceUsd})`;

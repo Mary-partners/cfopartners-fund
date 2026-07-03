@@ -187,7 +187,7 @@ export default function RoomPage({ params }: { params: { slug: string } }) {
             Unlock {room.shortName} with Founder OS Growth.
           </h2>
           <p className="mx-auto mb-8 max-w-[560px] text-ink-2">
-            KES 65,000 (USD 495) a month opens every Executive Room, every AI assistant,
+            KES 65,000 (USD 520) a month opens every Executive Room, every AI assistant,
             and the full business template library. Or start with the free
             diagnostic to see which Room your business needs first.
           </p>
