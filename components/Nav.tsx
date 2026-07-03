@@ -121,6 +121,7 @@ export function Nav() {
             onLeave={scheduleClose}
           />
           {[
+            { href: "/ai-automations", label: "AI Automations" },
             { href: "/pricing", label: "Pricing" },
             { href: "/blog", label: "Journal" },
             { href: "/resources", label: "Resources" },
@@ -240,6 +241,7 @@ export function Nav() {
             })}
           </MobileAccordion>
           {[
+            { href: "/ai-automations", label: "AI Automations" },
             { href: "/pricing", label: "Pricing" },
             { href: "/blog", label: "Journal" },
             { href: "/resources", label: "Resources" },
@@ -325,9 +327,28 @@ function ServicesPanel({ onNavigate }: { onNavigate: () => void }) {
         })}
       </div>
       <Link
+        href="/ai-automations"
+        onClick={onNavigate}
+        className="mt-4 flex items-center justify-between rounded-2xl border-2 border-accent bg-gold-soft/40 px-6 py-4 text-ink transition-colors hover:bg-gold-soft"
+      >
+        <span className="flex items-center gap-3">
+          <Rocket className="h-5 w-5 text-accent-2" />
+          <span>
+            <span className="block text-[0.95rem] font-semibold">
+              AI Automations
+            </span>
+            <span className="block text-[0.82rem] text-ink-3">
+              Tell us what to automate. We scope it, build it with you, and
+              train your team.
+            </span>
+          </span>
+        </span>
+        <ArrowRight className="h-4 w-4 flex-none text-accent-2" />
+      </Link>
+      <Link
         href="/#institutional"
         onClick={onNavigate}
-        className="mt-4 flex items-center justify-between rounded-2xl bg-ink px-6 py-4 text-white transition-colors hover:bg-ink-2"
+        className="mt-3 flex items-center justify-between rounded-2xl bg-ink px-6 py-4 text-white transition-colors hover:bg-ink-2"
       >
         <span className="flex items-center gap-3">
           <Building2 className="h-5 w-5 text-accent" />
