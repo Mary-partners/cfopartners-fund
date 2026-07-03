@@ -28,6 +28,7 @@ import { RoomFinder } from "@/components/RoomFinder";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ROOMS } from "@/lib/rooms";
+import { SERVICE_GROUPS } from "@/lib/services";
 import {
   HEADLINE_STATS,
   CORE_BELIEF,
@@ -57,6 +58,7 @@ export default function HomePage() {
       <Challenge />
       <Stats />
       <AdvisoryModel />
+      <Services />
       <ExecutiveRooms />
       <FinderSection />
       <Insight />
@@ -976,6 +978,75 @@ function FAQSection() {
         </Reveal>
         <Reveal delay={100}>
           <FAQ />
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+
+// ============================================================
+// SERVICES: four service groups, one integrated firm
+// ============================================================
+function Services() {
+  return (
+    <section id="services" className="bg-ink py-[90px] text-white">
+      <div className="mx-auto max-w-[1180px] px-6">
+        <Reveal>
+          <span className="mb-3 inline-block text-[0.8rem] font-semibold uppercase tracking-[0.1em] text-accent">
+            Our services
+          </span>
+          <h2 className="mb-5 max-w-[820px] text-white">
+            Four service groups. One integrated firm.
+          </h2>
+          <p className="mb-[50px] max-w-[720px] text-[1.05rem] leading-7 text-slate-300">
+            Everything we deliver sits in one of four groups, and every
+            engagement starts from the diagnostic, so the support you buy
+            matches the constraint the data surfaced.
+          </p>
+        </Reveal>
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+          {SERVICE_GROUPS.map((g, i) => (
+            <Reveal key={g.key} delay={i * 90}>
+              <div className="flex h-full flex-col rounded-card border-t-4 border-accent bg-white/5 p-7 backdrop-blur transition-colors hover:bg-white/10">
+                <h3 className="mb-2 text-[1.25rem] text-accent">{g.name}</h3>
+                <p className="mb-5 text-[0.95rem] leading-6 text-slate-300">
+                  {g.summary}
+                </p>
+                <ul className="mt-auto grid gap-2 sm:grid-cols-2">
+                  {g.items.map((item) => (
+                    <li
+                      key={item}
+                      className="flex items-start gap-2.5 text-[0.9rem] leading-6 text-slate-200"
+                    >
+                      <Check className="mt-1 h-4 w-4 flex-none text-accent" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+        <Reveal delay={200}>
+          <div className="mt-10 flex flex-wrap items-center justify-between gap-5 rounded-card border border-white/15 bg-white/5 px-7 py-6">
+            <p className="m-0 max-w-[560px] text-[0.95rem] text-slate-300">
+              Not sure which service fits? Start with the free diagnostic and
+              we will route you to the right one.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <CheckupTrigger variant="accent">
+                Take the diagnostic
+              </CheckupTrigger>
+              <Link
+                href="/pricing"
+                className="inline-flex items-center gap-2 rounded-full border-[1.5px] border-white/40 px-[22px] py-[14px] text-[0.95rem] font-semibold text-white transition-all hover:bg-white hover:text-ink"
+              >
+                See pricing
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
         </Reveal>
       </div>
     </section>

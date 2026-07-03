@@ -60,6 +60,7 @@ export function Footer() {
             <h4 className="mb-3 text-[0.85rem] font-semibold uppercase tracking-[0.06em] text-ink">
               Platform
             </h4>
+            <FLink href="/#services">Services</FLink>
             <FLink href="/#rooms">Executive Rooms</FLink>
             <FLink href="/pricing">Pricing</FLink>
             <FLink href="/blog">Journal</FLink>
