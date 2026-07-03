@@ -61,16 +61,16 @@ export const AUTOMATION_CATEGORIES: AutomationCategory[] = [
   {
     key: "leadership",
     name: "Leadership",
-    tagline: "Your goals, visible every week",
+    tagline: "The system that helps you make smart decisions",
     description:
-      "Leadership activities that slip when the weeks get busy: tracking goals against reality, reviewing KPIs, preparing board updates, and keeping the team accountable. Automation puts them in front of you without the assembly work.",
+      "Think of what a leader actually does: evaluates the skills in the team and works on upskilling, looks for where work is stuck and removes the friction, and makes decisions with the full picture instead of a gut feel. Automation assembles that picture every week so leading takes judgement, not admin.",
     examples: [
+      "Team skills map with upskilling plans per person",
+      "Friction detection: where work waits, stalls, or gets done twice",
       "Goal tracking against current targets",
-      "Weekly KPI digest to your inbox or WhatsApp",
-      "Board pack and investor update assembly",
-      "Team accountability nudges",
-      "Decision log with follow-through tracking",
+      "Data-backed decision briefs before big commitments",
+      "Weekly KPI digest and board pack assembly",
     ],
-    dashboardTitle: "Leadership goals dashboard",
+    dashboardTitle: "Leadership decision cockpit",
   },
 ];

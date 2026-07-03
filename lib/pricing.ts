@@ -80,6 +80,8 @@ export const TIERS: Tier[] = [
     highlighted: true,
     features: [
       "All AI executive assistants",
+      "Leadership dashboard: goals, team skills, friction points",
+      "Data-backed decision briefs",
       "Full business template library",
       "Monthly business review report",
       "Bankability Score",
@@ -145,6 +147,8 @@ export const TIERS: Tier[] = [
     cta: "Apply for Executive Support",
     features: [
       "Virtual CFO / COO / Growth support",
+      "Full leadership decision cockpit, built for your business",
+      "Team skills evaluation and upskilling plans",
       "Monthly management reporting",
       "Strategic advisory",
       "Founder review calls",

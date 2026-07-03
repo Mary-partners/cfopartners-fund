@@ -269,43 +269,60 @@ function MarketingDashboard() {
   );
 }
 
-/** Leadership: current goals with progress, KPI digest, focus. */
+/** Leadership: team skills, friction removal, decision support. */
 function LeadershipDashboard() {
-  const goals: [string, number, string][] = [
-    ["Grow monthly revenue to KES 3M", 68, "KES 2.04M now"],
-    ["Reduce top-customer share below 25%", 45, "at 34% today"],
-    ["Close books within 10 working days", 80, "12 days last month"],
-    ["Hire operations lead", 30, "shortlist of 3"],
+  const team: [string, number, string][] = [
+    ["Achieng · Sales", 78, "upskill: pricing conversations"],
+    ["Kamau · Operations", 62, "upskill: stock forecasting"],
+    ["Wanjiru · Accounts", 85, "ready for month-end ownership"],
   ];
   return (
-    <Frame title="Leadership · current goals · Q3 2026">
-      {goals.map(([goal, pct, note], i) => {
-        const y = 62 + i * 56;
+    <Frame title="Leadership decision cockpit · week 24">
+      {/* TEAM SKILLS */}
+      <text x="22" y="66" fontFamily="Georgia, serif" fontSize="14" fontWeight="bold" fill={CREAM}>
+        Team skills and upskilling
+      </text>
+      {team.map(([person, pct, note], i) => {
+        const y = 80 + i * 40;
         return (
-          <g key={goal}>
-            <text x="22" y={y + 4} fontFamily="Inter, sans-serif" fontSize="13" fill={CREAM} opacity="0.9">
-              {goal}
+          <g key={person}>
+            <text x="22" y={y + 10} fontFamily="Inter, sans-serif" fontSize="11.5" fill={CREAM} opacity="0.9">
+              {person}
             </text>
-            <text x="578" y={y + 4} textAnchor="end" fontFamily="Inter, sans-serif" fontSize="11.5" fill={GOLD}>
+            <rect x="180" y={y} width="180" height="11" rx="5.5" fill="rgba(255,255,255,0.1)" />
+            <rect x="180" y={y} width={180 * (pct / 100)} height="11" rx="5.5" fill={pct >= 75 ? GOLD : "rgba(244,241,234,0.55)"} />
+            <text x="370" y={y + 10} fontFamily="Inter, sans-serif" fontSize="10" fill={GOLD}>
               {note}
-            </text>
-            <rect x="22" y={y + 12} width="556" height="12" rx="6" fill="rgba(255,255,255,0.1)" />
-            <rect x="22" y={y + 12} width={556 * (pct / 100)} height="12" rx="6" fill={pct >= 60 ? GOLD : "rgba(244,241,234,0.55)"} />
-            <text x="22" y={y + 42} fontFamily="Inter, sans-serif" fontSize="10.5" fill={DIM}>
-              {pct}% of target
             </text>
           </g>
         );
       })}
-      <rect x="22" y="292" width="556" height="62" rx="10" fill={PANEL} stroke={GOLD} />
-      <text x="38" y="316" fontFamily="Georgia, serif" fontSize="14" fontWeight="bold" fill={GOLD}>
-        This week&apos;s focus, chosen from the goals above
+      {/* FRICTION */}
+      <text x="22" y="222" fontFamily="Georgia, serif" fontSize="14" fontWeight="bold" fill={CREAM}>
+        Friction found this week
       </text>
-      <text x="38" y="338" fontFamily="Inter, sans-serif" fontSize="12.5" fill={CREAM} opacity="0.9">
-        Two discovery calls with prospective anchor customers · final ops-lead interviews Thursday
+      {[
+        "Quotes wait 2.5 days for your approval. Suggest: limit to KES 100K+",
+        "Stock counted twice, by sales and by stores. One count would do.",
+      ].map((line, i) => (
+        <g key={line}>
+          <rect x="22" y={234 + i * 36} width="556" height="28" rx="8" fill={PANEL} stroke="rgba(192,57,43,0.5)" />
+          <circle cx="42" cy={248 + i * 36} r="4.5" fill="#C0392B" />
+          <text x="58" y={252 + i * 36} fontFamily="Inter, sans-serif" fontSize="11.5" fill={CREAM} opacity="0.9">
+            {line}
+          </text>
+        </g>
+      ))}
+      {/* DECISION BRIEF */}
+      <rect x="22" y="312" width="556" height="44" rx="10" fill={PANEL} stroke={GOLD} />
+      <text x="38" y="330" fontFamily="Georgia, serif" fontSize="12.5" fontWeight="bold" fill={GOLD}>
+        Decision brief: add a second delivery van?
       </text>
-      <text x="22" y="372" fontFamily="Inter, sans-serif" fontSize="12" fill={DIM}>
-        Assembled automatically every Monday 06:00 · sources: sales sheet, HR tracker, accounts
+      <text x="38" y="348" fontFamily="Inter, sans-serif" fontSize="11" fill={CREAM} opacity="0.9">
+        Utilisation 91%, 4 late deliveries last month. Numbers say yes from August. Your call.
+      </text>
+      <text x="22" y="374" fontFamily="Inter, sans-serif" fontSize="11" fill={DIM}>
+        Assembled every Monday from your sales, HR, and delivery data. You decide with the full picture.
       </text>
     </Frame>
   );
