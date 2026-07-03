@@ -1,18 +1,10 @@
 import type { Metadata } from "next";
-import {
-  Bot,
-  ClipboardList,
-  FileSpreadsheet,
-  MessageSquare,
-  ReceiptText,
-  Repeat,
-  Workflow,
-} from "lucide-react";
+import { Workflow } from "lucide-react";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { Reveal } from "@/components/Reveal";
 import { AutomationIntake } from "@/components/AutomationIntake";
-import { Card } from "@/components/ui/card";
+import { AutomationCategories } from "@/components/AutomationCategories";
 
 export const metadata: Metadata = {
   title: "AI Automations | CFO Partners",
@@ -20,44 +12,7 @@ export const metadata: Metadata = {
     "Tell us what you want to automate, what success looks like, your timeline, and who is involved. We scope it, build it with you, and train your team to run it.",
 };
 
-const EXAMPLES = [
-  {
-    icon: ReceiptText,
-    name: "Payment reconciliation",
-    detail:
-      "Match M-Pesa, bank, and till payments to invoices automatically, with a daily summary instead of a weekend spreadsheet session.",
-  },
-  {
-    icon: MessageSquare,
-    name: "Customer follow-up",
-    detail:
-      "Polite, automatic reminders for overdue invoices and quotes that went quiet, over WhatsApp or email.",
-  },
-  {
-    icon: FileSpreadsheet,
-    name: "Reporting",
-    detail:
-      "Monthly management accounts, KPI dashboards, and board-pack numbers assembled from your existing tools without manual copying.",
-  },
-  {
-    icon: ClipboardList,
-    name: "Compliance deadlines",
-    detail:
-      "KRA filing reminders, document checklists, and status tracking so nothing slips past the 9th or the 20th.",
-  },
-  {
-    icon: Repeat,
-    name: "Order and delivery flows",
-    detail:
-      "From order received to dispatch confirmed: status updates, stock alerts, and handoffs between teammates.",
-  },
-  {
-    icon: Bot,
-    name: "AI assistants for your team",
-    detail:
-      "Internal assistants trained on your prices, policies, and processes, so the team stops asking you everything.",
-  },
-];
+
 
 const PROCESS = [
   {
@@ -125,40 +80,27 @@ export default function AIAutomationsPage() {
         </div>
       </header>
 
-      {/* WHAT WE AUTOMATE */}
+      {/* CATEGORIES */}
       <section className="py-[80px]">
         <div className="mx-auto max-w-[1180px] px-6">
           <Reveal>
             <span className="mb-3 inline-block text-[0.8rem] font-semibold uppercase tracking-[0.1em] text-accent-2">
-              What founders automate with us
+              What can be automated
             </span>
             <h2 className="mb-5 max-w-[780px]">
-              If it repeats every week, it is a candidate.
+              Four categories, in the order most businesses adopt them.
             </h2>
-            <p className="mb-12 max-w-[720px] text-[1.05rem] text-ink-2">
-              Six patterns come up again and again in our diagnostic
-              submissions. Yours does not have to fit one of them; the brief
-              form takes anything.
+            <p className="mb-10 max-w-[720px] text-[1.05rem] text-ink-2">
+              Administrative work is where automation starts, because the
+              rules are already clear. Delivery and marketing follow once the
+              basics run themselves. Leadership automations come last and pay
+              the most: your goals and numbers in front of you every week
+              without the assembly work.
             </p>
           </Reveal>
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {EXAMPLES.map((e, i) => {
-              const Icon = e.icon;
-              return (
-                <Reveal key={e.name} delay={i * 70}>
-                  <Card className="h-full p-6 transition-all hover:-translate-y-0.5 hover:shadow-card">
-                    <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-gold-soft text-accent-2">
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <h3 className="mb-2 text-[1.05rem]">{e.name}</h3>
-                    <p className="m-0 text-[0.9rem] leading-6 text-ink-2">
-                      {e.detail}
-                    </p>
-                  </Card>
-                </Reveal>
-              );
-            })}
-          </div>
+          <Reveal delay={100}>
+            <AutomationCategories />
+          </Reveal>
         </div>
       </section>
 
