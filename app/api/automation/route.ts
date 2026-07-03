@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { notify } from "@/lib/notify";
 
 export const runtime = "edge";
 
@@ -52,6 +53,21 @@ export async function POST(request: Request) {
   };
 
   console.log("[automation]", JSON.stringify(record));
+
+  await notify({
+    subject: `New automation brief: ${record.name || record.email}`,
+    lines: [
+      ["Name", record.name],
+      ["Email", record.email],
+      ["Business", record.business],
+      ["Phone / WhatsApp", record.phone],
+      ["What they want to automate", record.automate],
+      ["What success looks like", record.success],
+      ["Timeline", record.timeline],
+      ["Dependencies and team", record.dependencies],
+      ["Submitted", record.at],
+    ],
+  });
 
   const webhook =
     process.env.AUTOMATION_WEBHOOK_URL ?? process.env.SUBSCRIBE_WEBHOOK_URL;

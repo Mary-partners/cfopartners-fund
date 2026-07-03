@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { notify } from "@/lib/notify";
 
 export const runtime = "edge";
 
@@ -39,6 +40,19 @@ export async function POST(request: Request) {
   };
 
   console.log("[subscribe]", JSON.stringify(record));
+
+  await notify({
+    subject:
+      record.resource
+        ? `Resource download: ${record.resource} (${record.email})`
+        : `New journal subscriber: ${record.email}`,
+    lines: [
+      ["Email", record.email],
+      ["Source", record.source],
+      ["Resource", record.resource ?? ""],
+      ["Submitted", record.at],
+    ],
+  });
 
   const webhook = process.env.SUBSCRIBE_WEBHOOK_URL;
   if (webhook) {
