@@ -15,6 +15,9 @@
 /.next/
 /out/
 
+# generated Prisma client
+/generated/
+
 # production
 /build
 

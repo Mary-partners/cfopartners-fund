@@ -1,10 +1,19 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import { WHATSAPP_URL } from "@/lib/links";
 
 /**
  * Floating WhatsApp chat button, fixed to the bottom-right corner on every
- * page. WhatsApp is the channel most Kenyan founders reach for first.
+ * marketing page. WhatsApp is the channel most Kenyan founders reach for
+ * first. Hidden on /os — an internal tool, not a page visitors land on.
  */
 export function WhatsAppButton() {
+  const pathname = usePathname();
+  if (pathname?.startsWith("/os")) {
+    return null;
+  }
+
   return (
     <a
       href={WHATSAPP_URL}

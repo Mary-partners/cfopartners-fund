@@ -136,6 +136,13 @@ export function Nav() {
               {l.label}
             </Link>
           ))}
+          <Link
+            href="/os"
+            onClick={closeAll}
+            className="rounded-full border-[1.5px] border-ink px-4 py-1.5 text-[0.85rem] font-semibold text-ink transition-colors hover:bg-ink hover:text-white"
+          >
+            Access your OS
+          </Link>
           <CheckupTrigger variant="primary">Free Check-Up</CheckupTrigger>
         </div>
 
@@ -247,6 +254,7 @@ export function Nav() {
             { href: "/resources", label: "Resources" },
             { href: "/#institutional", label: "For Institutions" },
             { href: "/contact", label: "Contact" },
+            { href: "/os", label: "Access your OS" },
           ].map((l) => (
             <Link
               key={l.href}

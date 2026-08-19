@@ -54,6 +54,17 @@ lib/
 └── checkup-data.ts    # questions, pillars, archetypes, tier mapping
 ```
 
+## CFOIP OS (`/os`)
+
+The practice's internal operating system — client portfolio, workflow
+management, quality review — lives at `/os`, in this same app and
+deployment (reachable from "Access your OS" in the main nav). It has its
+own database (Supabase Postgres via Prisma) and auth (Supabase Auth),
+scoped entirely under `app/os/`, `components/os/`, `lib/os/`, and
+`prisma/`. See [`/docs`](./docs) for the full picture — start with
+[`/docs/architecture.md`](./docs/architecture.md) and
+[`/docs/setup.md`](./docs/setup.md) (connecting the Supabase project).
+
 ## Editing common things
 
 | Want to change | Where |
