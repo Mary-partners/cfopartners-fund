@@ -6,11 +6,27 @@ import { NextResponse, type NextRequest } from "next/server";
 const PUBLIC_PATHS = ["/os/login", "/os/signup", "/os/auth/callback"];
 
 export async function middleware(request: NextRequest) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  // Fail closed with a clear message rather than an uncaught exception
+  // (which Vercel reports as an opaque MIDDLEWARE_INVOCATION_FAILED 500) —
+  // this only happens if the Supabase env vars haven't been set on this
+  // deployment yet. See /docs/setup.md.
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return new NextResponse(
+      "CFOIP OS is not configured yet: Supabase environment variables " +
+        "(NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY) are " +
+        "missing on this deployment. See /docs/setup.md.",
+      { status: 503 },
+    );
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         getAll() {
