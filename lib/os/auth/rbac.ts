@@ -24,7 +24,9 @@ export type Permission =
   | "task:assign"
   | "document:view"
   | "document:upload"
-  | "document:delete";
+  | "document:delete"
+  | "quality:view"
+  | "quality:review";
 
 const ALL_INTERNAL_PERMISSIONS: Permission[] = [
   "client:view",
@@ -43,6 +45,8 @@ const ALL_INTERNAL_PERMISSIONS: Permission[] = [
   "document:view",
   "document:upload",
   "document:delete",
+  "quality:view",
+  "quality:review",
 ];
 
 /**
@@ -67,6 +71,8 @@ const ROLE_PERMISSIONS: Record<OrgRole, ReadonlySet<Permission>> = {
     "document:view",
     "document:upload",
     "document:delete",
+    "quality:view",
+    "quality:review",
   ]),
   [OrgRole.PORTFOLIO_LEAD]: new Set([
     "client:view",
@@ -79,6 +85,8 @@ const ROLE_PERMISSIONS: Record<OrgRole, ReadonlySet<Permission>> = {
     "task:assign",
     "document:view",
     "document:upload",
+    "quality:view",
+    "quality:review",
   ]),
   [OrgRole.RELATIONSHIP_MANAGER]: new Set([
     "client:view",
@@ -86,6 +94,7 @@ const ROLE_PERMISSIONS: Record<OrgRole, ReadonlySet<Permission>> = {
     "membership:view",
     "document:view",
     "document:upload",
+    "quality:view",
   ]),
   [OrgRole.SERVICE_LEAD]: new Set([
     "client:view",
@@ -97,16 +106,24 @@ const ROLE_PERMISSIONS: Record<OrgRole, ReadonlySet<Permission>> = {
     "task:assign",
     "document:view",
     "document:upload",
+    "quality:view",
+    "quality:review",
   ]),
   [OrgRole.PREPARER_ANALYST]: new Set([
     "client:view",
     "task:updateStatus",
     "document:view",
     "document:upload",
+    "quality:view",
   ]),
-  [OrgRole.INDEPENDENT_REVIEWER]: new Set(["client:view", "document:view"]),
-  [OrgRole.FINANCE_BILLING]: new Set(["client:view", "billing:view", "document:view"]),
-  [OrgRole.READ_ONLY_AUDITOR]: new Set(["client:view", "audit:view", "document:view"]),
+  [OrgRole.INDEPENDENT_REVIEWER]: new Set([
+    "client:view",
+    "document:view",
+    "quality:view",
+    "quality:review",
+  ]),
+  [OrgRole.FINANCE_BILLING]: new Set(["client:view", "billing:view", "document:view", "quality:view"]),
+  [OrgRole.READ_ONLY_AUDITOR]: new Set(["client:view", "audit:view", "document:view", "quality:view"]),
 };
 
 export function can(role: OrgRole, permission: Permission): boolean {
@@ -135,9 +152,11 @@ export const ROLE_LABELS: Record<OrgRole, string> = {
 
 /**
  * Segregation of duties: a reviewer must never be the same person who
- * prepared the work they're reviewing. The Quality module (Phase 2) will
- * call this at the deliverable-review layer; kept here now so the rule
- * lives in one place from day one.
+ * prepared the work they're reviewing. Enforced in
+ * app/os/(app)/quality/actions.ts submitReviewAction before a Review row
+ * is ever created — kept here, not inlined there, so the rule lives in one
+ * place regardless of what else calls it later (a future Deliverable-level
+ * review, for instance).
  */
 export function canReview(preparerMembershipId: string, reviewerMembershipId: string): boolean {
   return preparerMembershipId !== reviewerMembershipId;

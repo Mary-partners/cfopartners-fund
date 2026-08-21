@@ -319,6 +319,42 @@ something tries to read it — a genuinely empty Vercel variable and a
 never-added one look identical to `process.env`, so "it's in the
 dashboard" isn't the same as "it has a value."
 
+## Quality reviews a `Task`, not a separate versioned `Deliverable`
+
+**Decision**: the first Quality slice adds one `Review` model tied to
+`Task`, using the `UNDER_REVIEW` status that already existed on
+`TaskStatus` (unused until now) as the review trigger — not the
+`Deliverable` → `DeliverableVersion` → `Review` → `ReviewFinding` →
+`SignOff` chain sketched in `/docs/implementation-plan.md`'s original
+Phase 2 outline.
+
+**Why**: `Task` already models exactly the unit of work Quality needs to
+gate — a title, an assignee, a due date, a status lifecycle that already
+included `UNDER_REVIEW` → `APPROVED` → `DELIVERED`. Building a parallel
+`Deliverable` entity would mean two overlapping concepts for "the thing
+being worked on" in the same Phase 1/2 slice, with no product signal yet
+for why a deliverable needs to be distinct from its task (multiple
+deliverables per task? a deliverable spanning multiple tasks? — no current
+feature needs either). Reusing `Task` means the segregation-of-duties rule
+(`canReview()`) protects real, already-shipping work immediately, not a
+new parallel concept nobody's used yet.
+
+**What's genuinely deferred, not silently dropped** (see
+`/docs/implementation-plan.md` "Simplifications" for the full reasoning
+per item): `ReviewFinding` (a review is one comments field, not a
+checklist of discrete issues), `DeliverableVersion` (no link between a
+specific uploaded Document and the review outcome it received), and a
+distinct `SignOff` step (approval and sign-off are the same event today —
+preparer → reviewer/approver, not preparer → reviewer → approver as three
+separate roles).
+
+**Reversible?** Yes, but not free. If CFOIP's real usage shows tasks
+genuinely need multiple review-able deliverables, or a review needs to
+survive the task being deleted/restructured, that's a real migration
+(`Review.taskId` → `Review.deliverableId`, with `Deliverable` introduced
+as its own entity) — not a config flip. Flagged here so it isn't
+mistaken for the final shape.
+
 ## Specialist review still needed before real client data
 
 Restating from `/docs/security.md`: this system is *designed toward*

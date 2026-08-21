@@ -1,4 +1,4 @@
-import type { TaskStatus, WorkflowInstanceStatus } from "@/generated/prisma/enums";
+import type { TaskStatus, WorkflowInstanceStatus, ReviewOutcome } from "@/generated/prisma/enums";
 
 /**
  * "Overdue" is not a stored status — it's derived here from the due date
@@ -40,4 +40,9 @@ export const WORKFLOW_INSTANCE_STATUS_LABEL: Record<WorkflowInstanceStatus, stri
   IN_PROGRESS: "In progress",
   COMPLETED: "Completed",
   CANCELLED: "Cancelled",
+};
+
+export const REVIEW_OUTCOME_LABEL: Record<ReviewOutcome, string> = {
+  APPROVED: "Approved",
+  CHANGES_REQUESTED: "Changes requested",
 };

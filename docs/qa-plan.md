@@ -17,10 +17,10 @@ This document is about (1).
 | Check | Command | Status |
 |---|---|---|
 | Type safety | `npx tsc --noEmit` (the repo root) | Passing, zero errors — across the *whole* app, existing marketing pages included |
-| Production build | `npx next build` (the repo root) | Succeeds: every existing marketing route (`/`, `/pricing`, `/blog`, `/contact`, `/resources`, `/rooms/[slug]`, `/api/*`) builds unchanged alongside all `/os/*` routes (incl. `/os/documents` and `/os/documents/[id]/download`), including without `DATABASE_URL` set (see `/docs/architecture.md` — lazy Prisma client) |
-| Database migrations | `npx prisma migrate dev` / `deploy` against real Postgres 16 | All six migrations apply cleanly, including through Prisma's shadow-database validation |
+| Production build | `npx next build` (the repo root) | Succeeds: every existing marketing route (`/`, `/pricing`, `/blog`, `/contact`, `/resources`, `/rooms/[slug]`, `/api/*`) builds unchanged alongside all `/os/*` routes (incl. `/os/documents`, `/os/documents/[id]/download`, `/os/quality`), including without `DATABASE_URL` set (see `/docs/architecture.md` — lazy Prisma client) |
+| Database migrations | `npx prisma migrate dev` / `deploy` against real Postgres 16 | All eight migrations apply cleanly, including through Prisma's shadow-database validation |
 | Seed script | `npm run db:seed` against real Postgres 16 | Runs end to end: 12 clients, 2 workflow templates, 3 workflow instances with realistic (verified by direct query) due-date/overdue spread |
-| Row Level Security | Manual `psql` session, `SET ROLE authenticated` + `SET request.jwt.claim.sub` | Verified on all 10 tenant tables (incl. `documents`): cross-tenant isolation holds, anonymous session sees nothing, direct writes are rejected. See `/docs/security.md` and `/docs/setup.md` |
+| Row Level Security | Manual `psql` session, `SET ROLE authenticated` + `SET request.jwt.claim.sub` | Verified on all 11 tenant tables (incl. `documents`, `reviews`): cross-tenant isolation holds, anonymous session sees nothing, direct writes are rejected. See `/docs/security.md` and `/docs/setup.md` |
 | Middleware scope | `next dev`, `curl` against `/`, `/pricing`, `/contact`, `/os`, `/os/login`, `/os/dashboard` | Marketing pages return `200` unauthenticated (middleware doesn't touch them — the exact bug this was checked for, see `/docs/architecture.md` "Middleware scope"); `/os` and `/os/dashboard` correctly redirect to `/os/login?next=...`; `/os/login` renders `200` |
 | Nav integration | Same dev-server smoke test, `curl \| grep` | "Access your OS" appears in the rendered homepage HTML (desktop + mobile nav) |
 
@@ -84,7 +84,13 @@ design lands.
       creation, workflow template/task-template creation, workflow
       instantiation, task status change and task assignment;
       `lib/os/audit.ts`.
-- [x] **Self-review is prevented.** `canReview()`, unit tested.
+- [x] **Self-review is prevented.** `canReview()` in `lib/os/auth/rbac.ts`,
+      now actually called (not just defined) from `submitReviewAction`
+      (`app/os/(app)/quality/actions.ts`) before a `Review` row is ever
+      created — a reviewer who is also the task's current assignee gets a
+      clear rejection, verified by reading the code path end to end rather
+      than a standalone unit test (no test runner in this repo — see
+      "What's not verified, and why" below).
 - [x] **Period schedules create correctly-dated work.** `computePeriodEnd`/
       `computeTaskDueDate` unit tested for weekly/monthly/quarterly/annual
       boundaries (including a February-in-a-non-leap-year case and a
@@ -104,12 +110,20 @@ design lands.
 - [x] **Document uploads/deletes appear in the audit log.**
       `DOCUMENT_UPLOADED`/`DOCUMENT_DELETED`, same `recordAuditEvent()`
       pattern as every other material action.
+- [x] **Quality reviews are tenant-isolated and RBAC-gated.**
+      `quality:view`/`quality:review` in `lib/os/auth/rbac.ts`; every
+      review submission checks org scoping (the task is fetched scoped to
+      `actor.organizationId`, same pattern as every other write in this
+      codebase); RLS on `reviews` verified against local Postgres (see the
+      table above).
+- [x] **Task reviews appear in the audit log.** `TASK_REVIEWED` (metadata
+      records the outcome), same `recordAuditEvent()` pattern.
 - [ ] Task dependencies/blocking, checklist evidence, onboarding gates,
       request SLAs, QA release gates, multi-currency billing, document
-      versioning, virus scanning — all Phase 2+ features or
-      explicitly-deferred Documents follow-ups not yet built; their
-      acceptance criteria live in `/docs/implementation-plan.md` against
-      the phase that ships them.
+      versioning, virus scanning, `ReviewFinding`/`SignOff` granularity —
+      all Phase 2+ features or explicitly-deferred follow-ups not yet
+      built; their acceptance criteria live in
+      `/docs/implementation-plan.md` against the phase that ships them.
 
 ## CI
 

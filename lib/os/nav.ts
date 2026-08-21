@@ -27,7 +27,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/os/clients", label: "Clients", icon: Building2, implemented: true, phase: "Phase 1" },
   { href: "/os/work", label: "Work", icon: ListChecks, implemented: true, phase: "Phase 1" },
   { href: "/os/requests", label: "Requests", icon: Inbox, implemented: false, phase: "Phase 2" },
-  { href: "/os/quality", label: "Quality", icon: ShieldCheck, implemented: false, phase: "Phase 2" },
+  { href: "/os/quality", label: "Quality", icon: ShieldCheck, implemented: true, phase: "Phase 2" },
   { href: "/os/calendar", label: "Calendar & Deadlines", icon: CalendarClock, implemented: true, phase: "Phase 1" },
   { href: "/os/billing", label: "Time & Billing", icon: Receipt, implemented: false, phase: "Phase 3" },
   { href: "/os/documents", label: "Documents", icon: FolderClosed, implemented: true, phase: "Phase 1" },

@@ -20,8 +20,8 @@ const ROADMAP = [
   },
   {
     phase: "Phase 2 — Service control",
-    status: "planned" as const,
-    items: ["Client portal", "Ad hoc requests", "Quality review & approval", "Meetings & decisions", "Capacity planning"],
+    status: "in-progress" as const,
+    items: ["Quality review & approval", "Client portal", "Ad hoc requests", "Meetings & decisions", "Capacity planning"],
   },
   {
     phase: "Phase 3 — Commercial management",
@@ -37,11 +37,13 @@ const ROADMAP = [
 
 const STATUS_LABEL: Record<(typeof ROADMAP)[number]["status"], string> = {
   live: "Live",
+  "in-progress": "In progress",
   planned: "Planned",
 };
 
 const STATUS_TONE: Record<(typeof ROADMAP)[number]["status"], "success" | "info" | "neutral"> = {
   live: "success",
+  "in-progress": "info",
   planned: "neutral",
 };
 

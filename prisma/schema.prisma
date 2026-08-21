@@ -74,6 +74,7 @@ enum AuditAction {
   TASK_ASSIGNED
   DOCUMENT_UPLOADED
   DOCUMENT_DELETED
+  TASK_REVIEWED
 }
 
 // How often a WorkflowTemplate's work recurs. Drives the default
@@ -106,6 +107,11 @@ enum TaskStatus {
   UNDER_REVIEW
   APPROVED
   DELIVERED
+}
+
+enum ReviewOutcome {
+  APPROVED
+  CHANGES_REQUESTED
 }
 
 // ---------------------------------------------------------------------------
@@ -156,6 +162,8 @@ model Membership {
   auditEvents          AuditEvent[]
   assignedTasks        Task[]       @relation("TaskAssignee")
   uploadedDocuments    Document[]   @relation("DocumentUploadedBy")
+  reviewsGiven         Review[]     @relation("ReviewReviewer")
+  reviewsReceived      Review[]     @relation("ReviewPreparer")
 
   @@unique([organizationId, userId])
   @@index([organizationId, role])
@@ -324,11 +332,38 @@ model Task {
 
   workflowInstance WorkflowInstance @relation(fields: [workflowInstanceId], references: [id], onDelete: Cascade)
   assignee         Membership?      @relation("TaskAssignee", fields: [assigneeMembershipId], references: [id], onDelete: SetNull)
+  reviews          Review[]
 
   @@index([workflowInstanceId, order])
   @@index([assigneeMembershipId])
   @@index([dueDate])
   @@map("tasks")
+}
+
+/// One review pass on a Task, taken while it sits at TaskStatus.UNDER_REVIEW.
+/// `preparerMembershipId` copies the task's assignee *at review time* (not
+/// joined live) so the segregation-of-duties record survives a later
+/// reassignment — see canReview() in lib/os/auth/rbac.ts, enforced in
+/// app/os/(app)/quality/actions.ts before this row is ever created.
+/// Deliberately layered onto the existing Task lifecycle (UNDER_REVIEW ->
+/// APPROVED/back to IN_PROGRESS) rather than a separate Deliverable entity
+/// — see /docs/decision-log.md for why.
+model Review {
+  id                    String        @id @default(uuid()) @db.Uuid
+  taskId                String        @db.Uuid
+  reviewerMembershipId  String        @db.Uuid
+  preparerMembershipId  String?       @db.Uuid
+  outcome               ReviewOutcome
+  comments              String?
+  createdAt             DateTime      @default(now())
+
+  task     Task        @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  reviewer Membership  @relation("ReviewReviewer", fields: [reviewerMembershipId], references: [id])
+  preparer Membership? @relation("ReviewPreparer", fields: [preparerMembershipId], references: [id], onDelete: SetNull)
+
+  @@index([taskId, createdAt])
+  @@index([reviewerMembershipId])
+  @@map("reviews")
 }
 
 /// One uploaded file. `storagePath` is the Supabase Storage object key

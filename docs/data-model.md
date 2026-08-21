@@ -31,6 +31,8 @@ Organization 1───* WorkflowTemplate
 Organization 1───* WorkflowInstance
 Organization 1───* Document *───0..1 Client
                         └──────0..1 Membership (uploadedBy)
+Task 1───* Review *───1 Membership (reviewer)
+              └────0..1 Membership (preparer)
 ```
 
 ## Why these tables and not the full section-20 list
@@ -93,8 +95,8 @@ banking/accounting systems) in Phase 1's Client 360 "Company profile" tab.
 Append-only. `AuditAction` is a closed enum extended as each module adds
 actions worth auditing (today: sign-up, membership role changes, client
 create, workflow template/task-template creation, workflow instantiation,
-task status change, task assignment, document upload/delete). Never updated
-or deleted from application code — see `/docs/security.md`.
+task status change, task assignment, document upload/delete, task review).
+Never updated or deleted from application code — see `/docs/security.md`.
 
 ### `workflow_templates` / `task_templates`
 A `WorkflowTemplate` is a reusable recipe ("Monthly Management Accounts");
@@ -133,6 +135,23 @@ independent row, not a new version of an existing one. See
 `/docs/implementation-plan.md` for what's deliberately deferred
 (versioning, virus scanning).
 
+### `reviews`
+One row per review pass on a `Task`, taken while it sits at
+`TaskStatus.UNDER_REVIEW`. No `organizationId` column — same reasoning as
+`tasks`: it belongs to exactly one task, which belongs to exactly one
+workflow instance, so scoping joins up through
+`task.workflowInstance.organizationId` rather than denormalizing.
+`preparerMembershipId` copies the task's assignee *at review time*, not
+joined live, so the segregation-of-duties record survives a later
+reassignment; both `preparerMembershipId` and `reviewerMembershipId` are
+nullable-safe against membership removal (`onDelete: SetNull` /
+no-op respectively — reviewer is required, `NOT NULL`, since a review
+without a reviewer isn't meaningful). `outcome` (`APPROVED` /
+`CHANGES_REQUESTED`) drives the task back to `APPROVED` or `IN_PROGRESS` —
+see `submitReviewAction` in `app/os/(app)/quality/actions.ts`. No separate
+`Deliverable`/`SignOff` concept yet; see `/docs/implementation-plan.md`
+"Simplifications" for what a fuller Quality model would add.
+
 ## Conventions
 
 - **IDs**: UUID primary keys (`@default(uuid())`), matching Supabase's own
@@ -160,7 +179,7 @@ independent row, not a new version of an existing one. See
 
 ## Migrations
 
-`prisma/migrations/` — six so far:
+`prisma/migrations/` — eight so far:
 
 1. `20260819092543_init` — organizations, memberships, clients,
    client_contacts, audit_events.
@@ -176,8 +195,13 @@ independent row, not a new version of an existing one. See
    `DOCUMENT_UPLOADED`/`DOCUMENT_DELETED` added to the `AuditAction` enum.
 6. `20260821132500_documents_rls` — RLS policy for `documents`, same pattern
    as (2) and (4).
+7. `20260821174144_add_reviews` — the `reviews` table and `ReviewOutcome`
+   enum, plus `TASK_REVIEWED` added to `AuditAction`.
+8. `20260821174500_reviews_rls` — RLS policy for `reviews`, same
+   EXISTS-through-a-join pattern as `tasks`' own policy (see (4)), since
+   `reviews` has no `organizationId` column either.
 
-All six were generated and applied against a real local Postgres 16
+All eight were generated and applied against a real local Postgres 16
 instance during development (not just written by hand and hoped correct) —
 see `/docs/setup.md` "Verifying migrations locally" if you need to do the
 same.

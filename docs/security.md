@@ -16,14 +16,14 @@ Implemented in `lib/os/auth/rbac.ts`, one file, one matrix
 | Role | Core authority (Phase 0/1 permissions) |
 |---|---|
 | Managing Partner | Everything |
-| Practice Administrator | Clients, team roles, settings, audit log, workflow templates & instantiation, documents (incl. delete) — not billing, not task execution |
-| Portfolio Lead / CFO | Clients (view/create/edit), billing visibility, start work, update/assign tasks, documents (view/upload) |
-| Client Relationship Manager | Clients (view/edit), documents (view/upload) |
-| Service Lead | Clients (view/edit), manage workflow templates, start work, update/assign tasks, documents (view/upload) |
-| Preparer / Analyst | Clients (view only), update task status (their own delivery work), documents (view/upload) |
-| Independent Reviewer | Clients (view only), documents (view only) |
-| Finance / Billing | Clients (view), billing visibility, documents (view only) |
-| Read-only / Auditor | Clients (view), audit log, documents (view only) |
+| Practice Administrator | Clients, team roles, settings, audit log, workflow templates & instantiation, documents (incl. delete), quality review — not billing, not task execution |
+| Portfolio Lead / CFO | Clients (view/create/edit), billing visibility, start work, update/assign tasks, documents (view/upload), quality review |
+| Client Relationship Manager | Clients (view/edit), documents (view/upload), quality (view only) |
+| Service Lead | Clients (view/edit), manage workflow templates, start work, update/assign tasks, documents (view/upload), quality review |
+| Preparer / Analyst | Clients (view only), update task status (their own delivery work), documents (view/upload), quality (view only — cannot submit reviews at all) |
+| Independent Reviewer | Clients (view only), documents (view only), quality review |
+| Finance / Billing | Clients (view), billing visibility, documents (view only), quality (view only) |
+| Read-only / Auditor | Clients (view), audit log, documents (view only), quality (view only) |
 
 Document *delete* is deliberately withheld from every role except Managing
 Partner and Practice Administrator — everyone who can view or upload can
@@ -31,24 +31,32 @@ add to the record, but removing a file (destructive, no undo — Documents
 has no version history yet, see `/docs/implementation-plan.md`) is held to
 a higher bar than upload.
 
-The permission surface is intentionally small right now (`client:*`,
-`membership:*`, `audit:view`, `settings:manage`, `billing:view`,
-`workflow:manageTemplates`, `workflow:instantiate`, `task:updateStatus`,
-`task:assign`, `document:view`, `document:upload`, `document:delete`)
-because that's all that's built. It grows with each phase —
-every new module adds its own permissions to the same matrix rather than
-inventing a parallel authorization mechanism. `billing:view` already exists
-in the matrix ahead of the Billing module (Phase 3) shipping, so the
-authority decision (who gets to see money) is made once and doesn't need
-revisiting when Billing lands. Note `task:updateStatus` is currently
-granted broadly to Preparer/Analyst rather than scoped to "only tasks
-assigned to me" — a real gap if CFOIP ever needs to stop analysts from
-touching each other's tasks; tracked in `/docs/decision-log.md`.
+The permission surface grows with each phase — every new module adds its
+own permissions to the same matrix rather than inventing a parallel
+authorization mechanism: `client:*`, `membership:*`, `audit:view`,
+`settings:manage`, `billing:view`, `workflow:manageTemplates`,
+`workflow:instantiate`, `task:updateStatus`, `task:assign`,
+`document:view`, `document:upload`, `document:delete`, `quality:view`,
+`quality:review`. `billing:view` already exists in the matrix ahead of the
+Billing module (Phase 3) shipping, so the authority decision (who gets to
+see money) is made once and doesn't need revisiting when Billing lands.
+Note `task:updateStatus` is currently granted broadly to Preparer/Analyst
+rather than scoped to "only tasks assigned to me" — a real gap if CFOIP
+ever needs to stop analysts from touching each other's tasks; tracked in
+`/docs/decision-log.md`.
 
 **Segregation of duties**: `canReview(preparerMembershipId,
-reviewerMembershipId)` in the same file refuses self-review. It's not wired
-into a UI yet (Quality is Phase 2) but the rule lives in one place from day
-one rather than being bolted onto the Quality module later.
+reviewerMembershipId)` in `lib/os/auth/rbac.ts` refuses self-review. Now
+actually wired in, not just defined — `submitReviewAction`
+(`app/os/(app)/quality/actions.ts`) calls it before creating a `Review`
+row, comparing the reviewer to the task's assignee *at review time*. Two
+layers hold this, not one: `quality:review` decides *which roles* can
+review at all (Preparer/Analyst has `quality:view` but not
+`quality:review` — can't review anything, their own work or otherwise);
+`canReview()` then blocks the specific case of a role that *can* review in
+general happening to be the preparer of *this* task (e.g. a Service Lead
+reviewing their own work). Both checks run server-side on every submission
+— there's no client-side-only enforcement to bypass.
 
 ## Tenant isolation
 
@@ -66,12 +74,13 @@ Two independent layers, deliberately not just one:
    (there is no query function that omits the `organizationId` parameter).
 
 2. **Row Level Security** (defense-in-depth, for other access paths):
-   `prisma/migrations/20260819092604_enable_row_level_security/` and
-   `.../20260819094215_workflow_engine_rls/` enable RLS and add `SELECT`
-   policies on every tenant table (organizations, memberships, clients,
+   four migrations (`20260819092604_enable_row_level_security`,
+   `20260819094215_workflow_engine_rls`, `20260821132500_documents_rls`,
+   `20260821174500_reviews_rls`) enable RLS and add `SELECT` policies on
+   every tenant table (organizations, memberships, clients,
    client_contacts, audit_events, workflow_templates, task_templates,
-   workflow_instances, tasks), keyed off `auth.uid()`. This protects any
-   *other* route into the same database —
+   workflow_instances, tasks, documents, reviews), keyed off `auth.uid()`.
+   This protects any *other* route into the same database —
    a browser Supabase client, Supabase's PostgREST auto-API, a future
    integration — none of which this app currently uses for data queries,
    but which would otherwise have no tenant boundary at all if ever added
@@ -94,7 +103,9 @@ Two independent layers, deliberately not just one:
    default). Re-verified after adding the workflow tables: a workflow
    template, task template, workflow instance and task seeded under Org A
    are visible only to user A, and the equivalent Org B rows only to user
-   B. See `/docs/setup.md` to reproduce.
+   B. Re-verified again after `documents` and `reviews`: a document and a
+   task-with-a-review seeded under each org are visible only to that org's
+   user. See `/docs/setup.md` to reproduce.
 
    One non-obvious bug this caught: a naive policy on `memberships` that
    queries `memberships` again inside itself causes Postgres to report
@@ -142,7 +153,8 @@ distinct from both layers in "Tenant isolation" above:
 `AuditEvent` (`prisma/schema.prisma`) is append-only by convention — no
 application code updates or deletes rows from it. Written today for:
 `USER_SIGNED_UP`, `MEMBERSHIP_ROLE_CHANGED`, `CLIENT_CREATED`,
-`DOCUMENT_UPLOADED`, `DOCUMENT_DELETED`. Extended per phase (the enum,
+`DOCUMENT_UPLOADED`, `DOCUMENT_DELETED`, `TASK_REVIEWED` (metadata records
+the outcome — approved or changes requested). Extended per phase (the enum,
 `AuditAction`, has room for `MEMBERSHIP_DEACTIVATED`, `CLIENT_UPDATED`,
 `CLIENT_LIFECYCLE_CHANGED` already reserved for near-term use). Not yet
 exposed in a UI (Read-only/Auditor role has `audit:view` permission

@@ -114,22 +114,54 @@ Phase 1 is now feature-complete against this plan.
   → antivirus function is the natural place to add it later without
   reworking the upload flow.
 
+- **Quality reviews a `Task`, not a versioned `Deliverable`.** The original
+  plan for this module was `Deliverable` → `DeliverableVersion` → `Review`
+  → `ReviewFinding` → `SignOff`, a full document-review lifecycle
+  independent of task tracking. What shipped instead reuses the `Task`
+  state machine that already existed (`UNDER_REVIEW` was already a
+  `TaskStatus` value, unused until now): a reviewer approves or requests
+  changes on the task itself, one `Review` row per pass, no separate
+  versioned-artifact concept. This is real, useful segregation-of-duties
+  enforcement today — a preparer genuinely cannot review their own
+  work — but it's coarser than the target model in three ways, closed when
+  there's real signal they matter rather than guessed now:
+  - No `ReviewFinding` — a review is one comments field, not a checklist of
+    discrete, individually-resolvable issues.
+  - No `DeliverableVersion` history — nothing ties a specific uploaded
+    Document to the specific review outcome it received; if a preparer
+    re-uploads after "changes requested," the review trail shows the
+    task's reviews in order but not "here is the file that was rejected"
+    vs "here is the file that replaced it."
+  - No separate `SignOff` step — approval *is* the sign-off. The brief's
+    three-role model (preparer → reviewer → approver, potentially three
+    different people) is enforced today as two roles (preparer → reviewer/
+    approver combined); add a distinct approver step if CFOIP's real
+    workflow needs that third gate, not preemptively.
+
 New entities this phase still needs beyond what's built (not yet in
 `schema.prisma`): `Engagement`, `ServicePackage` (replacing the
 `ServiceBucket` enum — see `/docs/decision-log.md`), `ChecklistTemplate` +
 `ChecklistResponse` (per-task checklists, distinct from the task itself),
 `TaskEvidence`, `DocumentVersion`, `WorkflowTemplateVersion`,
-`TaskDependency`.
+`TaskDependency`, `Deliverable`/`DeliverableVersion`/`ReviewFinding`/
+`SignOff` (if Quality's coarser model above proves insufficient).
 
-## Phase 2 — Service control — **planned**
+## Phase 2 — Service control — **in progress**
 
 - [ ] Client portal (new client-facing role model — see
       `/docs/data-model.md` "memberships" for why this isn't just reusing
       `OrgRole`)
 - [ ] Ad hoc requests (`/requests`) — SLA clocks, triage, scope approval
-- [ ] Quality review/approval (`/quality`) — `canReview()` already exists
-      (`lib/os/auth/rbac.ts`); needs `Deliverable`, `DeliverableVersion`,
-      `Review`, `ReviewFinding`, `SignOff`
+- [x] **Quality review/approval** (`/quality`) — preparer/reviewer
+      segregation of duties, layered onto the existing `Task` lifecycle
+      (`UNDER_REVIEW` → reviewer approves → `APPROVED`, or requests changes
+      → back to `IN_PROGRESS`) rather than the fuller `Deliverable`/
+      `DeliverableVersion`/`Review`/`ReviewFinding`/`SignOff` model
+      originally sketched here. `canReview()` (`lib/os/auth/rbac.ts`) is now
+      actually called, not just defined — enforced in
+      `app/os/(app)/quality/actions.ts` before a `Review` row is ever
+      created. See "Simplifications" below for exactly what's deferred and
+      why.
 - [ ] Meetings & decisions
 - [ ] Capacity planning (`/team`)
 - [ ] Richer reporting (`/reports`)
@@ -157,12 +189,18 @@ money" decision is made once, not revisited when Billing ships.
 - [ ] Advanced automation rules engine
 
 Per the brief: **do not start Phase 4 while tenant isolation, auditability,
-QA gates and recovery procedures are incomplete.** Phase 2's Quality module
-and a real incident-response/backup runbook are the gating items.
+QA gates and recovery procedures are incomplete.** Quality's first slice is
+live (see Phase 2 above) — a real gate now exists, though a coarser one
+than the target model — and a real incident-response/backup runbook is
+still the other gating item, not done.
 
 ## Immediate next slice (recommendation)
 
-Phase 1 is complete. Phase 2 (client portal, Quality, Requests) is the next
-slice — it can build against a real workflow/task/document concept instead
-of a guessed one. Before onboarding real client financial documents through
-Documents at any volume, close the virus-scanning gap noted above.
+Quality's first slice (segregation-of-duties review on tasks) is live.
+Client portal, Ad hoc requests, Meetings & decisions and Capacity planning
+remain in Phase 2 — Client portal is the architecturally biggest of these
+(new client-facing role model) and unlocks parts of the others, so it's the
+natural next pick, though Requests could ship first with staff logging
+requests on a client's behalf if client login isn't ready yet. Before
+onboarding real client financial documents through Documents at any
+volume, close the virus-scanning gap noted above.
