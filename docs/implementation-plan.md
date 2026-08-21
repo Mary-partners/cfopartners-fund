@@ -37,11 +37,11 @@ from the old one on trust.
 
 Shipped:
 - [x] Client portfolio list (`/clients`) with create-client form, RBAC-gated
-- [x] Client 360 — Overview tab and a real Work tab (workflow instances for
-      that client); remaining tabs listed as upcoming on the page itself
-      (Company profile, Engagement, Onboarding, Services, Requests,
-      Deliverables, Documents, Meetings, Financial operations, Billing,
-      Health & risk, Activity timeline)
+- [x] Client 360 — Overview tab, a real Work tab (workflow instances for
+      that client) and a real Documents section; remaining tabs listed as
+      upcoming on the page itself (Company profile, Engagement, Onboarding,
+      Services, Requests, Deliverables, Meetings, Financial operations,
+      Billing, Health & risk, Activity timeline)
 - [x] Command Centre — live counts (total/onboarding/active/watch+at-risk),
       clients by service bucket, recently updated clients
 - [x] Team & role management (`/settings/team`) — the self-serve piece that
@@ -61,10 +61,19 @@ Shipped:
       3 clients with realistic status spread (one fully delivered, two
       running behind schedule with genuinely overdue tasks) — see
       `prisma/seed.ts`.
+- [x] **Internal document storage** (`/documents`, plus a Documents section
+      on Client 360) — Supabase Storage-backed (`document:view/upload/
+      delete`). Uploads go browser → Storage directly over a short-lived
+      signed URL, never through a Next.js server action/route handler —
+      Vercel Serverless Functions cap request bodies around 4.5 MB, well
+      under what a scanned financial statement can be. Downloads are the
+      same shape in reverse: `/os/documents/[id]/download` checks RBAC +
+      org scoping on every request, then redirects to a signed URL valid
+      for 5 minutes. No public bucket URLs anywhere. See "Simplifications"
+      below for what this slice deliberately doesn't do yet (versioning,
+      virus scanning).
 
-Not yet built (placeholder page exists at this route, labelled "Ships
-Phase 1" in-product):
-- [ ] Internal document storage — `/documents`
+Phase 1 is now feature-complete against this plan.
 
 ### Simplifications taken to ship this slice (not silent — tracked here)
 
@@ -90,12 +99,26 @@ Phase 1" in-product):
   (UTC+3, no DST); revisit before onboarding a client whose reporting
   calendar depends on a timezone far enough from UTC for a day boundary to
   shift.
+- **Documents has no version history.** Uploading a file with the same name
+  again creates a second, independent `Document` row (its own uuid-prefixed
+  Storage path) rather than a new version of an existing one — there's no
+  `DocumentVersion` linking them or a "latest" concept. Fine for a first
+  slice; add `DocumentVersion` when CFOIP actually needs "see what changed
+  between drafts," not before.
+- **No virus/malware scanning on upload.** The brief's security posture
+  calls for it; this slice validates MIME type and a 25 MB size cap
+  client- and server-side (`lib/os/documents-shared.ts`,
+  `lib/os/validation/document.ts`) but doesn't scan file contents. Track in
+  `/docs/security.md` as a gap to close before this handles real client
+  financial documents at any real volume — a Supabase Storage webhook
+  → antivirus function is the natural place to add it later without
+  reworking the upload flow.
 
 New entities this phase still needs beyond what's built (not yet in
 `schema.prisma`): `Engagement`, `ServicePackage` (replacing the
 `ServiceBucket` enum — see `/docs/decision-log.md`), `ChecklistTemplate` +
 `ChecklistResponse` (per-task checklists, distinct from the task itself),
-`TaskEvidence`, `Document`, `DocumentVersion`, `WorkflowTemplateVersion`,
+`TaskEvidence`, `DocumentVersion`, `WorkflowTemplateVersion`,
 `TaskDependency`.
 
 ## Phase 2 — Service control — **planned**
@@ -139,9 +162,7 @@ and a real incident-response/backup runbook are the gating items.
 
 ## Immediate next slice (recommendation)
 
-Phase 1's only remaining item is **internal document storage**
-(`/documents`) — Supabase Storage-backed, with `Document`/`DocumentVersion`
-metadata in Postgres, short-lived signed URLs (never public bucket URLs),
-and virus-scanning hooked in per `/docs/security.md`. After that, Phase 1 is
-complete and Phase 2 (client portal, Quality, Requests) can start against a
-real workflow/task concept instead of a guessed one.
+Phase 1 is complete. Phase 2 (client portal, Quality, Requests) is the next
+slice — it can build against a real workflow/task/document concept instead
+of a guessed one. Before onboarding real client financial documents through
+Documents at any volume, close the virus-scanning gap noted above.

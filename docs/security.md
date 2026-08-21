@@ -16,19 +16,26 @@ Implemented in `lib/os/auth/rbac.ts`, one file, one matrix
 | Role | Core authority (Phase 0/1 permissions) |
 |---|---|
 | Managing Partner | Everything |
-| Practice Administrator | Clients, team roles, settings, audit log, workflow templates & instantiation — not billing, not task execution |
-| Portfolio Lead / CFO | Clients (view/create/edit), billing visibility, start work, update/assign tasks |
-| Client Relationship Manager | Clients (view/edit) |
-| Service Lead | Clients (view/edit), manage workflow templates, start work, update/assign tasks |
-| Preparer / Analyst | Clients (view only), update task status (their own delivery work) |
-| Independent Reviewer | Clients (view only) |
-| Finance / Billing | Clients (view), billing visibility |
-| Read-only / Auditor | Clients (view), audit log |
+| Practice Administrator | Clients, team roles, settings, audit log, workflow templates & instantiation, documents (incl. delete) — not billing, not task execution |
+| Portfolio Lead / CFO | Clients (view/create/edit), billing visibility, start work, update/assign tasks, documents (view/upload) |
+| Client Relationship Manager | Clients (view/edit), documents (view/upload) |
+| Service Lead | Clients (view/edit), manage workflow templates, start work, update/assign tasks, documents (view/upload) |
+| Preparer / Analyst | Clients (view only), update task status (their own delivery work), documents (view/upload) |
+| Independent Reviewer | Clients (view only), documents (view only) |
+| Finance / Billing | Clients (view), billing visibility, documents (view only) |
+| Read-only / Auditor | Clients (view), audit log, documents (view only) |
+
+Document *delete* is deliberately withheld from every role except Managing
+Partner and Practice Administrator — everyone who can view or upload can
+add to the record, but removing a file (destructive, no undo — Documents
+has no version history yet, see `/docs/implementation-plan.md`) is held to
+a higher bar than upload.
 
 The permission surface is intentionally small right now (`client:*`,
 `membership:*`, `audit:view`, `settings:manage`, `billing:view`,
 `workflow:manageTemplates`, `workflow:instantiate`, `task:updateStatus`,
-`task:assign`) because that's all that's built. It grows with each phase —
+`task:assign`, `document:view`, `document:upload`, `document:delete`)
+because that's all that's built. It grows with each phase —
 every new module adds its own permissions to the same matrix rather than
 inventing a parallel authorization mechanism. `billing:view` already exists
 in the matrix ahead of the Billing module (Phase 3) shipping, so the
@@ -97,16 +104,50 @@ Two independent layers, deliberately not just one:
    that runs as the migration-owner role, which is exempt from RLS on
    tables it owns, so the internal lookup doesn't re-trigger the policy.
 
+## Document storage
+
+Files (bucket `documents` in Supabase Storage) are a third access surface,
+distinct from both layers in "Tenant isolation" above:
+
+- **Never a public bucket, never a long-lived URL.** Every upload and
+  download is mediated by the app server, which mints a Supabase Storage
+  *signed URL* scoped to one object — upload URLs via
+  `requestDocumentUploadAction`, download URLs via the
+  `/os/documents/[id]/download` route handler (5-minute expiry). A client
+  never holds a credential that works against the bucket generally, only a
+  single-object, time-boxed one.
+- **RBAC is checked before every signed URL is minted**, same as any other
+  write/read: `document:upload` for the upload path, `document:view` for
+  download — see `lib/os/auth/rbac.ts`. Org scoping is enforced the same
+  way as `getClientById` — `getDocumentById(organizationId, id)` returns
+  `null` for another org's document, and the download route 404s on `null`
+  rather than ever redirecting to that object's signed URL.
+- **The `documents` Postgres table (file metadata, not bytes) has an RLS
+  `SELECT` policy** (`prisma/migrations/20260821132500_documents_rls/`),
+  same defense-in-depth posture as every other tenant table — see "Tenant
+  isolation" above for what that does and doesn't cover.
+- **Storage bucket policies (`storage.objects` RLS) are intentionally not
+  used.** Only the service-role Supabase client (`lib/os/supabase/admin.ts`,
+  server-only, never imported into a client component) ever talks to
+  Storage — no browser code holds the anon key against this bucket, so
+  there's no access path for `storage.objects` RLS to defend that isn't
+  already gated by the RBAC checks above. Revisit if that ever changes
+  (e.g. a future client-portal upload flow that talks to Storage directly).
+- **No virus/malware scanning yet.** Tracked as a real gap in
+  `/docs/implementation-plan.md` — close it before this handles real client
+  financial documents at volume.
+
 ## Audit trail
 
 `AuditEvent` (`prisma/schema.prisma`) is append-only by convention — no
 application code updates or deletes rows from it. Written today for:
-`USER_SIGNED_UP`, `MEMBERSHIP_ROLE_CHANGED`, `CLIENT_CREATED`. Extended per
-phase (the enum, `AuditAction`, has room for `MEMBERSHIP_DEACTIVATED`,
-`CLIENT_UPDATED`, `CLIENT_LIFECYCLE_CHANGED` already reserved for
-near-term use). Not yet exposed in a UI (Read-only/Auditor role has
-`audit:view` permission granted, waiting on a screen) — Phase 1/2 backlog
-item, see `/docs/implementation-plan.md`.
+`USER_SIGNED_UP`, `MEMBERSHIP_ROLE_CHANGED`, `CLIENT_CREATED`,
+`DOCUMENT_UPLOADED`, `DOCUMENT_DELETED`. Extended per phase (the enum,
+`AuditAction`, has room for `MEMBERSHIP_DEACTIVATED`, `CLIENT_UPDATED`,
+`CLIENT_LIFECYCLE_CHANGED` already reserved for near-term use). Not yet
+exposed in a UI (Read-only/Auditor role has `audit:view` permission
+granted, waiting on a screen) — Phase 1/2 backlog item, see
+`/docs/implementation-plan.md`.
 
 ## Authentication
 
@@ -127,10 +168,10 @@ enrollment), not a platform limitation.
 ## Secrets
 
 `.env.example` documents every required variable with no real values.
-`SUPABASE_SERVICE_ROLE_KEY` is present in the example file for future admin
-tooling but nothing in the Phase 0/1 codebase actually imports or uses it
-yet — grep `lib/os` and `app/os` before wiring anything to it, and keep it server-only
-(never `NEXT_PUBLIC_`) when you do. Real secrets live only in Vercel's
+`SUPABASE_SERVICE_ROLE_KEY` is used by `lib/os/supabase/admin.ts` (Storage
+operations for Documents — see "Document storage" above) — the one place
+in the codebase that imports it. Keep it server-only (never `NEXT_PUBLIC_`)
+if it's ever needed elsewhere. Real secrets live only in Vercel's
 Environment Variables and the developer's local `.env.local` (gitignored).
 
 ## Dependency posture

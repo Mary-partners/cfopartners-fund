@@ -57,6 +57,14 @@ export async function getClientList(organizationId: string) {
   });
 }
 
+export async function getClientOptions(organizationId: string) {
+  return db.client.findMany({
+    where: { organizationId },
+    orderBy: { name: "asc" },
+    select: { id: true, name: true },
+  });
+}
+
 export async function getClientById(organizationId: string, clientId: string) {
   return db.client.findFirst({
     where: { id: clientId, organizationId },

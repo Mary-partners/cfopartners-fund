@@ -29,17 +29,19 @@ Organization 1───* Membership *───1 (Supabase auth.users, by userId 
 Organization 1───* AuditEvent *───0..1 Membership (actor)
 Organization 1───* WorkflowTemplate
 Organization 1───* WorkflowInstance
+Organization 1───* Document *───0..1 Client
+                        └──────0..1 Membership (uploadedBy)
 ```
 
-## Why these five tables and not the full section-20 list
+## Why these tables and not the full section-20 list
 
 The original brief lists ~30 entities across workflow, quality, billing,
 documents, requests, meetings, health scoring and integrations. Building all
 of them before any UI exists on top of them would mean a schema with no
 proof it's the *right* shape. Phase 0/1 instead models exactly what the
-shipped UI (Command Centre, Clients list, Client 360 overview, Team) needs,
-and grows the schema alongside each subsequent phase's UI. The full target
-entity list — grouped by the phase that introduces it — is in
+shipped UI (Command Centre, Clients list, Client 360, Team, Documents)
+needs, and grows the schema alongside each subsequent phase's UI. The full
+target entity list — grouped by the phase that introduces it — is in
 `/docs/implementation-plan.md`.
 
 ## Tables
@@ -91,8 +93,8 @@ banking/accounting systems) in Phase 1's Client 360 "Company profile" tab.
 Append-only. `AuditAction` is a closed enum extended as each module adds
 actions worth auditing (today: sign-up, membership role changes, client
 create, workflow template/task-template creation, workflow instantiation,
-task status change, task assignment). Never updated or deleted from
-application code — see `/docs/security.md`.
+task status change, task assignment, document upload/delete). Never updated
+or deleted from application code — see `/docs/security.md`.
 
 ### `workflow_templates` / `task_templates`
 A `WorkflowTemplate` is a reusable recipe ("Monthly Management Accounts");
@@ -117,6 +119,20 @@ template never rewrites the record of what was actually delivered. Each
 status !== DELIVERED` at read time, so fixing a due date or delivering a
 task always immediately clears it rather than leaving a stale flag.
 
+### `documents`
+File metadata only — the bytes live in Supabase Storage (bucket
+`documents`), never in Postgres. `storagePath` is the Storage object key
+and is `@unique`; `clientId` is nullable so the practice can store
+org-wide files (templates, policies) alongside client-specific ones.
+`uploadedByMembershipId` is nullable (`onDelete: SetNull`) so deactivating
+or removing a membership never deletes the documents they uploaded. No
+`DocumentVersion` yet — re-uploading a same-named file creates an
+independent row, not a new version of an existing one. See
+`/docs/security.md` "Document storage" for the access-control model
+(signed URLs, not RLS on the Storage side) and
+`/docs/implementation-plan.md` for what's deliberately deferred
+(versioning, virus scanning).
+
 ## Conventions
 
 - **IDs**: UUID primary keys (`@default(uuid())`), matching Supabase's own
@@ -134,14 +150,17 @@ task always immediately clears it rather than leaving a stale flag.
 - **Money**: not yet modelled (no billing tables in Phase 0/1). When Phase 3
   adds them, money is stored as integer minor units + an ISO currency code
   per the original brief, never as floating point.
-- **Soft delete**: not used anywhere yet. Nothing in Phase 0/1 has a business
-  reason to be soft-deleted rather than genuinely removed (a mis-added
-  client can just be deleted); this is revisited per-table as retention
-  requirements land (documents, financial records).
+- **Soft delete**: not used anywhere yet, including `documents` — deleting a
+  document genuinely removes the row and the underlying Storage object
+  (`deleteDocumentAction`). Nothing in Phase 0/1 has a business reason to
+  soft-delete rather than genuinely remove; this is revisited per-table as
+  retention requirements land (documents, financial records) — a real
+  question for CFOIP's eventual records-retention policy, not a technical
+  one.
 
 ## Migrations
 
-`prisma/migrations/` — four so far:
+`prisma/migrations/` — six so far:
 
 1. `20260819092543_init` — organizations, memberships, clients,
    client_contacts, audit_events.
@@ -153,8 +172,12 @@ task always immediately clears it rather than leaving a stale flag.
    workflow_instances, tasks.
 4. `20260819094215_workflow_engine_rls` — RLS policies for the workflow
    tables, same pattern as (2).
+5. `20260821131927_add_documents` — the `documents` table, plus
+   `DOCUMENT_UPLOADED`/`DOCUMENT_DELETED` added to the `AuditAction` enum.
+6. `20260821132500_documents_rls` — RLS policy for `documents`, same pattern
+   as (2) and (4).
 
-All four were generated and applied against a real local Postgres 16
+All six were generated and applied against a real local Postgres 16
 instance during development (not just written by hand and hoped correct) —
 see `/docs/setup.md` "Verifying migrations locally" if you need to do the
 same.

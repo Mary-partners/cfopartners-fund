@@ -21,7 +21,10 @@ export type Permission =
   | "workflow:manageTemplates"
   | "workflow:instantiate"
   | "task:updateStatus"
-  | "task:assign";
+  | "task:assign"
+  | "document:view"
+  | "document:upload"
+  | "document:delete";
 
 const ALL_INTERNAL_PERMISSIONS: Permission[] = [
   "client:view",
@@ -37,6 +40,9 @@ const ALL_INTERNAL_PERMISSIONS: Permission[] = [
   "workflow:instantiate",
   "task:updateStatus",
   "task:assign",
+  "document:view",
+  "document:upload",
+  "document:delete",
 ];
 
 /**
@@ -58,6 +64,9 @@ const ROLE_PERMISSIONS: Record<OrgRole, ReadonlySet<Permission>> = {
     "settings:manage",
     "workflow:manageTemplates",
     "workflow:instantiate",
+    "document:view",
+    "document:upload",
+    "document:delete",
   ]),
   [OrgRole.PORTFOLIO_LEAD]: new Set([
     "client:view",
@@ -68,11 +77,15 @@ const ROLE_PERMISSIONS: Record<OrgRole, ReadonlySet<Permission>> = {
     "workflow:instantiate",
     "task:updateStatus",
     "task:assign",
+    "document:view",
+    "document:upload",
   ]),
   [OrgRole.RELATIONSHIP_MANAGER]: new Set([
     "client:view",
     "client:edit",
     "membership:view",
+    "document:view",
+    "document:upload",
   ]),
   [OrgRole.SERVICE_LEAD]: new Set([
     "client:view",
@@ -82,11 +95,18 @@ const ROLE_PERMISSIONS: Record<OrgRole, ReadonlySet<Permission>> = {
     "workflow:instantiate",
     "task:updateStatus",
     "task:assign",
+    "document:view",
+    "document:upload",
   ]),
-  [OrgRole.PREPARER_ANALYST]: new Set(["client:view", "task:updateStatus"]),
-  [OrgRole.INDEPENDENT_REVIEWER]: new Set(["client:view"]),
-  [OrgRole.FINANCE_BILLING]: new Set(["client:view", "billing:view"]),
-  [OrgRole.READ_ONLY_AUDITOR]: new Set(["client:view", "audit:view"]),
+  [OrgRole.PREPARER_ANALYST]: new Set([
+    "client:view",
+    "task:updateStatus",
+    "document:view",
+    "document:upload",
+  ]),
+  [OrgRole.INDEPENDENT_REVIEWER]: new Set(["client:view", "document:view"]),
+  [OrgRole.FINANCE_BILLING]: new Set(["client:view", "billing:view", "document:view"]),
+  [OrgRole.READ_ONLY_AUDITOR]: new Set(["client:view", "audit:view", "document:view"]),
 };
 
 export function can(role: OrgRole, permission: Permission): boolean {

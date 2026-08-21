@@ -260,6 +260,48 @@ live, neither a code bug:
    redeploy must target the *specific branch* (redeploying `main` doesn't
    help — `main` doesn't have `/os` until this branch merges).
 
+## Documents: signed-URL direct upload, no server action carries file bytes
+
+**Decision**: the browser uploads a file straight to Supabase Storage over
+a signed URL that `requestDocumentUploadAction` mints (metadata-only, tiny
+request/response); the file bytes never pass through a Next.js server
+action or route handler. Downloads are the same shape in reverse —
+`/os/documents/[id]/download` checks RBAC and org scoping, then redirects
+to a 5-minute signed URL.
+
+**Why**: Vercel Serverless Functions cap request bodies at roughly 4.5 MB.
+A scanned financial statement or a management accounts pack routinely
+exceeds that. Routing bytes through a server action would work in local
+dev (no such cap) and then fail silently in production on anything but a
+small file — exactly the kind of gap that's easy to miss until a real user
+hits it. Signed-URL direct upload has no such ceiling (bounded instead by
+`MAX_DOCUMENT_SIZE_BYTES` = 25 MB, an app-level choice, not a platform one).
+
+**Reversible?** Yes — the two-step action shape
+(`requestDocumentUploadAction` / `confirmDocumentUploadAction`) is already
+separate from the UI; swapping the transport later (e.g. if Vercel's limit
+changes, or a background job takes over large uploads) doesn't touch RBAC,
+audit logging or the `documents` table.
+
+## Documents Storage bucket is created lazily by the app, not a manual step
+
+**Decision**: `ensureDocumentsBucket()` in `lib/os/storage.ts` creates the
+`documents` Supabase Storage bucket on first use if it doesn't already
+exist, rather than adding a "create a Storage bucket" step to
+`/docs/setup.md`.
+
+**Why**: every other Supabase setup step that genuinely can't be automated
+(creating the project itself, copying API keys, setting the database
+password) already requires the dashboard — no need to add one more manual
+click for something the app can safely do itself. Storage's management API
+is a normal HTTPS call (unlike the Postgres connection, which is blocked
+from a sandboxed Claude Code session — see `/docs/setup.md`), so this was
+actually possible to build, not just convenient in theory.
+
+**Reversible?** Yes, trivially — delete the function, add a manual step to
+`/docs/setup.md` instead, if CFOIP ever wants tighter control over bucket
+creation (e.g. non-default settings the lazy path doesn't set).
+
 ## Specialist review still needed before real client data
 
 Restating from `/docs/security.md`: this system is *designed toward*

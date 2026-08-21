@@ -13,7 +13,8 @@ checked out, exactly as this one did.
    - `Project URL` → `NEXT_PUBLIC_SUPABASE_URL`
    - `anon` `public` key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - `service_role` key → `SUPABASE_SERVICE_ROLE_KEY` (keep this one secret —
-     it bypasses every permission check)
+     it bypasses every permission check; used by `lib/os/supabase/admin.ts`
+     for Documents' Storage uploads/downloads)
 3. Go to **Project Settings → Database → Connection string**:
    - Copy the **Transaction pooler** string (port `6543`) → `DATABASE_URL`.
      Append `?pgbouncer=true` if it isn't already there.
@@ -149,6 +150,14 @@ Push to `main` (or open a PR — Vercel builds a preview per branch) and the
 `/os` routes go live alongside the existing marketing pages, same domain,
 same deploy.
 
+## 7. Documents — nothing extra to set up
+
+No manual "create a Storage bucket" step: `ensureDocumentsBucket()`
+(`lib/os/storage.ts`) creates the `documents` bucket itself on first use if
+it isn't already there. As long as the five env vars from step 1 are set
+(specifically `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`),
+uploading a file from `/os/documents` just works.
+
 ### A note on sandboxed Claude Code sessions and Supabase
 
 A Claude Code sandbox's outbound network is typically HTTPS-only — direct
@@ -160,6 +169,14 @@ one-off command: Vercel's build servers have normal internet access. If a
 future session needs to run migrations by hand, do it from a *local*
 Postgres instance (`## 5` above) or from an environment with real network
 access — not by assuming a sandbox can reach Supabase's database port.
+
+Supabase Storage is a normal HTTPS REST API, unlike the Postgres
+connection, so it *is* reachable from a sandboxed session — that's what
+makes the automatic bucket creation in step 7 possible. It just can't be
+tested end-to-end (an actual signed-URL upload round trip) without the
+real project's credentials in `.env.local`, same as the rest of the
+authenticated flow — see "What's not verified, and why" in
+`/docs/qa-plan.md`.
 
 ## Everyday commands (the repo root)
 

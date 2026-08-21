@@ -15,7 +15,7 @@ const ROADMAP = [
   },
   {
     phase: "Phase 1 — Operational MVP",
-    status: "in-progress" as const,
+    status: "live" as const,
     items: ["Client portfolio & Client 360", "Command Centre", "Workflow templates & recurring work", "Deadlines calendar", "Internal documents"],
   },
   {
@@ -37,13 +37,11 @@ const ROADMAP = [
 
 const STATUS_LABEL: Record<(typeof ROADMAP)[number]["status"], string> = {
   live: "Live",
-  "in-progress": "In progress",
   planned: "Planned",
 };
 
 const STATUS_TONE: Record<(typeof ROADMAP)[number]["status"], "success" | "info" | "neutral"> = {
   live: "success",
-  "in-progress": "info",
   planned: "neutral",
 };
 

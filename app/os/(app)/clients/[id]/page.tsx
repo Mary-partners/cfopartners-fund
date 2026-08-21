@@ -2,13 +2,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireActor } from "@/lib/os/auth/session";
+import { can } from "@/lib/os/auth/rbac";
 import { getClientById } from "@/lib/os/queries/clients";
 import { getWorkflowInstancesForClient } from "@/lib/os/queries/workflow";
+import { getDocumentsForClient } from "@/lib/os/queries/documents";
+import { formatFileSize } from "@/lib/os/documents-shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/os/ui/card";
 import { LifecycleBadge, HealthBadge, SERVICE_BUCKET_LABEL } from "@/components/os/status-badge";
 import { WorkflowInstanceStatusBadge } from "@/components/os/workflow-status-badge";
 import { ProgressBar } from "@/components/os/progress-bar";
 import { computeWorkflowProgress } from "@/lib/os/workflow/status";
+import { DocumentUploadForm } from "@/components/os/document-upload-form";
+import { DeleteDocumentButton } from "@/components/os/delete-document-button";
 
 const UPCOMING_TABS = [
   "Company profile",
@@ -17,7 +22,6 @@ const UPCOMING_TABS = [
   "Services",
   "Requests",
   "Deliverables",
-  "Documents",
   "Meetings",
   "Financial operations",
   "Billing",
@@ -54,6 +58,12 @@ export default async function ClientDetailPage({
   }
 
   const workflowInstances = await getWorkflowInstancesForClient(actor.organizationId, client.id);
+  const canViewDocuments = can(actor.membership.role, "document:view");
+  const canUploadDocuments = can(actor.membership.role, "document:upload");
+  const canDeleteDocuments = can(actor.membership.role, "document:delete");
+  const documents = canViewDocuments
+    ? await getDocumentsForClient(actor.organizationId, client.id)
+    : [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -167,6 +177,55 @@ export default async function ClientDetailPage({
           )}
         </CardContent>
       </Card>
+
+      {canViewDocuments ? (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle>Documents ({documents.length})</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {documents.length === 0 ? (
+                <p className="p-5 text-sm text-ink-2/60">No documents for this client yet.</p>
+              ) : (
+                <ul className="divide-y divide-ink/5">
+                  {documents.map((doc) => (
+                    <li key={doc.id} className="flex items-center justify-between px-5 py-3">
+                      <div>
+                        <a
+                          href={`/os/documents/${doc.id}/download`}
+                          className="text-sm font-medium text-ink hover:underline"
+                        >
+                          {doc.fileName}
+                        </a>
+                        <div className="text-xs text-ink-2/50">
+                          {formatFileSize(doc.sizeBytes)} ·{" "}
+                          {doc.uploadedBy?.displayName ?? doc.uploadedBy?.email ?? "—"} ·{" "}
+                          {new Date(doc.createdAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                      {canDeleteDocuments ? (
+                        <DeleteDocumentButton documentId={doc.id} fileName={doc.fileName} />
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+
+          {canUploadDocuments ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Upload a document</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-2">
+                <DocumentUploadForm fixedClientId={client.id} />
+              </CardContent>
+            </Card>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }

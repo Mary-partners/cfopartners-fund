@@ -17,10 +17,10 @@ This document is about (1).
 | Check | Command | Status |
 |---|---|---|
 | Type safety | `npx tsc --noEmit` (the repo root) | Passing, zero errors — across the *whole* app, existing marketing pages included |
-| Production build | `npx next build` (the repo root) | Succeeds: every existing marketing route (`/`, `/pricing`, `/blog`, `/contact`, `/resources`, `/rooms/[slug]`, `/api/*`) builds unchanged alongside all 20 new `/os/*` routes, including without `DATABASE_URL` set (see `/docs/architecture.md` — lazy Prisma client) |
-| Database migrations | `npx prisma migrate dev` / `deploy` against real Postgres 16 | All four migrations apply cleanly, including through Prisma's shadow-database validation |
+| Production build | `npx next build` (the repo root) | Succeeds: every existing marketing route (`/`, `/pricing`, `/blog`, `/contact`, `/resources`, `/rooms/[slug]`, `/api/*`) builds unchanged alongside all `/os/*` routes (incl. `/os/documents` and `/os/documents/[id]/download`), including without `DATABASE_URL` set (see `/docs/architecture.md` — lazy Prisma client) |
+| Database migrations | `npx prisma migrate dev` / `deploy` against real Postgres 16 | All six migrations apply cleanly, including through Prisma's shadow-database validation |
 | Seed script | `npm run db:seed` against real Postgres 16 | Runs end to end: 12 clients, 2 workflow templates, 3 workflow instances with realistic (verified by direct query) due-date/overdue spread |
-| Row Level Security | Manual `psql` session, `SET ROLE authenticated` + `SET request.jwt.claim.sub` | Verified on all 9 tenant tables: cross-tenant isolation holds, anonymous session sees nothing, direct writes are rejected. See `/docs/security.md` and `/docs/setup.md` |
+| Row Level Security | Manual `psql` session, `SET ROLE authenticated` + `SET request.jwt.claim.sub` | Verified on all 10 tenant tables (incl. `documents`): cross-tenant isolation holds, anonymous session sees nothing, direct writes are rejected. See `/docs/security.md` and `/docs/setup.md` |
 | Middleware scope | `next dev`, `curl` against `/`, `/pricing`, `/contact`, `/os`, `/os/login`, `/os/dashboard` | Marketing pages return `200` unauthenticated (middleware doesn't touch them — the exact bug this was checked for, see `/docs/architecture.md` "Middleware scope"); `/os` and `/os/dashboard` correctly redirect to `/os/login?next=...`; `/os/login` renders `200` |
 | Nav integration | Same dev-server smoke test, `curl \| grep` | "Access your OS" appears in the rendered homepage HTML (desktop + mobile nav) |
 
@@ -31,7 +31,17 @@ This document is about (1).
   sandbox typically has no route to a live Postgres/Supabase instance to
   sign a real JWT against (HTTPS-only egress — see `/docs/setup.md`). Do
   this once the real Supabase project is connected, before calling this
-  slice done-done in production.
+  slice done-done in production. **Verified in production** for the
+  Phase 0/1 flow through sign-up (see `/docs/decision-log.md`).
+- **The Documents upload/download flow against real Supabase Storage** —
+  same HTTPS-only-egress constraint as above; the storage helpers
+  (`lib/os/storage.ts`), RBAC gates and the `documents` table's RLS were
+  all verified (schema/RBAC unit-level and RLS against local Postgres —
+  see the table above), but a real signed-upload-URL round trip and the
+  bucket auto-creation (`ensureDocumentsBucket()`) need a live Supabase
+  project. Do this — upload a file from `/os/documents`, confirm it
+  downloads correctly, confirm a second organization can't reach it —
+  before treating Documents as done-done in production.
 - **No test runner or ESLint** — pre-existing in this repo (not introduced
   by this work). `tsc --noEmit` and `next build` are the correctness gates
   used here; the RBAC/workflow-math unit tests written for the earlier
@@ -85,11 +95,21 @@ design lands.
       `computeIsOverdue` unit tested including a fake-clock test that flips
       the same task from not-overdue to overdue as `now` crosses the due
       date, and a test that delivering a task clears it even past due.
+- [x] **Documents are tenant-isolated and RBAC-gated.** `document:view/
+      upload/delete` in `lib/os/auth/rbac.ts`; every upload/download/delete
+      checks org scoping (`getDocumentById(organizationId, id)` — see
+      `/docs/security.md`); RLS on `documents` verified against local
+      Postgres the same way as every other tenant table (see the table
+      above).
+- [x] **Document uploads/deletes appear in the audit log.**
+      `DOCUMENT_UPLOADED`/`DOCUMENT_DELETED`, same `recordAuditEvent()`
+      pattern as every other material action.
 - [ ] Task dependencies/blocking, checklist evidence, onboarding gates,
-      request SLAs, QA release gates, multi-currency billing — all Phase 1
-      remainder / Phase 2+ features not yet built; their acceptance
-      criteria live in `/docs/implementation-plan.md` against the phase
-      that ships them.
+      request SLAs, QA release gates, multi-currency billing, document
+      versioning, virus scanning — all Phase 2+ features or
+      explicitly-deferred Documents follow-ups not yet built; their
+      acceptance criteria live in `/docs/implementation-plan.md` against
+      the phase that ships them.
 
 ## CI
 
