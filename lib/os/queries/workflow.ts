@@ -46,7 +46,10 @@ export async function getWorkflowInstanceById(organizationId: string, id: string
       workflowTemplate: { select: { id: true, name: true } },
       tasks: {
         orderBy: { order: "asc" },
-        include: { assignee: { select: { id: true, displayName: true, email: true } } },
+        include: {
+          assignee: { select: { id: true, displayName: true, email: true } },
+          documents: { orderBy: { createdAt: "desc" } },
+        },
       },
     },
   });

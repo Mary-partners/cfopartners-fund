@@ -319,6 +319,29 @@ something tries to read it — a genuinely empty Vercel variable and a
 never-added one look identical to `process.env`, so "it's in the
 dashboard" isn't the same as "it has a value."
 
+## Task-scoped documents derive `clientId` server-side, never from the uploader
+
+**Decision**: when a document is uploaded against a specific `Task` (from
+`/work/[id]`), the request only carries `taskId` — the form doesn't also
+ask which client, and the server doesn't trust a client selection sent
+alongside a `taskId` even if one were present. `clientId` is looked up from
+the task's own workflow instance (`resolveTaskContext()` in
+`app/os/(app)/documents/actions.ts`) and written from that lookup.
+
+**Why**: a task already belongs to exactly one client via its workflow
+instance — asking the uploader to also pick a client for a task-scoped
+upload would be redundant at best and silently wrong at worst (nothing
+would stop someone from picking a different client than the task's own,
+and the resulting document would show up in the wrong client's Documents
+list with no error to catch it). Deriving it removes an entire class of
+mismatch rather than validating against it after the fact.
+
+**Reversible?** Yes — if a future need arises for a document to be
+associated with a task *and* a different client (unclear what that would
+even mean today), this is a small, contained change in one function, not a
+schema change (`clientId` and `taskId` are already independent nullable
+columns).
+
 ## Specialist review still needed before real client data
 
 Restating from `/docs/security.md`: this system is *designed toward*

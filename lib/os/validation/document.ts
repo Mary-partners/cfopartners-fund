@@ -12,6 +12,9 @@ export const requestUploadSchema = z.object({
     .positive()
     .max(MAX_DOCUMENT_SIZE_BYTES, "File is larger than the 25 MB limit."),
   clientId: z.string().uuid().nullable(),
+  // When set, clientId above is ignored server-side and re-derived from the
+  // task's own client — see requestDocumentUploadAction.
+  taskId: z.string().uuid().nullable().optional(),
 });
 
 export const confirmUploadSchema = z.object({
@@ -20,4 +23,5 @@ export const confirmUploadSchema = z.object({
   mimeType: z.string().trim().min(1),
   sizeBytes: z.coerce.number().int().positive(),
   clientId: z.string().uuid().nullable(),
+  taskId: z.string().uuid().nullable().optional(),
 });

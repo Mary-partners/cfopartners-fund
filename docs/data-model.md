@@ -30,7 +30,8 @@ Organization 1───* AuditEvent *───0..1 Membership (actor)
 Organization 1───* WorkflowTemplate
 Organization 1───* WorkflowInstance
 Organization 1───* Document *───0..1 Client
-                        └──────0..1 Membership (uploadedBy)
+                        ├──────0..1 Membership (uploadedBy)
+                        └──────0..1 Task
 ```
 
 ## Why these tables and not the full section-20 list
@@ -124,10 +125,17 @@ File metadata only — the bytes live in Supabase Storage (bucket
 `documents`), never in Postgres. `storagePath` is the Storage object key
 and is `@unique`; `clientId` is nullable so the practice can store
 org-wide files (templates, policies) alongside client-specific ones.
-`uploadedByMembershipId` is nullable (`onDelete: SetNull`) so deactivating
-or removing a membership never deletes the documents they uploaded. No
-`DocumentVersion` yet — re-uploading a same-named file creates an
-independent row, not a new version of an existing one. See
+`taskId` is a further-nullable narrowing for files attached to one
+specific task (e.g. the deliverable for that task) rather than the client
+generally — when set, `clientId` is *not* independently chosen by the
+uploader, it's derived server-side from the task's own client
+(`resolveTaskContext()` in `app/os/(app)/documents/actions.ts`), so a
+task-scoped document is guaranteed consistent with which client it
+actually belongs to and always shows up in that client's document list
+too. `uploadedByMembershipId` is nullable (`onDelete: SetNull`) so
+deactivating or removing a membership never deletes the documents they
+uploaded. No `DocumentVersion` yet — re-uploading a same-named file
+creates an independent row, not a new version of an existing one. See
 `/docs/security.md` "Document storage" for the access-control model
 (signed URLs, not RLS on the Storage side) and
 `/docs/implementation-plan.md` for what's deliberately deferred
@@ -160,7 +168,7 @@ independent row, not a new version of an existing one. See
 
 ## Migrations
 
-`prisma/migrations/` — six so far:
+`prisma/migrations/` — seven so far:
 
 1. `20260819092543_init` — organizations, memberships, clients,
    client_contacts, audit_events.
@@ -176,8 +184,12 @@ independent row, not a new version of an existing one. See
    `DOCUMENT_UPLOADED`/`DOCUMENT_DELETED` added to the `AuditAction` enum.
 6. `20260821132500_documents_rls` — RLS policy for `documents`, same pattern
    as (2) and (4).
+7. `20260821180427_add_task_id_to_documents` — nullable `taskId` column +
+   foreign key on `documents`, no RLS change needed (the existing
+   `documents` policy scopes by `organizationId`, unaffected by this
+   column).
 
-All six were generated and applied against a real local Postgres 16
+All seven were generated and applied against a real local Postgres 16
 instance during development (not just written by hand and hoped correct) —
 see `/docs/setup.md` "Verifying migrations locally" if you need to do the
 same.

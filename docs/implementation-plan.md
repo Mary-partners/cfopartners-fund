@@ -61,15 +61,20 @@ Shipped:
       3 clients with realistic status spread (one fully delivered, two
       running behind schedule with genuinely overdue tasks) — see
       `prisma/seed.ts`.
-- [x] **Internal document storage** (`/documents`, plus a Documents section
-      on Client 360) — Supabase Storage-backed (`document:view/upload/
-      delete`). Uploads go browser → Storage directly over a short-lived
-      signed URL, never through a Next.js server action/route handler —
-      Vercel Serverless Functions cap request bodies around 4.5 MB, well
-      under what a scanned financial statement can be. Downloads are the
-      same shape in reverse: `/os/documents/[id]/download` checks RBAC +
-      org scoping on every request, then redirects to a signed URL valid
-      for 5 minutes. No public bucket URLs anywhere. See "Simplifications"
+- [x] **Internal document storage** (`/documents`, a Documents section on
+      Client 360, and per-task attachments on `/work/[id]`) — Supabase
+      Storage-backed (`document:view/upload/delete`). Uploads go browser →
+      Storage directly over a short-lived signed URL, never through a
+      Next.js server action/route handler — Vercel Serverless Functions cap
+      request bodies around 4.5 MB, well under what a scanned financial
+      statement can be. Downloads are the same shape in reverse:
+      `/os/documents/[id]/download` checks RBAC + org scoping on every
+      request, then redirects to a signed URL valid for 5 minutes. No
+      public bucket URLs anywhere. A document can be scoped to a specific
+      `Task` (the deliverable for that piece of work), not just a client
+      generally — `clientId` is always derived server-side from the task in
+      that case, never taken from the uploader, so it can't drift out of
+      sync with which client the task belongs to. See "Simplifications"
       below for what this slice deliberately doesn't do yet (versioning,
       virus scanning).
 

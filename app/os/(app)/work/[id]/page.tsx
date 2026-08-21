@@ -11,6 +11,8 @@ import { ProgressBar } from "@/components/os/progress-bar";
 import { computeWorkflowProgress } from "@/lib/os/workflow/status";
 import { TaskStatusForm } from "@/components/os/task-status-form";
 import { TaskAssigneeForm } from "@/components/os/task-assignee-form";
+import { DocumentUploadForm } from "@/components/os/document-upload-form";
+import { DeleteDocumentButton } from "@/components/os/delete-document-button";
 
 export async function generateMetadata({
   params,
@@ -41,6 +43,9 @@ export default async function WorkflowInstanceDetailPage({
 
   const canUpdateStatus = can(actor.membership.role, "task:updateStatus");
   const canAssign = can(actor.membership.role, "task:assign");
+  const canViewDocuments = can(actor.membership.role, "document:view");
+  const canUploadDocuments = can(actor.membership.role, "document:upload");
+  const canDeleteDocuments = can(actor.membership.role, "document:delete");
   const progress = computeWorkflowProgress(instance.tasks);
   const memberOptions = members.map((m) => ({ id: m.id, label: m.displayName ?? m.email }));
 
@@ -91,6 +96,11 @@ export default async function WorkflowInstanceDetailPage({
                   <th scope="col" className="px-5 py-3 font-medium">
                     Assignee
                   </th>
+                  {canViewDocuments ? (
+                    <th scope="col" className="px-5 py-3 font-medium">
+                      Documents
+                    </th>
+                  ) : null}
                 </tr>
               </thead>
               <tbody className="divide-y divide-ink/5">
@@ -121,6 +131,33 @@ export default async function WorkflowInstanceDetailPage({
                         </span>
                       )}
                     </td>
+                    {canViewDocuments ? (
+                      <td className="min-w-[220px] px-5 py-3">
+                        <div className="flex flex-col gap-1.5">
+                          {task.documents.length > 0 ? (
+                            <ul className="flex flex-col gap-1">
+                              {task.documents.map((doc) => (
+                                <li key={doc.id} className="flex items-center gap-1.5 text-xs">
+                                  <a
+                                    href={`/os/documents/${doc.id}/download`}
+                                    className="max-w-[140px] truncate text-ink hover:underline"
+                                    title={doc.fileName}
+                                  >
+                                    {doc.fileName}
+                                  </a>
+                                  {canDeleteDocuments ? (
+                                    <DeleteDocumentButton documentId={doc.id} fileName={doc.fileName} />
+                                  ) : null}
+                                </li>
+                              ))}
+                            </ul>
+                          ) : null}
+                          {canUploadDocuments ? (
+                            <DocumentUploadForm fixedTaskId={task.id} compact />
+                          ) : null}
+                        </div>
+                      </td>
+                    ) : null}
                   </tr>
                 ))}
               </tbody>
