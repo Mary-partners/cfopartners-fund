@@ -237,6 +237,29 @@ tightening later is a one-line change to `ROLE_PERMISSIONS` plus a
 Deliberately not added half-configured against a fake auth session — see
 `/docs/qa-plan.md` "What's not verified, and why."
 
+## `NEXT_PUBLIC_*` env vars must not be marked Sensitive; edits need a redeploy
+
+Two Vercel-specific gotchas hit while getting the first `/os` deployment
+live, neither a code bug:
+
+1. Marking `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` as
+   **Sensitive** in the Vercel dashboard excludes them from the build step
+   (they're injected at runtime only). Next.js inlines `NEXT_PUBLIC_*`
+   values into the client bundle at *build* time, so a Sensitive
+   `NEXT_PUBLIC_*` var silently resolves to `undefined` in the deployed
+   app — the middleware's fail-closed check then reports the vars as
+   missing, even though they're visibly present in the dashboard. Fixed by
+   re-adding both without the Sensitive flag (Vercel doesn't allow
+   toggling it on an existing variable, so it has to be deleted and
+   re-added).
+2. Editing an environment variable's value does **not** trigger a
+   redeploy — Vercel deployments are immutable snapshots taken at build
+   time. After the fix in (1), the existing branch deployment was still
+   serving the old (broken) snapshot until a new deployment was built.
+   `/docs/setup.md` step 6 now says this explicitly, including that a
+   redeploy must target the *specific branch* (redeploying `main` doesn't
+   help — `main` doesn't have `/os` until this branch merges).
+
 ## Specialist review still needed before real client data
 
 Restating from `/docs/security.md`: this system is *designed toward*

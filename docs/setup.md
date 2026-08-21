@@ -111,21 +111,39 @@ SQL
 ## 6. Vercel — no new project needed
 
 This repo is **already** a connected Vercel project (`cfopartners-fund`),
-deploying to production on every push to `main`. Nothing to import. Two
-things to add, in the Vercel dashboard:
+deploying to production on every push to `main`. Nothing to import. Just
+one thing to add, in the Vercel dashboard:
 
 1. **Environment Variables** (Project Settings → Environment Variables):
    add the five Supabase values from `.env.example` for Production (and
    Preview, if you want branch/PR previews to work against the same
    database).
-2. **Run migrations on every deploy** (Project Settings → General → Build
-   & Development Settings → Build Command → toggle **Override**):
-   ```
-   npx prisma migrate deploy && npm run build
-   ```
-   This applies any pending database migrations before building, on every
-   deploy — the standard CI/CD pattern, not a one-time workaround. Without
-   it, pushing a schema change wouldn't actually update the database.
+
+   - Leave `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+     **unchecked** for "Sensitive". Vercel excludes Sensitive vars from the
+     Next.js build step (they're only injected at runtime), which breaks
+     `NEXT_PUBLIC_*` values specifically — Next.js inlines those into the
+     client bundle *at build time*, so a Sensitive `NEXT_PUBLIC_*` var
+     resolves to `undefined` in the deployed app even though it shows up
+     fine in the dashboard. `DATABASE_URL`, `DIRECT_URL` and
+     `SUPABASE_SERVICE_ROLE_KEY` are fine as Sensitive (server-only, read
+     at runtime, never build-inlined).
+   - **No Build Command override needed.** Migrations run automatically —
+     `package.json`'s `build` script is `prisma migrate deploy && next
+     build`, scoped to this branch (`main` has no `prisma/` directory, so
+     don't add a project-level Build Command override; it would apply to
+     every branch, including `main`, and break it).
+
+2. **Every env var change needs a fresh deployment to take effect.**
+   Vercel deployments are immutable snapshots — editing a variable's value
+   in the dashboard does **not** rebuild or redeploy anything that's
+   already live. After adding/editing/removing a variable, go to
+   **Deployments**, find the latest one *for the branch you care about*
+   (not a different branch — redeploying `main` will not pick up a change
+   meant for `claude/add-cfoip-os`, and `main` has no `/os` routes at all
+   until this branch is merged), and use **Redeploy**. Easiest to get right:
+   push any commit to the branch (even a docs-only one) — Vercel's git
+   integration always builds fresh against current env vars.
 
 Push to `main` (or open a PR — Vercel builds a preview per branch) and the
 `/os` routes go live alongside the existing marketing pages, same domain,
