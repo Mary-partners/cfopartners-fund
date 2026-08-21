@@ -62,8 +62,14 @@ export async function requestDocumentUploadAction(input: {
   try {
     const upload = await createUploadUrl(storagePath);
     return { signedUrl: upload.signedUrl, token: upload.token, path: upload.path };
-  } catch {
-    return { error: "Couldn't prepare the upload. Try again in a moment." };
+  } catch (err) {
+    // Surfaced to the uploader rather than swallowed: this is an internal
+    // staff tool, and "couldn't prepare the upload, try again" with no
+    // detail is a dead end when the real cause (bad credentials, missing
+    // bucket permissions, etc.) is something only an admin can fix, not
+    // something retrying solves.
+    const detail = err instanceof Error ? err.message : String(err);
+    return { error: `Couldn't prepare the upload: ${detail}` };
   }
 }
 
