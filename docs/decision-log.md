@@ -302,6 +302,23 @@ actually possible to build, not just convenient in theory.
 `/docs/setup.md` instead, if CFOIP ever wants tighter control over bucket
 creation (e.g. non-default settings the lazy path doesn't set).
 
+## `SUPABASE_SERVICE_ROLE_KEY` sat unfilled in Vercel for two days
+
+Not a code decision, but worth recording exactly like the other Vercel env
+var gotchas above: the variable was added to Vercel back when the Phase 0/1
+`/os` work started, before anything in the codebase actually read it (see
+`.env.example`'s comment history). It went unnoticed that its value was
+never actually filled in, because nothing exercised it — the first thing
+that did was `lib/os/supabase/admin.ts` (Documents' Storage client), which
+surfaced it immediately as `getSupabaseAdmin()` throwing "are not set."
+
+**Lesson for next time a var is added ahead of the feature that uses it**:
+either fill in the real value at add-time even if unused yet, or leave a
+loud placeholder value (not blank) that fails obviously the moment
+something tries to read it — a genuinely empty Vercel variable and a
+never-added one look identical to `process.env`, so "it's in the
+dashboard" isn't the same as "it has a value."
+
 ## Specialist review still needed before real client data
 
 Restating from `/docs/security.md`: this system is *designed toward*
