@@ -26,3 +26,11 @@ export async function getRecentlyResolvedRequests(organizationId: string, limit 
     include: REQUEST_INCLUDE,
   });
 }
+
+export async function getRequestsForClient(organizationId: string, clientId: string) {
+  return db.request.findMany({
+    where: { organizationId, clientId },
+    orderBy: { createdAt: "desc" },
+    include: REQUEST_INCLUDE,
+  });
+}

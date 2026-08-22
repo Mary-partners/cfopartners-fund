@@ -1,20 +1,23 @@
 "use client";
 
 import { useFormState } from "react-dom";
-import { createRequestAction, type ActionState } from "@/app/os/(app)/requests/actions";
+import { createMeetingAction, type ActionState } from "@/app/os/(app)/meetings/actions";
 import { SubmitButton } from "@/components/os/ui/submit-button";
+import { Input } from "@/components/os/ui/input";
 import { Label } from "@/components/os/ui/label";
 
 const initialState: ActionState = {};
 
-export function CreateRequestForm({
+const todayIso = () => new Date().toISOString().slice(0, 10);
+
+export function CreateMeetingForm({
   clients,
   fixedClientId,
 }: {
   clients?: { id: string; name: string }[];
   fixedClientId?: string;
 }) {
-  const [state, formAction] = useFormState(createRequestAction, initialState);
+  const [state, formAction] = useFormState(createMeetingAction, initialState);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
@@ -28,9 +31,9 @@ export function CreateRequestForm({
         <input type="hidden" name="clientId" value={fixedClientId} />
       ) : (
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="requestClientId">Client</Label>
+          <Label htmlFor="meetingClientId">Client</Label>
           <select
-            id="requestClientId"
+            id="meetingClientId"
             name="clientId"
             required
             defaultValue=""
@@ -49,30 +52,32 @@ export function CreateRequestForm({
       )}
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="requestTitle">What do they need?</Label>
-        <input
-          id="requestTitle"
-          name="title"
-          required
-          maxLength={200}
-          className="h-10 rounded-md border border-ink/20 bg-white px-3 text-sm text-ink-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-          placeholder="e.g. A copy of last quarter's board pack"
-        />
-        {state.fieldErrors?.title ? <p className="text-xs text-red-700">{state.fieldErrors.title}</p> : null}
+        <Label htmlFor="meetingTitle">Title</Label>
+        <Input id="meetingTitle" name="title" required maxLength={200} placeholder="e.g. Monthly review" />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="requestDescription">Details (optional)</Label>
+        <Label htmlFor="meetingHeldAt">Date</Label>
+        <Input id="meetingHeldAt" name="heldAt" type="date" defaultValue={todayIso()} required />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="meetingAttendees">Attendees (optional)</Label>
+        <Input id="meetingAttendees" name="attendees" maxLength={500} placeholder="e.g. Jane, Sam, CFO team" />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="meetingNotes">Notes (optional)</Label>
         <textarea
-          id="requestDescription"
-          name="description"
+          id="meetingNotes"
+          name="notes"
           rows={3}
           className="w-full rounded-md border border-ink/20 bg-white px-3 py-2 text-sm text-ink-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         />
       </div>
 
       <SubmitButton pendingLabel="Logging…" className="mt-2">
-        Log request
+        Log meeting
       </SubmitButton>
     </form>
   );

@@ -83,6 +83,9 @@ enum AuditAction {
   REQUEST_TRIAGED
   REQUEST_STATUS_CHANGED
   REQUEST_RESOLVED
+  MEETING_LOGGED
+  DECISION_ADDED
+  DECISION_STATUS_CHANGED
 }
 
 enum ClientRole {
@@ -156,6 +159,11 @@ enum RequestStatus {
   DECLINED
 }
 
+enum DecisionStatus {
+  OPEN
+  DONE
+}
+
 // ---------------------------------------------------------------------------
 // Models
 // ---------------------------------------------------------------------------
@@ -179,6 +187,7 @@ model Organization {
   workflowInstances WorkflowInstance[]
   documents         Document[]
   requests          Request[]
+  meetings          Meeting[]
 
   @@map("organizations")
 }
@@ -210,6 +219,8 @@ model Membership {
   clientInvitesSent    ClientMembership[] @relation("ClientInviteSentBy")
   requestsRaised       Request[]          @relation("RequestRaisedBy")
   requestsAssigned     Request[]          @relation("RequestAssignee")
+  meetingsLogged       Meeting[]          @relation("MeetingLoggedBy")
+  decisionsOwned       Decision[]         @relation("DecisionOwner")
 
   @@unique([organizationId, userId])
   @@index([organizationId, role])
@@ -249,6 +260,7 @@ model Client {
   documents         Document[]
   clientMemberships ClientMembership[]
   requests          Request[]
+  meetings          Meeting[]
 
   @@index([organizationId, lifecycleStage])
   @@index([organizationId, serviceBucket])
@@ -551,4 +563,55 @@ model Request {
   @@index([organizationId, slaDueAt])
   @@index([clientId])
   @@map("requests")
+}
+
+/// A logged client meeting — date, attendees (free text), notes. Decisions
+/// made in it are tracked separately (Decision) rather than buried in the
+/// notes field, since product principle #3 ("one accountable owner") needs
+/// each decision to carry its own owner and due date, not just prose.
+model Meeting {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @db.Uuid
+  clientId       String @db.Uuid
+
+  title     String
+  heldAt    DateTime
+  attendees String?
+  notes     String?
+
+  loggedByMembershipId String? @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  client       Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  loggedBy     Membership?  @relation("MeetingLoggedBy", fields: [loggedByMembershipId], references: [id], onDelete: SetNull)
+  decisions    Decision[]
+
+  @@index([organizationId, clientId])
+  @@index([organizationId, heldAt])
+  @@map("meetings")
+}
+
+/// One decision made in one Meeting, with a named accountable owner and an
+/// optional due date — the "decisions" half of Meetings & decisions.
+model Decision {
+  id          String         @id @default(uuid()) @db.Uuid
+  meetingId   String         @db.Uuid
+  description String
+  dueDate     DateTime?
+  status      DecisionStatus @default(OPEN)
+
+  ownerMembershipId String? @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  meeting Meeting     @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  owner   Membership? @relation("DecisionOwner", fields: [ownerMembershipId], references: [id], onDelete: SetNull)
+
+  @@index([meetingId])
+  @@index([ownerMembershipId, status])
+  @@map("decisions")
 }

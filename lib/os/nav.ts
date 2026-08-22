@@ -11,6 +11,7 @@ import {
   BarChart3,
   Workflow,
   Settings,
+  MessagesSquare,
 } from "lucide-react";
 
 export type NavItem = {
@@ -29,6 +30,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/os/requests", label: "Requests", icon: Inbox, implemented: true, phase: "Phase 2" },
   { href: "/os/quality", label: "Quality", icon: ShieldCheck, implemented: true, phase: "Phase 2" },
   { href: "/os/calendar", label: "Calendar & Deadlines", icon: CalendarClock, implemented: true, phase: "Phase 1" },
+  { href: "/os/meetings", label: "Meetings & Decisions", icon: MessagesSquare, implemented: true, phase: "Phase 2" },
   { href: "/os/billing", label: "Time & Billing", icon: Receipt, implemented: false, phase: "Phase 3" },
   { href: "/os/documents", label: "Documents", icon: FolderClosed, implemented: true, phase: "Phase 1" },
   { href: "/os/team", label: "Team & Capacity", icon: Users, implemented: false, phase: "Phase 2" },
