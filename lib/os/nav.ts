@@ -33,7 +33,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/os/meetings", label: "Meetings & Decisions", icon: MessagesSquare, implemented: true, phase: "Phase 2" },
   { href: "/os/billing", label: "Time & Billing", icon: Receipt, implemented: false, phase: "Phase 3" },
   { href: "/os/documents", label: "Documents", icon: FolderClosed, implemented: true, phase: "Phase 1" },
-  { href: "/os/team", label: "Team & Capacity", icon: Users, implemented: false, phase: "Phase 2" },
+  { href: "/os/team", label: "Team & Capacity", icon: Users, implemented: true, phase: "Phase 2" },
   { href: "/os/reports", label: "Reports & Analytics", icon: BarChart3, implemented: false, phase: "Phase 2" },
   { href: "/os/templates", label: "Templates & Automations", icon: Workflow, implemented: true, phase: "Phase 1" },
   { href: "/os/settings", label: "Settings & Security", icon: Settings, implemented: true, phase: "Phase 0" },
