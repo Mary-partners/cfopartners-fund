@@ -79,6 +79,10 @@ enum AuditAction {
   CLIENT_PORTAL_ACCESS_CLAIMED
   CLIENT_PORTAL_ACCESS_REVOKED
   CLIENT_APPROVAL_SUBMITTED
+  REQUEST_CREATED
+  REQUEST_TRIAGED
+  REQUEST_STATUS_CHANGED
+  REQUEST_RESOLVED
 }
 
 enum ClientRole {
@@ -128,6 +132,30 @@ enum ReviewOutcome {
   CHANGES_REQUESTED
 }
 
+// Drives slaDueAt at triage time (see triageRequestAction) — not a stored
+// deadline the requester picks, so SLA commitments stay consistent across
+// the portfolio rather than whatever a triager happens to type in.
+enum RequestPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+// NEW (just raised, not yet looked at) -> TRIAGED (priority/SLA/assignee
+// set) -> [AWAITING_APPROVAL if it needs scope sign-off before starting] ->
+// IN_PROGRESS -> [AWAITING_CLIENT if staff needs something back from the
+// client] -> COMPLETED, or DECLINED at any point before COMPLETED.
+enum RequestStatus {
+  NEW
+  TRIAGED
+  AWAITING_APPROVAL
+  IN_PROGRESS
+  AWAITING_CLIENT
+  COMPLETED
+  DECLINED
+}
+
 // ---------------------------------------------------------------------------
 // Models
 // ---------------------------------------------------------------------------
@@ -150,6 +178,7 @@ model Organization {
   workflowTemplates WorkflowTemplate[]
   workflowInstances WorkflowInstance[]
   documents         Document[]
+  requests          Request[]
 
   @@map("organizations")
 }
@@ -179,6 +208,8 @@ model Membership {
   reviewsGiven         Review[]           @relation("ReviewReviewer")
   reviewsReceived      Review[]           @relation("ReviewPreparer")
   clientInvitesSent    ClientMembership[] @relation("ClientInviteSentBy")
+  requestsRaised       Request[]          @relation("RequestRaisedBy")
+  requestsAssigned     Request[]          @relation("RequestAssignee")
 
   @@unique([organizationId, userId])
   @@index([organizationId, role])
@@ -217,6 +248,7 @@ model Client {
   workflowInstances WorkflowInstance[]
   documents         Document[]
   clientMemberships ClientMembership[]
+  requests          Request[]
 
   @@index([organizationId, lifecycleStage])
   @@index([organizationId, serviceBucket])
@@ -446,6 +478,7 @@ model ClientMembership {
   invitedBy         Membership?      @relation("ClientInviteSentBy", fields: [invitedByMembershipId], references: [id], onDelete: SetNull)
   approvals         ClientApproval[]
   uploadedDocuments Document[]
+  requestsRaised    Request[]
 
   @@unique([clientId, email])
   @@index([userId])
@@ -473,4 +506,49 @@ model ClientApproval {
   @@index([taskId, createdAt])
   @@index([clientMembershipId])
   @@map("client_approvals")
+}
+
+/// An ad hoc, unscheduled ask — as opposed to Task, which belongs to a
+/// planned WorkflowInstance. Always scoped to exactly one Client (unlike
+/// Document/Task, there's no "general, not client-specific" request).
+/// `raisedByMembershipId` (staff logging it on the client's behalf) and
+/// `raisedByClientMembershipId` (the client raising it themselves through
+/// the portal) are exactly-one-set nullable columns, the same
+/// two-uploader-column pattern Document already uses for the same reason —
+/// see /docs/decision-log.md "Client-uploaded documents get their own
+/// uploader column."
+model Request {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @db.Uuid
+  clientId       String @db.Uuid
+
+  title       String
+  description String?
+  priority    RequestPriority @default(MEDIUM)
+  status      RequestStatus   @default(NEW)
+
+  // Set at triage time (triageRequestAction), derived from priority — not a
+  // deadline the requester picks. Null until triaged.
+  slaDueAt DateTime?
+
+  raisedByMembershipId       String? @db.Uuid
+  raisedByClientMembershipId String? @db.Uuid
+  assigneeMembershipId       String? @db.Uuid
+
+  resolutionNotes String?
+  resolvedAt      DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organization             Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  client                   Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  raisedBy                 Membership?       @relation("RequestRaisedBy", fields: [raisedByMembershipId], references: [id], onDelete: SetNull)
+  raisedByClientMembership ClientMembership? @relation(fields: [raisedByClientMembershipId], references: [id], onDelete: SetNull)
+  assignee                 Membership?       @relation("RequestAssignee", fields: [assigneeMembershipId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, status])
+  @@index([organizationId, slaDueAt])
+  @@index([clientId])
+  @@map("requests")
 }
