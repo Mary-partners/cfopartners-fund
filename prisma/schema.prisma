@@ -75,6 +75,20 @@ enum AuditAction {
   DOCUMENT_UPLOADED
   DOCUMENT_DELETED
   TASK_REVIEWED
+  CLIENT_PORTAL_INVITE_SENT
+  CLIENT_PORTAL_ACCESS_CLAIMED
+  CLIENT_PORTAL_ACCESS_REVOKED
+  CLIENT_APPROVAL_SUBMITTED
+}
+
+enum ClientRole {
+  CLIENT_ADMIN
+  CLIENT_COLLABORATOR
+}
+
+enum ClientApprovalOutcome {
+  APPROVED
+  CHANGES_REQUESTED
 }
 
 // How often a WorkflowTemplate's work recurs. Drives the default
@@ -164,6 +178,7 @@ model Membership {
   uploadedDocuments    Document[]   @relation("DocumentUploadedBy")
   reviewsGiven         Review[]     @relation("ReviewReviewer")
   reviewsReceived      Review[]     @relation("ReviewPreparer")
+  clientInvitesSent    ClientMembership[] @relation("ClientInviteSentBy")
 
   @@unique([organizationId, userId])
   @@index([organizationId, role])
@@ -201,6 +216,7 @@ model Client {
   contacts          ClientContact[]
   workflowInstances WorkflowInstance[]
   documents         Document[]
+  clientMemberships ClientMembership[]
 
   @@index([organizationId, lifecycleStage])
   @@index([organizationId, serviceBucket])
@@ -229,7 +245,7 @@ model AuditEvent {
   id                String      @id @default(uuid()) @db.Uuid
   organizationId    String      @db.Uuid
   actorMembershipId String?     @db.Uuid
-  actorLabel        String? // used for system/automation events with no membership
+  actorLabel        String? // system/automation events, or a client-portal actor — anything with no internal Membership
   action            AuditAction
   targetType        String
   targetId          String?
@@ -334,6 +350,7 @@ model Task {
   assignee         Membership?      @relation("TaskAssignee", fields: [assigneeMembershipId], references: [id], onDelete: SetNull)
   reviews          Review[]
   documents        Document[]
+  clientApprovals  ClientApproval[]
 
   @@index([workflowInstanceId, order])
   @@index([assigneeMembershipId])
@@ -399,4 +416,58 @@ model Document {
   @@index([organizationId, createdAt])
   @@index([taskId])
   @@map("documents")
+}
+
+/// A client-facing user account, scoped to exactly one `Client` — never
+/// the whole `Organization`, unlike internal `Membership`. Not self-serve:
+/// only created when internal staff sends an invite
+/// (`inviteClientUserAction`). `userId` stays null until the invited
+/// person actually completes sign-in for the first time — the row is
+/// matched and claimed by `email` at that point (see
+/// `lib/os/auth/portal-session.ts`), the same "invite now, identity later"
+/// shape as any invite-based system. `ClientRole` is deliberately a
+/// separate enum from `OrgRole` — a client contact must never be
+/// confusable with internal staff, in the type system or anywhere else.
+model ClientMembership {
+  id                     String     @id @default(uuid()) @db.Uuid
+  clientId               String     @db.Uuid
+  userId                 String?    @db.Uuid
+  email                  String
+  displayName            String?
+  role                   ClientRole @default(CLIENT_COLLABORATOR)
+  isActive               Boolean    @default(true)
+  invitedByMembershipId  String?    @db.Uuid
+  createdAt              DateTime   @default(now())
+  updatedAt              DateTime   @updatedAt
+
+  client      Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  invitedBy   Membership? @relation("ClientInviteSentBy", fields: [invitedByMembershipId], references: [id], onDelete: SetNull)
+  approvals   ClientApproval[]
+
+  @@unique([clientId, email])
+  @@index([userId])
+  @@map("client_memberships")
+}
+
+/// A client user's sign-off (or change request) on one `Task`, taken while
+/// it sits at `TaskStatus.APPROVED` — i.e. after it's already passed
+/// internal Quality review (see `Review`). Same shape as `Review`
+/// deliberately, but kept as a separate model/table: the actor is a
+/// `ClientMembership`, not a `Membership`, and mixing the two into one
+/// polymorphic table would make every query about "who reviewed this"
+/// need to handle two actor types instead of picking the right table.
+model ClientApproval {
+  id                 String                @id @default(uuid()) @db.Uuid
+  taskId             String                @db.Uuid
+  clientMembershipId String                @db.Uuid
+  outcome            ClientApprovalOutcome
+  comments           String?
+  createdAt          DateTime              @default(now())
+
+  task             Task             @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  clientMembership ClientMembership @relation(fields: [clientMembershipId], references: [id])
+
+  @@index([taskId, createdAt])
+  @@index([clientMembershipId])
+  @@map("client_approvals")
 }

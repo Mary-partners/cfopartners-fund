@@ -3,9 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireActor } from "@/lib/os/auth/session";
 import { can } from "@/lib/os/auth/rbac";
+import { CLIENT_ROLE_LABELS } from "@/lib/os/auth/portal-rbac";
 import { getClientById } from "@/lib/os/queries/clients";
 import { getWorkflowInstancesForClient } from "@/lib/os/queries/workflow";
 import { getDocumentsForClient } from "@/lib/os/queries/documents";
+import { getClientMembershipsForClient } from "@/lib/os/queries/portal";
 import { formatFileSize } from "@/lib/os/documents-shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/os/ui/card";
 import { LifecycleBadge, HealthBadge, SERVICE_BUCKET_LABEL } from "@/components/os/status-badge";
@@ -14,6 +16,8 @@ import { ProgressBar } from "@/components/os/progress-bar";
 import { computeWorkflowProgress } from "@/lib/os/workflow/status";
 import { DocumentUploadForm } from "@/components/os/document-upload-form";
 import { DeleteDocumentButton } from "@/components/os/delete-document-button";
+import { InviteClientUserForm } from "@/components/os/invite-client-user-form";
+import { ToggleClientAccessButton } from "@/components/os/toggle-client-access-button";
 
 const UPCOMING_TABS = [
   "Company profile",
@@ -63,6 +67,11 @@ export default async function ClientDetailPage({
   const canDeleteDocuments = can(actor.membership.role, "document:delete");
   const documents = canViewDocuments
     ? await getDocumentsForClient(actor.organizationId, client.id)
+    : [];
+
+  const canManagePortalAccess = can(actor.membership.role, "client:managePortalAccess");
+  const clientMemberships = canManagePortalAccess
+    ? await getClientMembershipsForClient(actor.organizationId, client.id)
     : [];
 
   return (
@@ -224,6 +233,58 @@ export default async function ClientDetailPage({
               </CardContent>
             </Card>
           ) : null}
+        </div>
+      ) : null}
+
+      {canManagePortalAccess ? (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle>Portal access ({clientMemberships.length})</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {clientMemberships.length === 0 ? (
+                <p className="p-5 text-sm text-ink-2/60">
+                  No client users invited yet. Invite someone at {client.name} to give them their own
+                  sign-in to view work, share documents, and approve deliverables.
+                </p>
+              ) : (
+                <ul className="divide-y divide-ink/5">
+                  {clientMemberships.map((membership) => (
+                    <li key={membership.id} className="flex items-center justify-between px-5 py-3">
+                      <div>
+                        <div className="text-sm font-medium text-ink">
+                          {membership.displayName ?? membership.email}
+                        </div>
+                        <div className="text-xs text-ink-2/50">
+                          {membership.email} · {CLIENT_ROLE_LABELS[membership.role]}
+                          {membership.isActive
+                            ? membership.userId
+                              ? " · Active"
+                              : " · Invited, not yet signed in"
+                            : " · Access revoked"}
+                        </div>
+                      </div>
+                      <ToggleClientAccessButton
+                        clientMembershipId={membership.id}
+                        isActive={membership.isActive}
+                        email={membership.email}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Invite a client user</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-2">
+              <InviteClientUserForm clientId={client.id} />
+            </CardContent>
+          </Card>
         </div>
       ) : null}
     </div>
