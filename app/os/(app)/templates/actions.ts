@@ -86,7 +86,14 @@ export async function addTaskTemplateAction(
 
   const parsed = addTaskTemplateSchema.safeParse({
     title: formData.get("title"),
-    description: formData.get("description"),
+    // FormData.get() returns null for a field that isn't in the form at
+    // all (AddTaskTemplateForm has no description input) — the schema's
+    // .optional() only accepts undefined, not null, so an un-normalized
+    // null here fails validation silently (no visible error, since the
+    // form doesn't render a "description" field error either) and the
+    // task template is never created. Same normalization the "description
+    // || null" write below already does, just needed before parsing too.
+    description: formData.get("description") || undefined,
     order: formData.get("order"),
     relativeDueDays: formData.get("relativeDueDays"),
   });
