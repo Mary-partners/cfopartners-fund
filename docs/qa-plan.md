@@ -6,9 +6,9 @@ conflate them:
 1. **Engineering QA** — how we know the *software* works (this document).
 2. **The Quality module** — the preparer/reviewer/approver *product feature*
    for reviewing client deliverables, described in the original brief
-   section 10. Not built yet (Phase 2). `canReview()` (segregation of
-   duties) is implemented ahead of time in `lib/os/auth/rbac.ts` so the
-   rule exists before the UI does — see `/docs/security.md`.
+   section 10. Live since Phase 2's first slice — `canReview()`
+   (segregation of duties) is enforced in `lib/os/auth/rbac.ts` and called
+   from `submitReviewAction` — see `/docs/security.md`.
 
 This document is about (1).
 
@@ -17,10 +17,10 @@ This document is about (1).
 | Check | Command | Status |
 |---|---|---|
 | Type safety | `npx tsc --noEmit` (the repo root) | Passing, zero errors — across the *whole* app, existing marketing pages included |
-| Production build | `npx next build` (the repo root) | Succeeds: every existing marketing route (`/`, `/pricing`, `/blog`, `/contact`, `/resources`, `/rooms/[slug]`, `/api/*`) builds unchanged alongside all `/os/*` and `/portal/*` routes (incl. `/os/documents`, `/os/documents/[id]/download`, `/os/quality`, `/portal/work`, `/portal/work/[id]`, `/portal/documents`, `/portal/documents/[id]/download`, `/portal/set-password`), including without `DATABASE_URL` set (see `/docs/architecture.md` — lazy Prisma client) |
-| Database migrations | `npx prisma migrate dev` / `deploy` against real Postgres 16 | All thirteen migrations apply cleanly on a fresh database, including through Prisma's shadow-database validation |
+| Production build | `npx next build` (the repo root) | Succeeds: every existing marketing route (`/`, `/pricing`, `/blog`, `/contact`, `/resources`, `/rooms/[slug]`, `/api/*`) builds unchanged alongside all `/os/*` and `/portal/*` routes (incl. `/os/documents`, `/os/documents/[id]/download`, `/os/quality`, `/os/requests`, `/os/meetings`, `/os/team`, `/os/reports`, `/portal/work`, `/portal/work/[id]`, `/portal/documents`, `/portal/documents/[id]/download`, `/portal/requests`, `/portal/set-password`), including without `DATABASE_URL` set (see `/docs/architecture.md` — lazy Prisma client) |
+| Database migrations | `npx prisma migrate dev` / `deploy` against real Postgres 16 | All nineteen migrations apply cleanly on a fresh database, including through Prisma's shadow-database validation |
 | Seed script | `npm run db:seed` against real Postgres 16 | Runs end to end: 12 clients, 2 workflow templates, 3 workflow instances with realistic (verified by direct query) due-date/overdue spread |
-| Row Level Security | Manual `psql` session, `SET ROLE authenticated` + `SET request.jwt.claim.sub` | Verified on all 13 tenant tables (incl. `documents`, `reviews`, `client_memberships`, `client_approvals`): cross-tenant isolation holds, anonymous session sees nothing, direct writes are rejected. Cross-*client* isolation (two clients in the same organization) separately verified for `client_memberships`/`client_approvals` — see `/docs/security.md` and `/docs/setup.md` |
+| Row Level Security | Manual `psql` session, `SET ROLE authenticated` + `SET request.jwt.claim.sub` | Verified on all 16 tenant tables (incl. `documents`, `reviews`, `client_memberships`, `client_approvals`, `requests`, `meetings`, `decisions`): cross-tenant isolation holds, anonymous session sees nothing, direct writes are rejected. Cross-*client* isolation (two clients in the same organization) separately verified for `client_memberships`/`client_approvals` — see `/docs/security.md` and `/docs/setup.md` |
 | Middleware scope | `next dev`, `curl` against `/`, `/pricing`, `/contact`, `/os`, `/os/login`, `/os/dashboard`, `/portal`, `/portal/login`, `/portal/work`, `/portal/documents`, `/portal/set-password` | Marketing pages return `200` unauthenticated (middleware doesn't touch them — see `/docs/architecture.md` "Middleware scope"); every protected `/os/*`/`/portal/*` path returns `307`, redirecting to *its own side's* login page with the right `?next=` (`/os/dashboard` → `/os/login?next=%2Fos%2Fdashboard`; `/portal/work`/`/portal/documents`/`/portal/set-password` → `/portal/login?next=...`, never crossing to `/os/login` or vice versa — the exact case the middleware.ts rewrite in "Client Portal shares the Supabase session" (`/docs/decision-log.md`) exists to get right); `/os/login` and `/portal/login` render `200` unauthenticated |
 | Nav integration | Same dev-server smoke test, `curl \| grep` | "Access your OS" appears in the rendered homepage HTML (desktop + mobile nav) |
 
@@ -173,12 +173,31 @@ design lands.
       instead of `actorMembershipId` for the client-initiated ones, since a
       `ClientMembership` isn't a `Membership` (see `/docs/security.md`
       "Audit trail").
+- [x] **Requests are tenant-isolated, RBAC-gated, and their SLA clock is
+      derived, not stale.** `request:view`/`request:triage`/
+      `request:resolve` (internal) and `request:view`/`request:submit`
+      (portal) in the respective RBAC modules; every write scopes by
+      `organizationId` (internal) or the portal actor's own `clientId`;
+      RLS on `requests` verified against local Postgres (see the table
+      above). `computeIsRequestOverdue` derives SLA-breached the same
+      "never a stale stored flag" way `computeIsOverdue` does for tasks —
+      changing a request's priority or resolving it clears the breach
+      immediately rather than leaving it flagged.
+- [x] **A decision's own owner can close it out; requests/meetings/
+      capacity all appear in the audit log.** `REQUEST_CREATED`/
+      `REQUEST_TRIAGED`/`REQUEST_STATUS_CHANGED`/`REQUEST_RESOLVED`,
+      `MEETING_LOGGED`/`DECISION_ADDED`/`DECISION_STATUS_CHANGED`,
+      `MEMBERSHIP_CAPACITY_SET` — same `recordAuditEvent()` pattern as
+      every other material action. The owner-can-close-their-own-decision
+      rule in `updateDecisionStatusAction` verified by reading the code
+      path end to end (no test runner — see below).
 - [ ] Task dependencies/blocking, checklist evidence, onboarding gates,
-      request SLAs, QA release gates, multi-currency billing, document
-      versioning, virus scanning, `ReviewFinding`/`SignOff` granularity —
-      all Phase 2+ features or explicitly-deferred follow-ups not yet
-      built; their acceptance criteria live in
-      `/docs/implementation-plan.md` against the phase that ships them.
+      QA release gates, multi-currency billing, document versioning,
+      virus scanning, `ReviewFinding`/`SignOff` granularity, request
+      comment threads, drill-through reporting — all Phase 2+ features or
+      explicitly-deferred follow-ups not yet built; their acceptance
+      criteria live in `/docs/implementation-plan.md` against the phase
+      that ships them.
 
 ## CI
 

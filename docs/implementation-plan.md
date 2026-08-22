@@ -173,6 +173,45 @@ Phase 1 is now feature-complete against this plan.
     Fine for a first slice; worth reconciling if staff start expecting one
     to drive the other.
 
+- **Requests has no comment thread.** A `Request` carries one
+  `description` and one `resolutionNotes` field — there's no back-and-forth
+  conversation log the way a support ticket system would have (client asks
+  a clarifying question, staff replies, repeat). Fine for a first slice
+  where most requests resolve in one or two status changes; add a
+  `RequestComment` model if real usage shows requests need an actual
+  back-and-forth, not just a start state and an end state.
+- **"Scope approval" is a `RequestStatus` value, not a separate approval
+  workflow.** The brief's "scope approval" concept is modelled as
+  `RequestStatus.AWAITING_APPROVAL` in the request lifecycle — moving a
+  request into and out of that state is just another status change via
+  `updateRequestAction`, not a distinct approval entity with its own actor/
+  outcome/audit shape (the way `Review`/`ClientApproval` are for Quality/
+  Client Portal). Add a real `RequestApproval`-style model if scope
+  approval needs its own audit trail separate from "who changed the
+  status," not before.
+- **No request notifications.** Same gap as the Client Portal's — nobody
+  is emailed when a request is raised, triaged, or resolved; staff and
+  clients both have to check their respective Requests page. Real,
+  separate work alongside a broader notification system.
+- **Meetings has no recurring-meeting or calendar-integration concept.**
+  Each `Meeting` is logged after the fact (or ahead of time, manually) —
+  there's no link to an external calendar, and no "this is the monthly
+  review series" grouping across meetings. Fine for a log; revisit if
+  CFOIP wants meeting scheduling itself, not just a record of what
+  happened.
+- **Team & Capacity's workload signal is assigned-open-task *count*, not
+  effort-weighted.** A member with five quick tasks and a member with one
+  large task both show as "N tasks assigned" with no sense of relative
+  size — there's no task-level effort estimate to weight by yet. Honest
+  proxy for a first slice; revisit once (if) tasks carry an estimate.
+- **Reports has no drill-through.** The original brief scope
+  ("operational, quality, client and commercial reporting with
+  drill-through") is delivered as read-only aggregate numbers — clicking
+  a stat doesn't jump to the underlying list of tasks/reviews/requests
+  that make it up. Add drill-through links once the aggregate views
+  themselves have proven useful, rather than building navigation for
+  numbers nobody's checked yet.
+
 New entities this phase still needs beyond what's built (not yet in
 `schema.prisma`): `Engagement`, `ServicePackage` (replacing the
 `ServiceBucket` enum — see `/docs/decision-log.md`), `ChecklistTemplate` +
@@ -181,7 +220,7 @@ New entities this phase still needs beyond what's built (not yet in
 `TaskDependency`, `Deliverable`/`DeliverableVersion`/`ReviewFinding`/
 `SignOff` (if Quality's coarser model above proves insufficient).
 
-## Phase 2 — Service control — **in progress**
+## Phase 2 — Service control — **live**
 
 - [x] **Client portal** (`/portal`) — new client-facing role model
       (`ClientMembership`/`ClientRole`, wholly separate from
@@ -196,7 +235,15 @@ New entities this phase still needs beyond what's built (not yet in
       review (`TaskStatus.APPROVED` → `DELIVERED`/`IN_PROGRESS`, the same
       status-reuse approach Quality took, no new `TaskStatus` values
       needed). See "Simplifications" below for what's deferred.
-- [ ] Ad hoc requests (`/requests`) — SLA clocks, triage, scope approval
+- [x] **Ad hoc requests** (`/os/requests`, `/portal/requests`) — SLA
+      clocks (`slaDueAt` computed from priority, anchored to when the
+      request was actually raised — see `/docs/decision-log.md`), triage
+      (priority/assignee/status), raised by staff on a client's behalf or
+      by the client themselves through the portal. "Scope approval" is
+      modelled as a `RequestStatus.AWAITING_APPROVAL` state in the
+      lifecycle rather than a separate approval entity/workflow — see
+      "Simplifications" below for what a fuller scope-approval flow would
+      add.
 - [x] **Quality review/approval** (`/quality`) — preparer/reviewer
       segregation of duties, layered onto the existing `Task` lifecycle
       (`UNDER_REVIEW` → reviewer approves → `APPROVED`, or requests changes
@@ -207,9 +254,24 @@ New entities this phase still needs beyond what's built (not yet in
       `app/os/(app)/quality/actions.ts` before a `Review` row is ever
       created. See "Simplifications" below for exactly what's deferred and
       why.
-- [ ] Meetings & decisions
-- [ ] Capacity planning (`/team`)
-- [ ] Richer reporting (`/reports`)
+- [x] **Meetings & decisions** (`/os/meetings`) — a `Meeting` logged
+      against one client (date, attendees, notes); `Decision` rows tracked
+      separately with a named accountable owner and optional due date
+      (product principle #3), rather than buried in a notes field. A
+      decision's own owner can close it out without broad `meeting:manage`
+      authority — see `/docs/decision-log.md`.
+- [x] **Capacity planning** (`/os/team`) — workload (assigned open tasks,
+      overdue count, clients led) computed from real data, alongside a
+      manager-declared `weeklyCapacityHours` target — explicitly *not* a
+      measured utilisation percentage, since there's no time-tracking data
+      yet (Phase 3). See "Simplifications" below and
+      `/docs/decision-log.md`.
+- [x] **Richer reporting** (`/os/reports`) — Operational (task throughput/
+      overdue), Quality (review pass rate), Requests (SLA compliance),
+      Client portfolio composition. No commercial/billing section — no
+      billing data exists yet (Phase 3) to report on; see
+      `/docs/decision-log.md` for why that's a visible, deliberate gap
+      rather than a silent one.
 
 ## Phase 3 — Commercial management — **planned**
 
@@ -241,12 +303,16 @@ still the other gating item, not done.
 
 ## Immediate next slice (recommendation)
 
-Quality's first slice (segregation-of-duties review on tasks) and Client
-Portal (client sign-in, Work/Documents visibility, task approval) are both
-live. Ad hoc requests, Meetings & decisions and Capacity planning remain in
-Phase 2 — Requests is the natural next pick now that client login exists
-(a request can be raised by staff on a client's behalf *or* by the client
-themselves through the portal, rather than staff-only). Before onboarding
-real client financial documents through Documents at any volume, close the
-virus-scanning gap noted above — now more pressing with clients able to
-upload their own files through the portal, not just staff.
+Every item on Phase 2's checklist is now live: Client Portal, Quality,
+Requests, Meetings & decisions, Capacity planning, and Reporting. Phase 2
+itself is complete — the natural next move is Phase 3 (Commercial
+management: time entry, budgets/retainers, invoicing, realisation/
+profitability reporting), which also unlocks the commercial/billing
+reporting section Reports currently and deliberately omits. Before
+starting Phase 3, close two things flagged along the way: the
+virus-scanning gap on Documents (now more pressing with clients able to
+upload their own files through the portal, not just staff) and a real
+incident-response/backup runbook — the brief's own gate on Phase 4 also
+names both, and neither is Phase-3-specific work, so closing them now
+rather than mid-Phase-3 avoids retrofitting them onto a commercial system
+handling real money.

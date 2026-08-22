@@ -462,6 +462,79 @@ internal one; no new `TaskStatus` values were needed for either Quality or
 Client Portal, both slices repurposed statuses that already existed
 unused on the enum since Phase 1.
 
+## A request's SLA clock is anchored to when it was raised, not when it was triaged
+
+**Decision**: `Request.slaDueAt` is computed as `createdAt + N days`
+(`computeSlaDueAt()` in `lib/os/requests/status.ts`), where `N` comes from
+`priority` — not `now() + N days` at the moment someone actually triages
+it.
+
+**Why**: a request that sits untouched in the inbox for two days before a
+triager opens it shouldn't quietly get two extra days added to its
+deadline just because that's when someone got around to it — that would
+reward slow triage with a longer SLA instead of penalizing it. Anchoring
+to `createdAt` means the SLA reflects the commitment made *to the person
+who raised it*, at the moment they raised it.
+
+**Reversible?** Yes — it's one function; if CFOIP wants "triage-to-SLA" or
+a configurable SLA-clock start event instead (e.g. clock starts when
+staff first responds, not when raised), that's a change in one place, not
+a schema change (`slaDueAt` is already just a plain column).
+
+## A decision's owner can close it out without broad `meeting:manage` authority
+
+**Decision**: `updateDecisionStatusAction`
+(`app/os/(app)/meetings/actions.ts`) allows a `Decision` to be marked
+`DONE`/reopened by either someone with `meeting:manage`, or the specific
+`Membership` recorded as that decision's `ownerMembershipId` — even if
+that person's role doesn't otherwise have `meeting:manage` (e.g. a
+Preparer/Analyst who was made accountable for a follow-up in a client
+meeting).
+
+**Why**: product principle #3 ("one accountable owner",
+`/docs/product-spec.md`) means the *owner* is the one actually
+responsible for following through — gating "mark my own commitment done"
+behind a broader authority to manage meetings generally would mean the
+person accountable for a decision often couldn't close their own item
+without asking someone else. Same shape as `canReview()`: a static
+role→permission table, plus a second, situational check layered on top.
+
+## Team & Capacity shows declared targets, not measured utilisation
+
+**Decision**: `Team & Capacity` (`/os/team`) shows workload (assigned open
+tasks, overdue count, clients led) computed from real data, alongside a
+`weeklyCapacityHours` *target* a Managing Partner or Practice Admin can
+set per person — not a computed utilisation percentage (workload ÷
+capacity), and not anything claiming to be a measured "actual hours
+worked."
+
+**Why**: there's no time-tracking data yet (Billing/Time entry is Phase
+3) — computing a utilisation percentage today would require either
+inventing fake hours-worked data or silently treating "assigned open
+tasks" as a proxy for hours, both of which would present a fabricated
+number as if it were measured. Showing workload and a declared target
+side by side, undisguised as anything more, is the honest version of this
+feature until real time data exists to compute utilisation from.
+
+**Reversible?** Yes, and the natural upgrade path once Billing/Time entry
+ships: a real utilisation percentage becomes workload-in-hours ÷
+`weeklyCapacityHours`, replacing the task-count proxy — `weeklyCapacityHours`
+itself doesn't need to change shape for that to happen.
+
+## Reports has no commercial/billing section yet
+
+**Decision**: `/os/reports` covers Operational (tasks), Quality (review
+pass rate), Requests (SLA compliance) and Client portfolio composition —
+explicitly, visibly, *not* a commercial/billing/profitability section,
+even though the original brief's reporting scope includes one.
+
+**Why**: same reasoning as Team & Capacity above — there's no billing data
+in the schema yet (Phase 3), so a commercial reporting section today would
+either be empty (confusing — did it break, or does it just not exist?) or
+worse, populated with placeholder/fake numbers. The page says this
+explicitly in its own copy rather than letting the section's absence read
+as an oversight once someone goes looking for it.
+
 ## Specialist review still needed before real client data
 
 Restating from `/docs/security.md`: this system is *designed toward*
