@@ -27,6 +27,21 @@ async function assertClientInOrg(organizationId: string, clientId: string | null
   return Boolean(client);
 }
 
+/**
+ * A task-scoped document's clientId is never taken from the caller — it's
+ * derived here from the task's own workflow instance, so it can't drift
+ * out of sync with which client the task actually belongs to. Returns
+ * null if the task doesn't exist in this org (including "wrong org").
+ */
+async function resolveTaskContext(organizationId: string, taskId: string) {
+  const task = await db.task.findFirst({
+    where: { id: taskId, workflowInstance: { organizationId } },
+    select: { workflowInstanceId: true, workflowInstance: { select: { clientId: true } } },
+  });
+  if (!task) return null;
+  return { workflowInstanceId: task.workflowInstanceId, clientId: task.workflowInstance.clientId };
+}
+
 export type RequestUploadResult =
   | { error: string }
   | { signedUrl: string; token: string; path: string };
@@ -42,6 +57,7 @@ export async function requestDocumentUploadAction(input: {
   mimeType: string;
   sizeBytes: number;
   clientId: string | null;
+  taskId?: string | null;
 }): Promise<RequestUploadResult> {
   const actor = await requireActor();
   if (!can(actor.membership.role, "document:upload")) {
@@ -53,11 +69,18 @@ export async function requestDocumentUploadAction(input: {
     return { error: parsed.error.issues[0]?.message ?? "Invalid file." };
   }
 
-  if (!(await assertClientInOrg(actor.organizationId, parsed.data.clientId))) {
+  let clientId = parsed.data.clientId;
+  if (parsed.data.taskId) {
+    const taskContext = await resolveTaskContext(actor.organizationId, parsed.data.taskId);
+    if (!taskContext) {
+      return { error: "Task not found." };
+    }
+    clientId = taskContext.clientId;
+  } else if (!(await assertClientInOrg(actor.organizationId, clientId))) {
     return { error: "Client not found." };
   }
 
-  const storagePath = buildStoragePath(actor.organizationId, parsed.data.clientId, parsed.data.fileName);
+  const storagePath = buildStoragePath(actor.organizationId, clientId, parsed.data.fileName);
 
   try {
     const upload = await createUploadUrl(storagePath);
@@ -82,6 +105,7 @@ export async function confirmDocumentUploadAction(input: {
   mimeType: string;
   sizeBytes: number;
   clientId: string | null;
+  taskId?: string | null;
 }): Promise<ConfirmUploadResult> {
   const actor = await requireActor();
   if (!can(actor.membership.role, "document:upload")) {
@@ -93,14 +117,24 @@ export async function confirmDocumentUploadAction(input: {
     return { error: "Invalid upload." };
   }
 
-  if (!(await assertClientInOrg(actor.organizationId, parsed.data.clientId))) {
+  let clientId = parsed.data.clientId;
+  let workflowInstanceId: string | null = null;
+  if (parsed.data.taskId) {
+    const taskContext = await resolveTaskContext(actor.organizationId, parsed.data.taskId);
+    if (!taskContext) {
+      return { error: "Task not found." };
+    }
+    clientId = taskContext.clientId;
+    workflowInstanceId = taskContext.workflowInstanceId;
+  } else if (!(await assertClientInOrg(actor.organizationId, clientId))) {
     return { error: "Client not found." };
   }
 
   const document = await db.document.create({
     data: {
       organizationId: actor.organizationId,
-      clientId: parsed.data.clientId,
+      clientId,
+      taskId: parsed.data.taskId ?? null,
       uploadedByMembershipId: actor.membership.id,
       fileName: parsed.data.fileName,
       storagePath: parsed.data.storagePath,
@@ -115,12 +149,15 @@ export async function confirmDocumentUploadAction(input: {
     action: "DOCUMENT_UPLOADED",
     targetType: "Document",
     targetId: document.id,
-    metadata: { fileName: document.fileName, clientId: document.clientId },
+    metadata: { fileName: document.fileName, clientId: document.clientId, taskId: document.taskId },
   });
 
   revalidatePath("/os/documents");
   if (document.clientId) {
     revalidatePath(`/os/clients/${document.clientId}`);
+  }
+  if (workflowInstanceId) {
+    revalidatePath(`/os/work/${workflowInstanceId}`);
   }
 
   return { documentId: document.id };
@@ -142,6 +179,7 @@ export async function deleteDocumentAction(
 
   const document = await db.document.findFirst({
     where: { id: documentId, organizationId: actor.organizationId },
+    include: { task: { select: { workflowInstanceId: true } } },
   });
   if (!document) {
     return { error: "Document not found." };
@@ -163,12 +201,15 @@ export async function deleteDocumentAction(
     action: "DOCUMENT_DELETED",
     targetType: "Document",
     targetId: document.id,
-    metadata: { fileName: document.fileName, clientId: document.clientId },
+    metadata: { fileName: document.fileName, clientId: document.clientId, taskId: document.taskId },
   });
 
   revalidatePath("/os/documents");
   if (document.clientId) {
     revalidatePath(`/os/clients/${document.clientId}`);
+  }
+  if (document.task) {
+    revalidatePath(`/os/work/${document.task.workflowInstanceId}`);
   }
 
   return {};

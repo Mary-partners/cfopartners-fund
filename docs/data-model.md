@@ -30,7 +30,8 @@ Organization 1───* AuditEvent *───0..1 Membership (actor)
 Organization 1───* WorkflowTemplate
 Organization 1───* WorkflowInstance
 Organization 1───* Document *───0..1 Client
-                        └──────0..1 Membership (uploadedBy)
+                        ├──────0..1 Membership (uploadedBy)
+                        └──────0..1 Task
 Task 1───* Review *───1 Membership (reviewer)
               └────0..1 Membership (preparer)
 ```
@@ -126,10 +127,17 @@ File metadata only — the bytes live in Supabase Storage (bucket
 `documents`), never in Postgres. `storagePath` is the Storage object key
 and is `@unique`; `clientId` is nullable so the practice can store
 org-wide files (templates, policies) alongside client-specific ones.
-`uploadedByMembershipId` is nullable (`onDelete: SetNull`) so deactivating
-or removing a membership never deletes the documents they uploaded. No
-`DocumentVersion` yet — re-uploading a same-named file creates an
-independent row, not a new version of an existing one. See
+`taskId` is a further-nullable narrowing for files attached to one
+specific task (e.g. the deliverable for that task) rather than the client
+generally — when set, `clientId` is *not* independently chosen by the
+uploader, it's derived server-side from the task's own client
+(`resolveTaskContext()` in `app/os/(app)/documents/actions.ts`), so a
+task-scoped document is guaranteed consistent with which client it
+actually belongs to and always shows up in that client's document list
+too. `uploadedByMembershipId` is nullable (`onDelete: SetNull`) so
+deactivating or removing a membership never deletes the documents they
+uploaded. No `DocumentVersion` yet — re-uploading a same-named file
+creates an independent row, not a new version of an existing one. See
 `/docs/security.md` "Document storage" for the access-control model
 (signed URLs, not RLS on the Storage side) and
 `/docs/implementation-plan.md` for what's deliberately deferred
@@ -179,7 +187,7 @@ see `submitReviewAction` in `app/os/(app)/quality/actions.ts`. No separate
 
 ## Migrations
 
-`prisma/migrations/` — eight so far:
+`prisma/migrations/` — nine so far:
 
 1. `20260819092543_init` — organizations, memberships, clients,
    client_contacts, audit_events.
@@ -200,8 +208,12 @@ see `submitReviewAction` in `app/os/(app)/quality/actions.ts`. No separate
 8. `20260821174500_reviews_rls` — RLS policy for `reviews`, same
    EXISTS-through-a-join pattern as `tasks`' own policy (see (4)), since
    `reviews` has no `organizationId` column either.
+9. `20260821180427_add_task_id_to_documents` — nullable `taskId` column +
+   foreign key on `documents`, no RLS change needed (the existing
+   `documents` policy scopes by `organizationId`, unaffected by this
+   column).
 
-All eight were generated and applied against a real local Postgres 16
+All nine were generated and applied against a real local Postgres 16
 instance during development (not just written by hand and hoped correct) —
 see `/docs/setup.md` "Verifying migrations locally" if you need to do the
 same.

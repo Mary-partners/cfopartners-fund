@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   requestDocumentUploadAction,
@@ -19,15 +19,27 @@ type ClientOption = { id: string; name: string };
  * 2 confirms the write and creates the Document row) — see
  * app/os/(app)/documents/actions.ts for why. useFormState doesn't fit that
  * shape, so this manages its own pending/error state instead.
+ *
+ * `fixedTaskId` scopes the upload to one task (the server derives clientId
+ * from the task, ignoring any client selection) — used inline on the Work
+ * page, where this form is rendered once per task row, hence `useId()`
+ * rather than a hardcoded input id. `compact` drops the helper text and
+ * lays the file input and button out in one row, for that same cramped
+ * table-cell context.
  */
 export function DocumentUploadForm({
   clients,
   fixedClientId,
+  fixedTaskId,
+  compact,
 }: {
   clients?: ClientOption[];
   fixedClientId?: string;
+  fixedTaskId?: string;
+  compact?: boolean;
 }) {
   const router = useRouter();
+  const fileInputId = useId();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [clientId, setClientId] = useState<string>(fixedClientId ?? "");
   const [status, setStatus] = useState<"idle" | "uploading" | "error">("idle");
@@ -45,13 +57,15 @@ export function DocumentUploadForm({
     setStatus("uploading");
     setError(null);
 
-    const resolvedClientId = clientId || null;
+    const resolvedClientId = fixedTaskId ? null : clientId || null;
+    const taskId = fixedTaskId ?? null;
 
     const requested = await requestDocumentUploadAction({
       fileName: file.name,
       mimeType: file.type,
       sizeBytes: file.size,
       clientId: resolvedClientId,
+      taskId,
     });
     if ("error" in requested) {
       setError(requested.error);
@@ -75,6 +89,7 @@ export function DocumentUploadForm({
       mimeType: file.type,
       sizeBytes: file.size,
       clientId: resolvedClientId,
+      taskId,
     });
     if (confirmed.error) {
       setError(confirmed.error);
@@ -89,6 +104,33 @@ export function DocumentUploadForm({
 
   const uploading = status === "uploading";
 
+  const fileInput = (
+    <input
+      ref={fileInputRef}
+      id={fileInputId}
+      type="file"
+      disabled={uploading}
+      className="text-sm text-ink-2 file:mr-3 file:rounded-md file:border-0 file:bg-ink/5 file:px-3 file:py-2 file:text-sm file:font-medium file:text-ink disabled:opacity-50"
+    />
+  );
+
+  if (compact) {
+    return (
+      <form onSubmit={handleSubmit} className="flex flex-col gap-1.5">
+        {error ? <p className="text-xs text-red-700">{error}</p> : null}
+        <div className="flex items-center gap-2">
+          <Label htmlFor={fileInputId} className="sr-only">
+            File
+          </Label>
+          {fileInput}
+          <Button type="submit" size="sm" disabled={uploading}>
+            {uploading ? "Uploading…" : "Upload"}
+          </Button>
+        </div>
+      </form>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       {error ? (
@@ -97,7 +139,7 @@ export function DocumentUploadForm({
         </p>
       ) : null}
 
-      {clients && !fixedClientId ? (
+      {clients && !fixedClientId && !fixedTaskId ? (
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="documentClientId">Client (optional)</Label>
           <select
@@ -118,14 +160,8 @@ export function DocumentUploadForm({
       ) : null}
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="documentFile">File</Label>
-        <input
-          ref={fileInputRef}
-          id="documentFile"
-          type="file"
-          disabled={uploading}
-          className="text-sm text-ink-2 file:mr-3 file:rounded-md file:border-0 file:bg-ink/5 file:px-3 file:py-2 file:text-sm file:font-medium file:text-ink disabled:opacity-50"
-        />
+        <Label htmlFor={fileInputId}>File</Label>
+        {fileInput}
         <p className="text-xs text-ink-2/50">
           PDF, Word, Excel, PowerPoint, CSV or image. Up to{" "}
           {Math.round(MAX_DOCUMENT_SIZE_BYTES / (1024 * 1024))} MB.

@@ -333,6 +333,7 @@ model Task {
   workflowInstance WorkflowInstance @relation(fields: [workflowInstanceId], references: [id], onDelete: Cascade)
   assignee         Membership?      @relation("TaskAssignee", fields: [assigneeMembershipId], references: [id], onDelete: SetNull)
   reviews          Review[]
+  documents        Document[]
 
   @@index([workflowInstanceId, order])
   @@index([assigneeMembershipId])
@@ -372,11 +373,16 @@ model Review {
 /// server-side (see src/lib/storage.ts); no client ever holds a long-lived
 /// credential for the bucket. `clientId` is nullable so the practice can
 /// store organization-wide files (templates, policies) alongside
-/// client-specific ones.
+/// client-specific ones. `taskId` is a further-nullable narrowing — a
+/// task-scoped document always has `clientId` set too (auto-derived from
+/// the task's client server-side, not user-supplied — see
+/// app/os/(app)/documents/actions.ts), so client-level listing never
+/// misses a task's files.
 model Document {
   id                     String   @id @default(uuid()) @db.Uuid
   organizationId         String   @db.Uuid
   clientId               String?  @db.Uuid
+  taskId                 String?  @db.Uuid
   uploadedByMembershipId String?  @db.Uuid
   fileName               String
   storagePath            String   @unique
@@ -386,9 +392,11 @@ model Document {
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   client       Client?      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  task         Task?        @relation(fields: [taskId], references: [id], onDelete: Cascade)
   uploadedBy   Membership?  @relation("DocumentUploadedBy", fields: [uploadedByMembershipId], references: [id], onDelete: SetNull)
 
   @@index([organizationId, clientId])
   @@index([organizationId, createdAt])
+  @@index([taskId])
   @@map("documents")
 }

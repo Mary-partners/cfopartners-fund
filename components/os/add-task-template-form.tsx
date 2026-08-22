@@ -16,6 +16,15 @@ export function AddTaskTemplateForm({
   nextOrder: number;
 }) {
   const [state, formAction] = useFormState(addTaskTemplateAction, initialState);
+  // Fields this form actually renders an inline error for — anything else
+  // in fieldErrors (a validation failure on a field with no dedicated slot
+  // here) falls through to the catch-all below instead of being silently
+  // dropped, which is exactly what happened with "description" before this
+  // was added: a real validation failure with nowhere to display it.
+  const handledFields = new Set(["title", "relativeDueDays"]);
+  const unhandledErrors = Object.entries(state.fieldErrors ?? {}).filter(
+    ([field]) => !handledFields.has(field),
+  );
 
   return (
     <form action={formAction} className="flex flex-col gap-3">
@@ -27,6 +36,11 @@ export function AddTaskTemplateForm({
           {state.error}
         </p>
       ) : null}
+      {unhandledErrors.map(([field, message]) => (
+        <p key={field} role="alert" className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+          {message}
+        </p>
+      ))}
 
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="title">Task title</Label>
