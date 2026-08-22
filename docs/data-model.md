@@ -31,9 +31,13 @@ Organization 1───* WorkflowTemplate
 Organization 1───* WorkflowInstance
 Organization 1───* Document *───0..1 Client
                         ├──────0..1 Membership (uploadedBy)
+                        ├──────0..1 ClientMembership (uploadedByClientMembership)
                         └──────0..1 Task
 Task 1───* Review *───1 Membership (reviewer)
               └────0..1 Membership (preparer)
+Task 1───* ClientApproval *───1 ClientMembership
+Client 1───* ClientMembership *───0..1 (Supabase auth.users, by userId — claimed on first sign-in)
+                  └───0..1 Membership (invitedBy)
 ```
 
 ## Why these tables and not the full section-20 list
@@ -65,11 +69,10 @@ userId)` is unique.
 `OrgRole` enum: `MANAGING_PARTNER`, `PRACTICE_ADMIN`, `PORTFOLIO_LEAD`,
 `RELATIONSHIP_MANAGER`, `SERVICE_LEAD`, `PREPARER_ANALYST`,
 `INDEPENDENT_REVIEWER`, `FINANCE_BILLING`, `READ_ONLY_AUDITOR`. Client-facing
-roles (`CLIENT_ADMIN`, `CLIENT_COLLABORATOR` in the original brief) are not
-modelled yet — they arrive with the client portal in Phase 2, likely as a
-separate `ClientMembership` table scoped to one `Client` rather than the
-whole `Organization`, since a client user must never see another client's
-data even within the same practice.
+roles now exist too, as the separate `client_memberships` table below —
+not as additional `OrgRole` values, since a client user must never see
+another client's data even within the same practice (a whole-`Organization`
+scope, which `Membership` has, would be the wrong shape for that).
 
 ### `clients`
 One row per client company. `lifecycleStage` (`PROSPECT` → `ONBOARDING` →
@@ -136,8 +139,14 @@ task-scoped document is guaranteed consistent with which client it
 actually belongs to and always shows up in that client's document list
 too. `uploadedByMembershipId` is nullable (`onDelete: SetNull`) so
 deactivating or removing a membership never deletes the documents they
-uploaded. No `DocumentVersion` yet — re-uploading a same-named file
-creates an independent row, not a new version of an existing one. See
+uploaded. `uploadedByClientMembershipId` is the same idea for a
+client-portal upload — exactly one of the two uploader columns is set for
+any given row (staff upload vs. client upload), never both; it's what lets
+`deletePortalDocumentAction` restrict a client to deleting only their own
+mistaken upload, never a staff-delivered document (see
+`/docs/security.md` "Document storage"). No `DocumentVersion` yet —
+re-uploading a same-named file creates an independent row, not a new
+version of an existing one. See
 `/docs/security.md` "Document storage" for the access-control model
 (signed URLs, not RLS on the Storage side) and
 `/docs/implementation-plan.md` for what's deliberately deferred
@@ -159,6 +168,31 @@ without a reviewer isn't meaningful). `outcome` (`APPROVED` /
 see `submitReviewAction` in `app/os/(app)/quality/actions.ts`. No separate
 `Deliverable`/`SignOff` concept yet; see `/docs/implementation-plan.md`
 "Simplifications" for what a fuller Quality model would add.
+
+### `client_memberships`
+A client-facing user account, scoped to exactly one `Client` — never the
+whole `Organization`, unlike `Membership`. Not self-serve: only ever
+created by `inviteClientUserAction`, with `userId` left `null` until the
+invited person actually signs in for the first time (see
+`lib/os/auth/portal-session.ts`, and `/docs/security.md` "Client Portal
+identity separation" for why this can't just reuse `Membership`).
+`(clientId, email)` is unique — revoking access sets `isActive = false`
+rather than deleting the row, so re-inviting the same email reactivates
+the same `ClientMembership` (and its `ClientApproval` history) instead of
+hitting the unique constraint. `role` is `ClientRole`
+(`CLIENT_ADMIN` / `CLIENT_COLLABORATOR`), a wholly separate enum from
+`OrgRole` — see `/docs/security.md`.
+
+### `client_approvals`
+One row per client sign-off (or change request) on a `Task`, taken while
+it sits at `TaskStatus.APPROVED` — i.e. after the task has already passed
+*internal* Quality review (a `Review`, above). Same shape as `Review`
+deliberately, but a separate table: the actor is a `ClientMembership`, not
+a `Membership`, and folding both into one polymorphic table would make
+every "who acted on this" query handle two actor types instead of picking
+the right table. `outcome` (`APPROVED` / `CHANGES_REQUESTED`) drives the
+task to `DELIVERED` or back to `IN_PROGRESS` — see
+`submitClientApprovalAction` in `app/portal/(app)/work/actions.ts`.
 
 ## Conventions
 
@@ -187,7 +221,7 @@ see `submitReviewAction` in `app/os/(app)/quality/actions.ts`. No separate
 
 ## Migrations
 
-`prisma/migrations/` — nine so far:
+`prisma/migrations/` — thirteen so far:
 
 1. `20260819092543_init` — organizations, memberships, clients,
    client_contacts, audit_events.
@@ -212,8 +246,23 @@ see `submitReviewAction` in `app/os/(app)/quality/actions.ts`. No separate
    foreign key on `documents`, no RLS change needed (the existing
    `documents` policy scopes by `organizationId`, unaffected by this
    column).
+10. `20260822090237_add_client_portal` — `client_memberships` and
+    `client_approvals` tables, `ClientRole`/`ClientApprovalOutcome` enums,
+    plus `CLIENT_PORTAL_INVITE_SENT`/`CLIENT_PORTAL_ACCESS_CLAIMED`/
+    `CLIENT_APPROVAL_SUBMITTED` added to `AuditAction`.
+11. `20260822090500_client_portal_rls` — a parallel
+    `public.current_client_ids()` helper (mirrors `current_org_ids()`, one
+    level stricter) and RLS `SELECT` policies for the two new tables — see
+    `/docs/security.md` "Tenant isolation" for what this does and
+    deliberately doesn't cover.
+12. `20260822091005_add_client_portal_access_revoked` —
+    `CLIENT_PORTAL_ACCESS_REVOKED` added to `AuditAction` (for
+    `setClientMembershipActiveAction`'s revoke path).
+13. `20260822092218_add_document_client_uploader` — nullable
+    `uploadedByClientMembershipId` column + foreign key on `documents`, no
+    RLS change needed, same reasoning as migration 9.
 
-All nine were generated and applied against a real local Postgres 16
+All thirteen were generated and applied against a real local Postgres 16
 instance during development (not just written by hand and hoped correct) —
 see `/docs/setup.md` "Verifying migrations locally" if you need to do the
 same.
