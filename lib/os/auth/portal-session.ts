@@ -15,6 +15,7 @@ export type CurrentPortalActor = {
     isActive: boolean;
   };
   clientId: string;
+  clientName: string;
   organizationId: string;
 };
 
@@ -71,13 +72,13 @@ export async function getCurrentPortalActor(): Promise<CurrentPortalActor | null
       },
     });
 
-    const client = await db.client.findUniqueOrThrow({
+    const claimedClient = await db.client.findUniqueOrThrow({
       where: { id: clientMembership.clientId },
       select: { organizationId: true },
     });
 
     await recordAuditEvent({
-      organizationId: client.organizationId,
+      organizationId: claimedClient.organizationId,
       actorLabel: `client:${user.email}`,
       action: "CLIENT_PORTAL_ACCESS_CLAIMED",
       targetType: "ClientMembership",
@@ -87,13 +88,14 @@ export async function getCurrentPortalActor(): Promise<CurrentPortalActor | null
 
   const client = await db.client.findUniqueOrThrow({
     where: { id: clientMembership.clientId },
-    select: { organizationId: true },
+    select: { organizationId: true, name: true },
   });
 
   return {
     userId: user.id,
     email: user.email,
     clientId: clientMembership.clientId,
+    clientName: client.name,
     organizationId: client.organizationId,
     clientMembership: {
       id: clientMembership.id,
