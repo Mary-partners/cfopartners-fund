@@ -171,13 +171,13 @@ model Membership {
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  portfolioLeadFor     Client[]     @relation("PortfolioLead")
-  relationshipOwnerFor Client[]     @relation("RelationshipOwner")
+  portfolioLeadFor     Client[]           @relation("PortfolioLead")
+  relationshipOwnerFor Client[]           @relation("RelationshipOwner")
   auditEvents          AuditEvent[]
-  assignedTasks        Task[]       @relation("TaskAssignee")
-  uploadedDocuments    Document[]   @relation("DocumentUploadedBy")
-  reviewsGiven         Review[]     @relation("ReviewReviewer")
-  reviewsReceived      Review[]     @relation("ReviewPreparer")
+  assignedTasks        Task[]             @relation("TaskAssignee")
+  uploadedDocuments    Document[]         @relation("DocumentUploadedBy")
+  reviewsGiven         Review[]           @relation("ReviewReviewer")
+  reviewsReceived      Review[]           @relation("ReviewPreparer")
   clientInvitesSent    ClientMembership[] @relation("ClientInviteSentBy")
 
   @@unique([organizationId, userId])
@@ -367,13 +367,13 @@ model Task {
 /// APPROVED/back to IN_PROGRESS) rather than a separate Deliverable entity
 /// — see /docs/decision-log.md for why.
 model Review {
-  id                    String        @id @default(uuid()) @db.Uuid
-  taskId                String        @db.Uuid
-  reviewerMembershipId  String        @db.Uuid
-  preparerMembershipId  String?       @db.Uuid
-  outcome               ReviewOutcome
-  comments              String?
-  createdAt             DateTime      @default(now())
+  id                   String        @id @default(uuid()) @db.Uuid
+  taskId               String        @db.Uuid
+  reviewerMembershipId String        @db.Uuid
+  preparerMembershipId String?       @db.Uuid
+  outcome              ReviewOutcome
+  comments             String?
+  createdAt            DateTime      @default(now())
 
   task     Task        @relation(fields: [taskId], references: [id], onDelete: Cascade)
   reviewer Membership  @relation("ReviewReviewer", fields: [reviewerMembershipId], references: [id])
@@ -396,21 +396,23 @@ model Review {
 /// app/os/(app)/documents/actions.ts), so client-level listing never
 /// misses a task's files.
 model Document {
-  id                     String   @id @default(uuid()) @db.Uuid
-  organizationId         String   @db.Uuid
-  clientId               String?  @db.Uuid
-  taskId                 String?  @db.Uuid
-  uploadedByMembershipId String?  @db.Uuid
-  fileName               String
-  storagePath            String   @unique
-  mimeType               String
-  sizeBytes              Int
-  createdAt              DateTime @default(now())
+  id                           String   @id @default(uuid()) @db.Uuid
+  organizationId               String   @db.Uuid
+  clientId                     String?  @db.Uuid
+  taskId                       String?  @db.Uuid
+  uploadedByMembershipId       String?  @db.Uuid
+  uploadedByClientMembershipId String?  @db.Uuid
+  fileName                     String
+  storagePath                  String   @unique
+  mimeType                     String
+  sizeBytes                    Int
+  createdAt                    DateTime @default(now())
 
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  client       Client?      @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  task         Task?        @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  uploadedBy   Membership?  @relation("DocumentUploadedBy", fields: [uploadedByMembershipId], references: [id], onDelete: SetNull)
+  organization               Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  client                     Client?           @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  task                       Task?             @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  uploadedBy                 Membership?       @relation("DocumentUploadedBy", fields: [uploadedByMembershipId], references: [id], onDelete: SetNull)
+  uploadedByClientMembership ClientMembership? @relation(fields: [uploadedByClientMembershipId], references: [id], onDelete: SetNull)
 
   @@index([organizationId, clientId])
   @@index([organizationId, createdAt])
@@ -429,20 +431,21 @@ model Document {
 /// separate enum from `OrgRole` — a client contact must never be
 /// confusable with internal staff, in the type system or anywhere else.
 model ClientMembership {
-  id                     String     @id @default(uuid()) @db.Uuid
-  clientId               String     @db.Uuid
-  userId                 String?    @db.Uuid
-  email                  String
-  displayName            String?
-  role                   ClientRole @default(CLIENT_COLLABORATOR)
-  isActive               Boolean    @default(true)
-  invitedByMembershipId  String?    @db.Uuid
-  createdAt              DateTime   @default(now())
-  updatedAt              DateTime   @updatedAt
+  id                    String     @id @default(uuid()) @db.Uuid
+  clientId              String     @db.Uuid
+  userId                String?    @db.Uuid
+  email                 String
+  displayName           String?
+  role                  ClientRole @default(CLIENT_COLLABORATOR)
+  isActive              Boolean    @default(true)
+  invitedByMembershipId String?    @db.Uuid
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
 
-  client      Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  invitedBy   Membership? @relation("ClientInviteSentBy", fields: [invitedByMembershipId], references: [id], onDelete: SetNull)
-  approvals   ClientApproval[]
+  client            Client           @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  invitedBy         Membership?      @relation("ClientInviteSentBy", fields: [invitedByMembershipId], references: [id], onDelete: SetNull)
+  approvals         ClientApproval[]
+  uploadedDocuments Document[]
 
   @@unique([clientId, email])
   @@index([userId])

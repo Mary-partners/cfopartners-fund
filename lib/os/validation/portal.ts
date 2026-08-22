@@ -11,7 +11,7 @@ export const inviteClientUserSchema = z.object({
     .max(200)
     .optional()
     .transform((value) => (value ? value : undefined)),
-  role: z.nativeEnum(ClientRole),
+  role: z.enum(ClientRole, { error: "Choose an access level" }),
 });
 
 export type InviteClientUserInput = z.infer<typeof inviteClientUserSchema>;
