@@ -1,4 +1,9 @@
-import type { TaskStatus, WorkflowInstanceStatus, ReviewOutcome } from "@/generated/prisma/enums";
+import type {
+  TaskStatus,
+  WorkflowInstanceStatus,
+  ReviewOutcome,
+  ClientApprovalOutcome,
+} from "@/generated/prisma/enums";
 
 /**
  * "Overdue" is not a stored status — it's derived here from the due date
@@ -43,6 +48,17 @@ export const WORKFLOW_INSTANCE_STATUS_LABEL: Record<WorkflowInstanceStatus, stri
 };
 
 export const REVIEW_OUTCOME_LABEL: Record<ReviewOutcome, string> = {
+  APPROVED: "Approved",
+  CHANGES_REQUESTED: "Changes requested",
+};
+
+/**
+ * Same string values as ReviewOutcome (internal Quality review) — a
+ * deliberately separate enum/label map anyway, since ClientApproval and
+ * Review are separate models with separate actor types. See the comment on
+ * the ClientApproval model in schema.prisma.
+ */
+export const CLIENT_APPROVAL_OUTCOME_LABEL: Record<ClientApprovalOutcome, string> = {
   APPROVED: "Approved",
   CHANGES_REQUESTED: "Changes requested",
 };
