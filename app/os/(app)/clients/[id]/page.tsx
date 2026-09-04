@@ -8,25 +8,30 @@ import { getClientById } from "@/lib/os/queries/clients";
 import { getWorkflowInstancesForClient } from "@/lib/os/queries/workflow";
 import { getDocumentsForClient } from "@/lib/os/queries/documents";
 import { getClientMembershipsForClient } from "@/lib/os/queries/portal";
+import { getRequestsForClient } from "@/lib/os/queries/requests";
+import { getMeetingsForClient } from "@/lib/os/queries/meetings";
 import { formatFileSize } from "@/lib/os/documents-shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/os/ui/card";
 import { LifecycleBadge, HealthBadge, SERVICE_BUCKET_LABEL } from "@/components/os/status-badge";
 import { WorkflowInstanceStatusBadge } from "@/components/os/workflow-status-badge";
+import { RequestStatusBadge, RequestPriorityBadge } from "@/components/os/request-status-badge";
+import { Badge } from "@/components/os/ui/badge";
 import { ProgressBar } from "@/components/os/progress-bar";
 import { computeWorkflowProgress } from "@/lib/os/workflow/status";
 import { DocumentUploadForm } from "@/components/os/document-upload-form";
 import { DeleteDocumentButton } from "@/components/os/delete-document-button";
 import { InviteClientUserForm } from "@/components/os/invite-client-user-form";
 import { ToggleClientAccessButton } from "@/components/os/toggle-client-access-button";
+import { CreateRequestForm } from "@/components/os/create-request-form";
+import { CreateMeetingForm } from "@/components/os/create-meeting-form";
+import { DecisionStatusToggle } from "@/components/os/decision-status-toggle";
 
 const UPCOMING_TABS = [
   "Company profile",
   "Engagement",
   "Onboarding",
   "Services",
-  "Requests",
   "Deliverables",
-  "Meetings",
   "Financial operations",
   "Billing",
   "Health & risk",
@@ -73,6 +78,14 @@ export default async function ClientDetailPage({
   const clientMemberships = canManagePortalAccess
     ? await getClientMembershipsForClient(actor.organizationId, client.id)
     : [];
+
+  const canViewRequests = can(actor.membership.role, "request:view");
+  const canTriageRequests = can(actor.membership.role, "request:triage");
+  const requests = canViewRequests ? await getRequestsForClient(actor.organizationId, client.id) : [];
+
+  const canViewMeetings = can(actor.membership.role, "meeting:view");
+  const canManageMeetings = can(actor.membership.role, "meeting:manage");
+  const meetings = canViewMeetings ? await getMeetingsForClient(actor.organizationId, client.id) : [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -285,6 +298,108 @@ export default async function ClientDetailPage({
               <InviteClientUserForm clientId={client.id} />
             </CardContent>
           </Card>
+        </div>
+      ) : null}
+
+      {canViewRequests ? (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle>Requests ({requests.length})</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {requests.length === 0 ? (
+                <p className="p-5 text-sm text-ink-2/60">No requests logged for this client yet.</p>
+              ) : (
+                <ul className="divide-y divide-ink/5">
+                  {requests.map((request) => (
+                    <li key={request.id} className="flex items-center justify-between px-5 py-3">
+                      <div>
+                        <span className="text-sm font-medium text-ink">{request.title}</span>
+                        <div className="mt-1 flex items-center gap-1.5">
+                          <RequestPriorityBadge priority={request.priority} />
+                          <RequestStatusBadge request={request} />
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+
+          {canTriageRequests ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Log a request</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-2">
+                <CreateRequestForm fixedClientId={client.id} />
+              </CardContent>
+            </Card>
+          ) : null}
+        </div>
+      ) : null}
+
+      {canViewMeetings ? (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle>Meetings & decisions ({meetings.length})</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {meetings.length === 0 ? (
+                <p className="p-5 text-sm text-ink-2/60">No meetings logged for this client yet.</p>
+              ) : (
+                <ul className="divide-y divide-ink/5">
+                  {meetings.map((meeting) => (
+                    <li key={meeting.id} className="flex flex-col gap-2 px-5 py-3">
+                      <div>
+                        <span className="text-sm font-medium text-ink">{meeting.title}</span>
+                        <div className="text-xs text-ink-2/50">
+                          {new Date(meeting.heldAt).toLocaleDateString()}
+                          {meeting.attendees ? ` · ${meeting.attendees}` : ""}
+                        </div>
+                      </div>
+                      {meeting.decisions.length > 0 ? (
+                        <ul className="flex flex-col gap-1">
+                          {meeting.decisions.map((decision) => (
+                            <li
+                              key={decision.id}
+                              className="flex items-center justify-between gap-2 rounded-md bg-ink/5 px-2.5 py-1.5 text-xs"
+                            >
+                              <span className={decision.status === "DONE" ? "text-ink-2/50 line-through" : "text-ink"}>
+                                {decision.description}
+                              </span>
+                              <div className="flex items-center gap-1.5">
+                                <Badge tone={decision.status === "DONE" ? "success" : "warning"}>
+                                  {decision.status === "DONE" ? "Done" : "Open"}
+                                </Badge>
+                                {canManageMeetings || decision.owner?.id === actor.membership.id ? (
+                                  <DecisionStatusToggle decisionId={decision.id} isDone={decision.status === "DONE"} />
+                                ) : null}
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+
+          {canManageMeetings ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Log a meeting</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-2">
+                <CreateMeetingForm fixedClientId={client.id} />
+              </CardContent>
+            </Card>
+          ) : null}
         </div>
       ) : null}
     </div>

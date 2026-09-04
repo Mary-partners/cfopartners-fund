@@ -27,7 +27,14 @@ export type Permission =
   | "document:upload"
   | "document:delete"
   | "quality:view"
-  | "quality:review";
+  | "quality:review"
+  | "request:view"
+  | "request:triage"
+  | "request:resolve"
+  | "meeting:view"
+  | "meeting:manage"
+  | "team:view"
+  | "team:manageCapacity";
 
 const ALL_INTERNAL_PERMISSIONS: Permission[] = [
   "client:view",
@@ -49,6 +56,13 @@ const ALL_INTERNAL_PERMISSIONS: Permission[] = [
   "document:delete",
   "quality:view",
   "quality:review",
+  "request:view",
+  "request:triage",
+  "request:resolve",
+  "meeting:view",
+  "meeting:manage",
+  "team:view",
+  "team:manageCapacity",
 ];
 
 /**
@@ -76,6 +90,13 @@ const ROLE_PERMISSIONS: Record<OrgRole, ReadonlySet<Permission>> = {
     "document:delete",
     "quality:view",
     "quality:review",
+    "request:view",
+    "request:triage",
+    "request:resolve",
+    "meeting:view",
+    "meeting:manage",
+    "team:view",
+    "team:manageCapacity",
   ]),
   [OrgRole.PORTFOLIO_LEAD]: new Set([
     "client:view",
@@ -91,6 +112,12 @@ const ROLE_PERMISSIONS: Record<OrgRole, ReadonlySet<Permission>> = {
     "document:upload",
     "quality:view",
     "quality:review",
+    "request:view",
+    "request:triage",
+    "request:resolve",
+    "meeting:view",
+    "meeting:manage",
+    "team:view",
   ]),
   [OrgRole.RELATIONSHIP_MANAGER]: new Set([
     "client:view",
@@ -100,6 +127,12 @@ const ROLE_PERMISSIONS: Record<OrgRole, ReadonlySet<Permission>> = {
     "document:view",
     "document:upload",
     "quality:view",
+    "request:view",
+    "request:triage",
+    "request:resolve",
+    "meeting:view",
+    "meeting:manage",
+    "team:view",
   ]),
   [OrgRole.SERVICE_LEAD]: new Set([
     "client:view",
@@ -113,6 +146,12 @@ const ROLE_PERMISSIONS: Record<OrgRole, ReadonlySet<Permission>> = {
     "document:upload",
     "quality:view",
     "quality:review",
+    "request:view",
+    "request:triage",
+    "request:resolve",
+    "meeting:view",
+    "meeting:manage",
+    "team:view",
   ]),
   [OrgRole.PREPARER_ANALYST]: new Set([
     "client:view",
@@ -120,15 +159,37 @@ const ROLE_PERMISSIONS: Record<OrgRole, ReadonlySet<Permission>> = {
     "document:view",
     "document:upload",
     "quality:view",
+    "request:view",
+    "meeting:view",
+    "team:view",
   ]),
   [OrgRole.INDEPENDENT_REVIEWER]: new Set([
     "client:view",
     "document:view",
     "quality:view",
     "quality:review",
+    "request:view",
+    "meeting:view",
+    "team:view",
   ]),
-  [OrgRole.FINANCE_BILLING]: new Set(["client:view", "billing:view", "document:view", "quality:view"]),
-  [OrgRole.READ_ONLY_AUDITOR]: new Set(["client:view", "audit:view", "document:view", "quality:view"]),
+  [OrgRole.FINANCE_BILLING]: new Set([
+    "client:view",
+    "billing:view",
+    "document:view",
+    "quality:view",
+    "request:view",
+    "meeting:view",
+    "team:view",
+  ]),
+  [OrgRole.READ_ONLY_AUDITOR]: new Set([
+    "client:view",
+    "audit:view",
+    "document:view",
+    "quality:view",
+    "request:view",
+    "meeting:view",
+    "team:view",
+  ]),
 };
 
 export function can(role: OrgRole, permission: Permission): boolean {

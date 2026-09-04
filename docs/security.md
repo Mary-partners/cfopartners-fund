@@ -16,14 +16,22 @@ Implemented in `lib/os/auth/rbac.ts`, one file, one matrix
 | Role | Core authority (Phase 0/1 permissions) |
 |---|---|
 | Managing Partner | Everything |
-| Practice Administrator | Clients, team roles, settings, audit log, workflow templates & instantiation, documents (incl. delete), quality review — not billing, not task execution |
-| Portfolio Lead / CFO | Clients (view/create/edit), billing visibility, start work, update/assign tasks, documents (view/upload), quality review |
-| Client Relationship Manager | Clients (view/edit), documents (view/upload), quality (view only) |
-| Service Lead | Clients (view/edit), manage workflow templates, start work, update/assign tasks, documents (view/upload), quality review |
-| Preparer / Analyst | Clients (view only), update task status (their own delivery work), documents (view/upload), quality (view only — cannot submit reviews at all) |
-| Independent Reviewer | Clients (view only), documents (view only), quality review |
-| Finance / Billing | Clients (view), billing visibility, documents (view only), quality (view only) |
-| Read-only / Auditor | Clients (view), audit log, documents (view only), quality (view only) |
+| Practice Administrator | Clients, team roles, settings, audit log, workflow templates & instantiation, documents (incl. delete), quality review, requests (triage & resolve), meetings (manage), team capacity — not billing, not task execution |
+| Portfolio Lead / CFO | Clients (view/create/edit), billing visibility, start work, update/assign tasks, documents (view/upload), quality review, requests (triage & resolve), meetings (manage), team (view only) |
+| Client Relationship Manager | Clients (view/edit), documents (view/upload), quality (view only), requests (triage & resolve), meetings (manage), team (view only) |
+| Service Lead | Clients (view/edit), manage workflow templates, start work, update/assign tasks, documents (view/upload), quality review, requests (triage & resolve), meetings (manage), team (view only) |
+| Preparer / Analyst | Clients (view only), update task status (their own delivery work), documents (view/upload), quality (view only — cannot submit reviews at all), requests/meetings/team (view only) |
+| Independent Reviewer | Clients (view only), documents (view only), quality review, requests/meetings/team (view only) |
+| Finance / Billing | Clients (view), billing visibility, documents (view only), quality (view only), requests/meetings/team (view only) |
+| Read-only / Auditor | Clients (view), audit log, documents (view only), quality (view only), requests/meetings/team (view only) |
+
+Every role above also has `request:view`, `meeting:view` and `team:view` —
+seeing what's open/logged/staffed is deliberately broad, the same way
+`quality:view`/`document:view` already are; the narrower authority is
+*acting* on them (`request:triage`/`request:resolve`, `meeting:manage`,
+`team:manageCapacity`, held only by Managing Partner, Practice Admin,
+Portfolio Lead, Relationship Manager and Service Lead — `team:manageCapacity`
+further narrowed to just Managing Partner/Practice Admin).
 
 Document *delete* is deliberately withheld from every role except Managing
 Partner and Practice Administrator — everyone who can view or upload can
@@ -38,8 +46,8 @@ into the table above:
 
 | Client role | Portal authority |
 |---|---|
-| Client Admin | View work & documents, upload documents, approve or request changes on a task, delete a document *they themselves* uploaded |
-| Client Collaborator | View work & documents, upload documents, delete a document *they themselves* uploaded — cannot approve or request changes |
+| Client Admin | View work, documents & requests, upload documents, raise a request, approve or request changes on a task, delete a document *they themselves* uploaded |
+| Client Collaborator | View work, documents & requests, upload documents, raise a request, delete a document *they themselves* uploaded — cannot approve or request changes |
 
 `document:delete` in the portal matrix only gates *whether a role can ever
 delete anything* — the stronger rule (only your own upload, never a
@@ -54,7 +62,9 @@ authorization mechanism: `client:*`, `membership:*`, `audit:view`,
 `settings:manage`, `billing:view`, `workflow:manageTemplates`,
 `workflow:instantiate`, `task:updateStatus`, `task:assign`,
 `document:view`, `document:upload`, `document:delete`, `quality:view`,
-`quality:review`. `billing:view` already exists in the matrix ahead of the
+`quality:review`, `request:view`, `request:triage`, `request:resolve`,
+`meeting:view`, `meeting:manage`, `team:view`, `team:manageCapacity`.
+`billing:view` already exists in the matrix ahead of the
 Billing module (Phase 3) shipping, so the authority decision (who gets to
 see money) is made once and doesn't need revisiting when Billing lands.
 Note `task:updateStatus` is currently granted broadly to Preparer/Analyst
@@ -145,14 +155,16 @@ Two independent layers, deliberately not just one:
    (there is no query function that omits the `organizationId` parameter).
 
 2. **Row Level Security** (defense-in-depth, for other access paths):
-   five migrations (`20260819092604_enable_row_level_security`,
+   seven migrations (`20260819092604_enable_row_level_security`,
    `20260819094215_workflow_engine_rls`, `20260821132500_documents_rls`,
-   `20260821174500_reviews_rls`, `20260822090500_client_portal_rls`) enable
-   RLS and add `SELECT` policies on every tenant table (organizations,
-   memberships, clients, client_contacts, audit_events, workflow_templates,
-   task_templates, workflow_instances, tasks, documents, reviews,
-   client_memberships, client_approvals), keyed off `auth.uid()`. This
-   protects any *other* route into the same database —
+   `20260821174500_reviews_rls`, `20260822090500_client_portal_rls`,
+   `20260822135000_requests_rls`, `20260822135700_meetings_decisions_rls`)
+   enable RLS and add `SELECT` policies on every tenant table
+   (organizations, memberships, clients, client_contacts, audit_events,
+   workflow_templates, task_templates, workflow_instances, tasks,
+   documents, reviews, client_memberships, client_approvals, requests,
+   meetings, decisions), keyed off `auth.uid()`. This protects any *other*
+   route into the same database —
    a browser Supabase client, Supabase's PostgREST auto-API, a future
    integration — none of which this app currently uses for data queries,
    but which would otherwise have no tenant boundary at all if ever added
@@ -205,6 +217,17 @@ Two independent layers, deliberately not just one:
    in `lib/os/queries/documents.ts` takes `clientId` directly, the same
    "app-layer is primary, RLS is defense-in-depth" split as the rest of
    this section), not an oversight — see `/docs/decision-log.md`.
+
+   `requests` has its own `organizationId` column (a request is always
+   staff-side visible portfolio-wide, unlike client-portal data), so its
+   policy is the simple direct-column shape, same as `documents`.
+   `meetings` is the same; `decisions` has no `organizationId` of its own
+   and joins through `meetings`, the same EXISTS-through-a-join shape as
+   `reviews` joining through `tasks`. Re-verified against a real local
+   Postgres instance the same way as every table above: two organizations
+   seeded with a request, a meeting and a decision each — a session
+   claiming Org A's user sees exactly Org A's rows across all three
+   tables, none of Org B's.
 
 ## Document storage
 
@@ -266,7 +289,11 @@ the outcome — approved or changes requested), and, for the Client Portal:
 `CLIENT_PORTAL_INVITE_SENT` (and re-sent/reactivated invites),
 `CLIENT_PORTAL_ACCESS_CLAIMED` (first sign-in claiming a pending invite),
 `CLIENT_PORTAL_ACCESS_REVOKED`, and `CLIENT_APPROVAL_SUBMITTED` (metadata
-records the outcome, same shape as `TASK_REVIEWED`). Extended per phase
+records the outcome, same shape as `TASK_REVIEWED`), and, for Requests/
+Meetings/Capacity: `REQUEST_CREATED`, `REQUEST_TRIAGED`,
+`REQUEST_STATUS_CHANGED`, `REQUEST_RESOLVED`, `MEETING_LOGGED`,
+`DECISION_ADDED`, `DECISION_STATUS_CHANGED`, `MEMBERSHIP_CAPACITY_SET`.
+Extended per phase
 (the enum, `AuditAction`, has room for `MEMBERSHIP_DEACTIVATED`,
 `CLIENT_UPDATED`, `CLIENT_LIFECYCLE_CHANGED` already reserved for near-term
 use). A client-portal action's `actorLabel` is `client:<email>` rather than

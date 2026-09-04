@@ -15,7 +15,9 @@ export type PortalPermission =
   | "document:view"
   | "document:upload"
   | "document:delete"
-  | "approval:submit";
+  | "approval:submit"
+  | "request:view"
+  | "request:submit";
 
 const ALL_PORTAL_PERMISSIONS: PortalPermission[] = [
   "work:view",
@@ -23,6 +25,8 @@ const ALL_PORTAL_PERMISSIONS: PortalPermission[] = [
   "document:upload",
   "document:delete",
   "approval:submit",
+  "request:view",
+  "request:submit",
 ];
 
 /**
@@ -49,6 +53,8 @@ const PORTAL_ROLE_PERMISSIONS: Record<ClientRole, ReadonlySet<PortalPermission>>
     "document:view",
     "document:upload",
     "document:delete",
+    "request:view",
+    "request:submit",
   ]),
 };
 

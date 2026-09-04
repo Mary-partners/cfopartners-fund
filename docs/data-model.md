@@ -38,6 +38,13 @@ Task 1───* Review *───1 Membership (reviewer)
 Task 1───* ClientApproval *───1 ClientMembership
 Client 1───* ClientMembership *───0..1 (Supabase auth.users, by userId — claimed on first sign-in)
                   └───0..1 Membership (invitedBy)
+
+Organization 1───* Request *───1 Client
+                       ├──────0..1 Membership (raisedBy / assignee)
+                       └──────0..1 ClientMembership (raisedByClientMembership)
+Organization 1───* Meeting *───1 Client
+                       └────0..1 Membership (loggedBy)
+Meeting 1───* Decision *───0..1 Membership (owner)
 ```
 
 ## Why these tables and not the full section-20 list
@@ -73,6 +80,13 @@ roles now exist too, as the separate `client_memberships` table below —
 not as additional `OrgRole` values, since a client user must never see
 another client's data even within the same practice (a whole-`Organization`
 scope, which `Membership` has, would be the wrong shape for that).
+
+`weeklyCapacityHours` (nullable `Int`) is a manager-declared capacity
+target for Team & Capacity (`/os/team`) — not a measured actual. There's
+no time-tracking data yet (Billing/Time entry is Phase 3), so workload
+(assigned open tasks, clients led) is computed from real data while
+capacity is just what a Managing Partner or Practice Admin typed in. See
+`/docs/decision-log.md`.
 
 ### `clients`
 One row per client company. `lifecycleStage` (`PROSPECT` → `ONBOARDING` →
@@ -194,6 +208,32 @@ the right table. `outcome` (`APPROVED` / `CHANGES_REQUESTED`) drives the
 task to `DELIVERED` or back to `IN_PROGRESS` — see
 `submitClientApprovalAction` in `app/portal/(app)/work/actions.ts`.
 
+### `requests`
+An ad hoc, unscheduled ask — as opposed to `Task`, which belongs to a
+planned `WorkflowInstance`. Always scoped to exactly one `Client` (unlike
+`Document`/`Task`, there's no "general, not client-specific" request).
+`raisedByMembershipId` (staff logging it on the client's behalf) and
+`raisedByClientMembershipId` (the client raising it themselves through the
+portal) are exactly-one-set nullable columns, the same two-uploader-column
+pattern `Document` already uses — see `/docs/decision-log.md`.
+`slaDueAt` is computed from `priority` at triage time, anchored to
+`createdAt` (when the request was actually raised), not to whenever staff
+got around to triaging it — see `computeSlaDueAt()` in
+`lib/os/requests/status.ts`. `status` runs `NEW` → `TRIAGED` →
+[`AWAITING_APPROVAL`] → `IN_PROGRESS` → [`AWAITING_CLIENT`] → `COMPLETED`,
+or `DECLINED` at any point before `COMPLETED`.
+
+### `meetings` / `decisions`
+A `Meeting` is logged against one `Client` (title, date, attendees as free
+text, notes). Decisions made in it are tracked as separate `Decision` rows
+rather than buried in the notes field — product principle #3 ("one
+accountable owner", `/docs/product-spec.md`) needs each decision to carry
+its own `ownerMembershipId` and optional `dueDate`, not just prose. A
+decision's own owner can mark it `DONE` even without broad
+`meeting:manage` authority — see `updateDecisionStatusAction` in
+`app/os/(app)/meetings/actions.ts`, the same situational-check-on-top-of-
+the-static-table shape as `canReview()`.
+
 ## Conventions
 
 - **IDs**: UUID primary keys (`@default(uuid())`), matching Supabase's own
@@ -221,7 +261,7 @@ task to `DELIVERED` or back to `IN_PROGRESS` — see
 
 ## Migrations
 
-`prisma/migrations/` — thirteen so far:
+`prisma/migrations/` — nineteen so far:
 
 1. `20260819092543_init` — organizations, memberships, clients,
    client_contacts, audit_events.
@@ -261,8 +301,27 @@ task to `DELIVERED` or back to `IN_PROGRESS` — see
 13. `20260822092218_add_document_client_uploader` — nullable
     `uploadedByClientMembershipId` column + foreign key on `documents`, no
     RLS change needed, same reasoning as migration 9.
+14. `20260822134845_add_requests` — the `requests` table, `RequestPriority`/
+    `RequestStatus` enums, plus `REQUEST_CREATED`/`REQUEST_TRIAGED`/
+    `REQUEST_STATUS_CHANGED`/`REQUEST_RESOLVED` added to `AuditAction`.
+15. `20260822135000_requests_rls` — RLS policy for `requests`, same
+    direct-`organizationId`-column pattern as (6), since `requests` has its
+    own `organizationId` column (unlike `reviews`/`client_approvals`, which
+    join through a parent).
+16. `20260822135550_add_meetings_decisions` — the `meetings` and
+    `decisions` tables, `DecisionStatus` enum, plus `MEETING_LOGGED`/
+    `DECISION_ADDED`/`DECISION_STATUS_CHANGED` added to `AuditAction`.
+17. `20260822135700_meetings_decisions_rls` — RLS policies for both new
+    tables: `meetings` gets the direct-column policy (has its own
+    `organizationId`), `decisions` gets the EXISTS-through-a-join policy
+    (has none — same shape as `reviews`).
+18. `20260822140107_add_membership_weekly_capacity_hours` — nullable
+    `weeklyCapacityHours` column on `memberships`, no RLS change needed
+    (the existing `memberships` policy is unaffected by an added column).
+19. `20260822140140_add_membership_capacity_set_audit_action` —
+    `MEMBERSHIP_CAPACITY_SET` added to `AuditAction`.
 
-All thirteen were generated and applied against a real local Postgres 16
+All nineteen were generated and applied against a real local Postgres 16
 instance during development (not just written by hand and hoped correct) —
 see `/docs/setup.md` "Verifying migrations locally" if you need to do the
 same.
