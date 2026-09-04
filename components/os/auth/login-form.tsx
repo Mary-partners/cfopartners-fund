@@ -13,7 +13,7 @@ import { Label } from "@/components/os/ui/label";
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [formError, setFormError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(searchParams.get("error"));
   const {
     register,
     handleSubmit,

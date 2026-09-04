@@ -88,6 +88,8 @@ enum AuditAction {
   DECISION_STATUS_CHANGED
   MEMBERSHIP_CAPACITY_SET
   PORTFOLIO_DIGEST_SENT
+  STAFF_INVITE_SENT
+  STAFF_INVITE_CLAIMED
 }
 
 enum ClientRole {
@@ -201,7 +203,11 @@ model Organization {
 model Membership {
   id                  String   @id @default(uuid()) @db.Uuid
   organizationId      String   @db.Uuid
-  userId              String   @db.Uuid
+  // Nullable: a row invited via inviteStaffMemberAction (Settings -> Team)
+  // exists before the person has ever signed in — same "pending invite,
+  // claimed by matching email on first sign-in" shape as ClientMembership.
+  // See lib/os/auth/session.ts.
+  userId              String?  @db.Uuid
   email               String
   displayName         String?
   role                OrgRole
@@ -230,6 +236,7 @@ model Membership {
   decisionsOwned       Decision[]         @relation("DecisionOwner")
 
   @@unique([organizationId, userId])
+  @@unique([organizationId, email])
   @@index([organizationId, role])
   @@map("memberships")
 }

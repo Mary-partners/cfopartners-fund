@@ -58,13 +58,8 @@ export async function getOrCreateCurrentActor(): Promise<CurrentActor | null> {
 
   const organization = await getOrCreateDefaultOrganization();
 
-  let membership = await db.membership.findUnique({
-    where: {
-      organizationId_userId: {
-        organizationId: organization.id,
-        userId: user.id,
-      },
-    },
+  let membership = await db.membership.findFirst({
+    where: { organizationId: organization.id, userId: user.id },
   });
 
   if (!membership) {
@@ -83,6 +78,43 @@ export async function getOrCreateCurrentActor(): Promise<CurrentActor | null> {
     });
     if (isClientPortalUser) {
       return null;
+    }
+
+    // Claim a pending staff invite (inviteStaffMemberAction created this row
+    // with userId null and a manager-chosen role) before falling back to
+    // self-serve provisioning — same "match by email, attach userId" shape
+    // as getCurrentPortalActor's ClientMembership claiming. Matched
+    // case-insensitively for the same reason as the portal side: Supabase
+    // Auth itself lowercases emails, but the invited address may have been
+    // typed with different casing.
+    const pendingInvite = await db.membership.findFirst({
+      where: { organizationId: organization.id, userId: null, email: { equals: user.email, mode: "insensitive" } },
+    });
+
+    if (pendingInvite) {
+      membership = await db.membership.update({
+        where: { id: pendingInvite.id },
+        data: {
+          userId: user.id,
+          displayName:
+            pendingInvite.displayName ?? ((user.user_metadata?.full_name as string | undefined) ?? null),
+        },
+      });
+
+      await recordAuditEvent({
+        organizationId: organization.id,
+        actorMembershipId: membership.id,
+        action: "STAFF_INVITE_CLAIMED",
+        targetType: "Membership",
+        targetId: membership.id,
+      });
+
+      return {
+        userId: user.id,
+        email: user.email,
+        organizationId: organization.id,
+        membership: { id: membership.id, role: membership.role, isActive: membership.isActive },
+      };
     }
 
     const existingMemberCount = await db.membership.count({

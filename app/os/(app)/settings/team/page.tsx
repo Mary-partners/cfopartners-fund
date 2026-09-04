@@ -3,7 +3,9 @@ import { requireActor } from "@/lib/os/auth/session";
 import { db } from "@/lib/os/db";
 import { can, ROLE_LABELS } from "@/lib/os/auth/rbac";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/os/ui/card";
+import { Badge } from "@/components/os/ui/badge";
 import { RoleSelectForm } from "@/components/os/role-select-form";
+import { InviteStaffMemberForm } from "@/components/os/invite-staff-member-form";
 
 export const metadata: Metadata = { title: "Team" };
 
@@ -21,9 +23,20 @@ export default async function TeamSettingsPage() {
       <div>
         <h1 className="text-2xl font-semibold text-ink">Team</h1>
         <p className="text-sm text-ink-2/70">
-          Everyone who has signed in to CFOIP OS, and their internal role.
+          Everyone with CFOIP OS access, invited or already signed in, and their internal role.
         </p>
       </div>
+
+      {canChangeRole ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Invite a team member</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-2">
+            <InviteStaffMemberForm />
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card>
         <CardHeader>
@@ -45,8 +58,9 @@ export default async function TeamSettingsPage() {
               {members.map((member) => (
                 <tr key={member.id}>
                   <td className="px-5 py-3">
-                    <div className="font-medium text-ink">
-                      {member.displayName ?? member.email}
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-ink">{member.displayName ?? member.email}</span>
+                      {!member.userId ? <Badge tone="warning">Invited — not yet signed in</Badge> : null}
                     </div>
                     <div className="text-xs text-ink-2/50">{member.email}</div>
                   </td>
