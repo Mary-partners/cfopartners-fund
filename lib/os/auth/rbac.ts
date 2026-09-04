@@ -12,6 +12,7 @@ export type Permission =
   | "client:view"
   | "client:create"
   | "client:edit"
+  | "client:managePortalAccess"
   | "membership:view"
   | "membership:changeRole"
   | "membership:deactivate"
@@ -32,6 +33,7 @@ const ALL_INTERNAL_PERMISSIONS: Permission[] = [
   "client:view",
   "client:create",
   "client:edit",
+  "client:managePortalAccess",
   "membership:view",
   "membership:changeRole",
   "membership:deactivate",
@@ -61,6 +63,7 @@ const ROLE_PERMISSIONS: Record<OrgRole, ReadonlySet<Permission>> = {
     "client:view",
     "client:create",
     "client:edit",
+    "client:managePortalAccess",
     "membership:view",
     "membership:changeRole",
     "membership:deactivate",
@@ -78,6 +81,7 @@ const ROLE_PERMISSIONS: Record<OrgRole, ReadonlySet<Permission>> = {
     "client:view",
     "client:create",
     "client:edit",
+    "client:managePortalAccess",
     "membership:view",
     "billing:view",
     "workflow:instantiate",
@@ -91,6 +95,7 @@ const ROLE_PERMISSIONS: Record<OrgRole, ReadonlySet<Permission>> = {
   [OrgRole.RELATIONSHIP_MANAGER]: new Set([
     "client:view",
     "client:edit",
+    "client:managePortalAccess",
     "membership:view",
     "document:view",
     "document:upload",

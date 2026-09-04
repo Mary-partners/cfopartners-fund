@@ -378,6 +378,90 @@ even mean today), this is a small, contained change in one function, not a
 schema change (`clientId` and `taskId` are already independent nullable
 columns).
 
+## Client Portal shares the Supabase session with `/os` — middleware's login-page shortcut had to go
+
+**Context**: `/os` and `/portal` are the same Next.js app on the same
+domain, so internal staff and client-portal users share one Supabase
+`auth.users` table and one set of session cookies. `middleware.ts`
+previously bounced any authenticated session straight from `/os/login` to
+`/os/dashboard` — safe when every signed-in user was necessarily staff,
+no longer safe once a session can belong to a client-portal user instead.
+
+**Decision**: remove that shortcut from `middleware.ts` entirely (for both
+`/os` and `/portal`) and move it into each side's own login/signup page as
+a server-component check against a real, DB-backed actor lookup
+(`getOrCreateCurrentActor()` / `getCurrentPortalActor()`).
+
+**Why**: Edge middleware has no Prisma access, so it can't tell which side
+a Supabase session belongs to — only "a session exists." Keeping the
+bounce-away behavior there would have meant a signed-in client-portal user
+hitting `/os/login` gets sent to `/os/dashboard`, which correctly refuses
+them (see "Client Portal identity separation" in `/docs/security.md`) and
+sends them right back to `/os/login` — an infinite redirect loop. Full
+reasoning and the fix itself is in `middleware.ts`'s own comment.
+
+**Reversible?** Yes, and cheap — if the app ever gains an edge-compatible
+way to resolve actor identity (e.g. a signed JWT claim carrying which side
+a user belongs to, set at invite/signup time), the shortcut could move back
+into middleware. Not worth building until there's a real performance reason
+to.
+
+## Client Portal accounts are invite-only, never self-serve
+
+**Decision**: there is no `/portal/signup`. A `ClientMembership` row is
+only ever created by `inviteClientUserAction` (staff-initiated, gated by
+`client:managePortalAccess`); a first-time portal sign-in *claims* a
+pending invite by email match, it never creates one.
+
+**Why**: unlike internal staff (where "first person to sign up becomes
+Managing Partner" solves a real chicken-and-egg bootstrap problem — see
+"First-user-becomes-Managing-Partner" above), there's no equivalent
+bootstrap need on the client side: every client relationship starts with
+staff already having the client's contact email on file (`ClientContact`),
+so staff-initiated invite is both simpler and the safer default — a
+self-serve `/portal/signup` would mean anyone who discovers the URL and
+guesses (or already knows) a real client's name could create an account
+claiming to represent them, with no verification step at all.
+
+**Reversible?** Yes, but it's the more consequential direction to reverse —
+self-serve signup for a client-facing financial system needs a real
+identity-verification story (domain-matching, an approval step, something)
+that invite-only sidesteps entirely by construction.
+
+## Client-uploaded documents get their own uploader column, not a shared one
+
+**Decision**: `Document.uploadedByClientMembershipId` (nullable, mirrors
+the existing `uploadedByMembershipId`) rather than widening
+`uploadedByMembershipId` itself to somehow also point at a
+`ClientMembership`.
+
+**Why**: `ClientMembership` and `Membership` are deliberately separate,
+non-overlapping identity tables (see "Client Portal identity separation"
+in `/docs/security.md`) — a single foreign-key column can't reference
+"whichever of two tables" without either a polymorphic-association
+anti-pattern (a `uploaderType` discriminator column plus app-level joins
+Prisma can't express as a real relation) or a shared parent table neither
+side actually wants. Two nullable columns, exactly one ever set per row,
+is the boring, type-safe answer, and is what makes
+`deletePortalDocumentAction`'s "only your own upload" rule a simple
+equality check rather than a type-branching one.
+
+## `ClientApproval` is a separate table from `Review`, on purpose
+
+Same reasoning as "Quality reviews a `Task`, not a separate versioned
+`Deliverable`" above, one level further: `ClientApproval` reuses `Task`
+and the `outcome` (`APPROVED`/`CHANGES_REQUESTED`) shape `Review` already
+established, but stays its own table rather than one polymorphic
+"approval" table shared with `Review` — the actor is a `ClientMembership`
+for one, a `Membership` for the other, and every "who acted on this task"
+query would otherwise need to branch on actor type. `TaskStatus.APPROVED`
+now means two different things depending on which table has the latest
+row for a task — passed internal review, awaiting *client* approval — and
+`TaskStatus.DELIVERED` is reached only after the client-side step, not the
+internal one; no new `TaskStatus` values were needed for either Quality or
+Client Portal, both slices repurposed statuses that already existed
+unused on the enum since Phase 1.
+
 ## Specialist review still needed before real client data
 
 Restating from `/docs/security.md`: this system is *designed toward*

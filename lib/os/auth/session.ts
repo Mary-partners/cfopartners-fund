@@ -68,6 +68,23 @@ export async function getOrCreateCurrentActor(): Promise<CurrentActor | null> {
   });
 
   if (!membership) {
+    // Security-critical: a client-portal user (ClientMembership, no
+    // internal Membership) must never be silently upgraded to internal
+    // staff just by visiting /os. Without this check, a client contact
+    // signing in here for the first time would fall straight into the
+    // auto-provisioning branch below and become a Preparer/Analyst with
+    // access to every client in the practice, not just their own — a real
+    // privilege escalation once client-portal accounts exist, not a
+    // hypothetical one. See /docs/security.md "Client Portal identity
+    // separation."
+    const isClientPortalUser = await db.clientMembership.findFirst({
+      where: { userId: user.id, isActive: true },
+      select: { id: true },
+    });
+    if (isClientPortalUser) {
+      return null;
+    }
+
     const existingMemberCount = await db.membership.count({
       where: { organizationId: organization.id },
     });

@@ -3,9 +3,15 @@ import {
   TASK_STATUS_LABEL,
   WORKFLOW_INSTANCE_STATUS_LABEL,
   REVIEW_OUTCOME_LABEL,
+  CLIENT_APPROVAL_OUTCOME_LABEL,
   computeIsOverdue,
 } from "@/lib/os/workflow/status";
-import type { TaskStatus, WorkflowInstanceStatus, ReviewOutcome } from "@/generated/prisma/enums";
+import type {
+  TaskStatus,
+  WorkflowInstanceStatus,
+  ReviewOutcome,
+  ClientApprovalOutcome,
+} from "@/generated/prisma/enums";
 
 const TASK_STATUS_TONE: Record<TaskStatus, BadgeProps["tone"]> = {
   NOT_STARTED: "neutral",
@@ -46,4 +52,15 @@ const REVIEW_OUTCOME_TONE: Record<ReviewOutcome, BadgeProps["tone"]> = {
 
 export function ReviewOutcomeBadge({ outcome }: { outcome: ReviewOutcome }) {
   return <Badge tone={REVIEW_OUTCOME_TONE[outcome]}>{REVIEW_OUTCOME_LABEL[outcome]}</Badge>;
+}
+
+const CLIENT_APPROVAL_OUTCOME_TONE: Record<ClientApprovalOutcome, BadgeProps["tone"]> = {
+  APPROVED: "success",
+  CHANGES_REQUESTED: "warning",
+};
+
+export function ClientApprovalOutcomeBadge({ outcome }: { outcome: ClientApprovalOutcome }) {
+  return (
+    <Badge tone={CLIENT_APPROVAL_OUTCOME_TONE[outcome]}>{CLIENT_APPROVAL_OUTCOME_LABEL[outcome]}</Badge>
+  );
 }

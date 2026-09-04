@@ -158,6 +158,36 @@ it isn't already there. As long as the five env vars from step 1 are set
 (specifically `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`),
 uploading a file from `/os/documents` just works.
 
+## 8. Client Portal invite emails — one Supabase setting to add
+
+Staff invite a client user from a Client 360 page (**Portal access → Invite
+a client user**), which calls Supabase Auth's `inviteUserByEmail` — the
+same underlying mechanism as the internal signup confirmation email, just
+triggered server-side by staff instead of self-serve. The invite link it
+emails needs a redirect target Supabase is willing to send users to:
+
+1. In Supabase: **Authentication → URL Configuration → Redirect URLs**, add
+   every origin this app is ever deployed at, each followed by `/**`:
+   - `https://www.cfopartners.fund/**` (production)
+   - `https://cfopartners-fund-npyz.vercel.app/**` (or whatever the
+     project's default Vercel domain is) if invites might ever be sent from
+     a preview deployment
+2. Nothing else to configure — `inviteClientUserAction`
+   (`app/os/(app)/clients/[id]/portal-actions.ts`) builds the exact
+   `redirectTo` URL from the *request's own origin* (`x-forwarded-host` /
+   `x-forwarded-proto`), the same approach `/os/auth/callback` already uses
+   for signup confirmations, so it needs no separate `SITE_URL` env var and
+   works unmodified on every branch's preview URL as long as that URL (or a
+   wildcard covering it) is in the allow-list above.
+
+An invite that isn't in the allow-list fails at Supabase with a "redirect
+URL not allowed" error surfaced back through `inviteClientUserAction`'s
+catch block — if a staff member reports that error, this is the fix.
+
+This can't be tested end-to-end from a sandboxed Claude Code session (no
+real email delivery there) — see "What's not verified, and why" in
+`/docs/qa-plan.md`.
+
 ### A note on sandboxed Claude Code sessions and Supabase
 
 A Claude Code sandbox's outbound network is typically HTTPS-only — direct

@@ -10,10 +10,21 @@ CFOIP OS practice-management app share a single codebase and deployment.
 app/
   page.tsx, ai-automations/, blog/, contact/, pricing/, resources/,
   rooms/, api/            Public marketing site — untouched by this work
-  os/                      CFOIP OS — everything behind /os
+  os/                      CFOIP OS (internal staff) — everything behind /os
     (auth)/login, (auth)/signup    Public within /os
-    (app)/dashboard, clients, work, templates, calendar, ...   Behind auth
+    (app)/dashboard, clients, work, templates, calendar, quality, ...
+                                    Behind internal auth (requireActor())
     auth/callback, auth/sign-out    Supabase auth routes
+  portal/                  Client Portal — everything behind /portal,
+                            same identity model as /os but a fully
+                            separate one (see /docs/security.md "Client
+                            Portal identity separation")
+    (auth)/login, (auth)/set-password    Public/session-only within /portal
+                                          — no (auth)/signup, invite-only
+    (app)/work, documents               Behind portal auth
+                                          (requirePortalActor())
+    auth/callback, auth/sign-out          Supabase auth routes
+    documents/[id]/download                Signed-URL download route
 
 components/
   Nav.tsx, WhatsAppButton.tsx, ...   Marketing site — untouched
@@ -22,22 +33,30 @@ components/
     ui/                                OS's own Button/Card/Badge/Input/Label
                                         (deliberately separate from
                                         components/ui/ — see below)
+    portal/                            Client Portal-specific components
+                                        (sidebar, topbar, forms) — separate
+                                        from components/os/ the same way
+                                        components/os/ is separate from
+                                        components/ui/
 
 lib/
   rooms.ts, services.ts, pricing.ts, ...   Marketing site — untouched
   utils.ts                                  Shared cn() helper — reused as-is
                                              by OS components, not duplicated
   os/                                        OS-specific server/shared code
-    db.ts, audit.ts, nav.ts
-    auth/       rbac.ts, session.ts
-    supabase/   client.ts, server.ts
-    queries/    clients.ts, workflow.ts
-    validation/ auth.ts, client.ts, workflow.ts
+    db.ts, audit.ts, nav.ts, portal-nav.ts
+    auth/       rbac.ts, session.ts (internal) —
+                portal-rbac.ts, portal-session.ts (Client Portal)
+    supabase/   client.ts, server.ts, admin.ts
+    queries/    clients.ts, workflow.ts, documents.ts, quality.ts,
+                portal.ts (client-membership roster), portal-work.ts
+    validation/ auth.ts, document.ts, quality.ts, portal.ts,
+                portal-auth.ts, portal-documents.ts, portal-work.ts
     workflow/   period.ts, status.ts
 
-prisma/          Schema, migrations, seed script — OS only
-middleware.ts    Scoped to /os/:path* only (see below) — never touches
-                 the marketing site
+prisma/          Schema, migrations, seed script — OS + Client Portal
+middleware.ts    Scoped to /os/:path* and /portal/:path* only (see below)
+                 — never touches the marketing site
 docs/            This directory
 ```
 
@@ -119,33 +138,51 @@ shared components exist specifically to satisfy that:
 
 ## Request flow
 
-1. **`middleware.ts`** runs on every request under `/os/:path*` only (its
-   `matcher` config — see "Middleware scope" below). It refreshes the
-   Supabase session cookie and redirects unauthenticated requests away from
-   anything under `/os/(app)` to `/os/login`, and authenticated requests
-   away from `/os/login`/`/os/signup` to `/os/dashboard`. It never touches
-   the database — Edge runtime can't run `pg`/Prisma.
+1. **`middleware.ts`** runs on every request under `/os/:path*` or
+   `/portal/:path*` only (its `matcher` config — see "Middleware scope"
+   below). It refreshes the Supabase session cookie and redirects an
+   unauthenticated request away from a protected path to *that side's own*
+   login page (`/os/login` or `/portal/login`, chosen by which prefix the
+   request path starts with). It never touches the database — Edge
+   runtime can't run `pg`/Prisma, and (since the Client Portal shipped)
+   deliberately does **not** try to bounce an already-authenticated
+   visitor off a login page either — see "Client Portal identity
+   separation" in `/docs/security.md` for why that check moved to each
+   side's own login page instead.
 2. **`app/os/(app)/layout.tsx`** (Node.js runtime, Server Component) calls
    `requireActor()`, which resolves the Supabase user to an internal
    `Membership` row via Prisma — creating one on first sign-in (see
-   "Single-tenant bootstrap" in `/docs/decision-log.md`).
-3. Page Server Components call functions in `lib/os/queries/*.ts`, which
-   query Prisma scoped explicitly by `organizationId`.
+   "Single-tenant bootstrap" in `/docs/decision-log.md`), unless that user
+   already has a `ClientMembership`, in which case it refuses. The portal
+   side is the mirror image: **`app/portal/(app)/layout.tsx`** calls
+   `requirePortalActor()`, which resolves (and, on a pending invite,
+   claims) a `ClientMembership` — never auto-creating one.
+3. Page Server Components call functions in `lib/os/queries/*.ts` (scoped
+   by `organizationId`) or `lib/os/queries/portal-work.ts` /
+   the portal-scoped functions in `lib/os/queries/documents.ts` (scoped by
+   `clientId`, one level stricter — see `/docs/security.md` "Tenant
+   isolation").
 4. Mutations are Next.js Server Actions (`"use server"` files, e.g.
-   `app/os/(app)/clients/actions.ts`) that re-check `can(role, permission)`
-   from `lib/os/auth/rbac.ts` before writing, then write an `AuditEvent`.
+   `app/os/(app)/clients/actions.ts`, `app/portal/(app)/work/actions.ts`)
+   that re-check `can(role, permission)` (`lib/os/auth/rbac.ts`) or
+   `canPortal(role, permission)` (`lib/os/auth/portal-rbac.ts`) before
+   writing, then write an `AuditEvent`.
 
 ### Middleware scope
 
-`middleware.ts`'s `config.matcher` is `["/os/:path*"]` — deliberately
-narrow. An earlier draft (from the standalone-app prototype) matched
-*everything except static assets*, which would be correct for an app that
-is 100% behind auth but would be a serious bug here: it would force every
+`middleware.ts`'s `config.matcher` is `["/os/:path*", "/portal/:path*"]` —
+deliberately narrow, covering exactly the two authenticated subtrees. An
+earlier draft (from the standalone-app prototype) matched *everything
+except static assets*, which would be correct for an app that is 100%
+behind auth but would be a serious bug here: it would force every
 marketing page (`/`, `/pricing`, `/blog`, ...) through Supabase auth
 middleware and potentially redirect real visitors to a login page. Verified
 directly: `curl` against `/`, `/pricing`, `/contact` all return `200`
-unauthenticated, while `/os` and `/os/dashboard` correctly redirect to
-`/os/login`. See `/docs/qa-plan.md`.
+unauthenticated, while every protected path under either subtree
+(`/os/dashboard`, `/portal/work`, `/portal/documents`, `/portal/set-password`,
+...) correctly redirects to that subtree's own login page with the right
+`?next=` — never crossing to the other side's login page. See
+`/docs/qa-plan.md` "Middleware scope".
 
 ## Database connection strategy
 
@@ -190,3 +227,11 @@ The schema is organization-scoped (`Organization` → `Membership`/`Client` →
 ...) even though the product only exposes one organization today (CFOIP
 itself). See `/docs/decision-log.md` — "Single-tenant bootstrap" — for why,
 and `/docs/security.md` — "Tenant isolation" — for how it's enforced.
+
+The Client Portal adds a second, stricter scoping level *within* one
+organization: `Client` → `ClientMembership`. A portal user must never see
+another client's data even though both clients share the same
+organization (unlike internal staff, who legitimately see every client in
+their organization) — so every portal-facing query takes `clientId`
+directly, not `organizationId`. See `/docs/security.md` "Tenant isolation"
+and "Client Portal identity separation" for the full reasoning.

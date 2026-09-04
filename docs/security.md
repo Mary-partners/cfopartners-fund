@@ -31,6 +31,23 @@ add to the record, but removing a file (destructive, no undo — Documents
 has no version history yet, see `/docs/implementation-plan.md`) is held to
 a higher bar than upload.
 
+**Client Portal roles** are a wholly separate matrix
+(`lib/os/auth/portal-rbac.ts`, `PORTAL_ROLE_PERMISSIONS`, `canPortal()`) —
+see "Client Portal identity separation" below for why this is never merged
+into the table above:
+
+| Client role | Portal authority |
+|---|---|
+| Client Admin | View work & documents, upload documents, approve or request changes on a task, delete a document *they themselves* uploaded |
+| Client Collaborator | View work & documents, upload documents, delete a document *they themselves* uploaded — cannot approve or request changes |
+
+`document:delete` in the portal matrix only gates *whether a role can ever
+delete anything* — the stronger rule (only your own upload, never a
+staff-delivered document) is checked separately in
+`deletePortalDocumentAction` (`app/portal/(app)/documents/actions.ts`)
+against `Document.uploadedByClientMembershipId`, the same
+situational-check-on-top-of-a-static-table shape as `canReview()` above.
+
 The permission surface grows with each phase — every new module adds its
 own permissions to the same matrix rather than inventing a parallel
 authorization mechanism: `client:*`, `membership:*`, `audit:view`,
@@ -58,6 +75,60 @@ general happening to be the preparer of *this* task (e.g. a Service Lead
 reviewing their own work). Both checks run server-side on every submission
 — there's no client-side-only enforcement to bypass.
 
+## Client Portal identity separation
+
+Internal staff (`Membership`, scoped to an `Organization`) and client-portal
+users (`ClientMembership`, scoped to exactly one `Client`) share the same
+underlying Supabase `auth.users` table and the same session cookies — `/os`
+and `/portal` are the same Next.js app on the same domain, so there's only
+ever one Supabase session per signed-in browser. That's a real
+privilege-escalation surface if the two sides aren't kept deliberately
+separate, not a hypothetical one: without the guard below, a client contact
+signing in for the first time would fall into `/os`'s "auto-provision on
+first sign-in" bootstrap (`getOrCreateCurrentActor()`, see "Authentication"
+below) and become an internal Preparer/Analyst with read access to every
+client in the practice, not just their own.
+
+Two independent, deliberately asymmetric guards close this:
+
+- **`getOrCreateCurrentActor()` (`lib/os/auth/session.ts`) refuses to
+  auto-provision an internal `Membership`** for a signed-in user who
+  already has an active `ClientMembership` — checked before the
+  first-sign-in bootstrap branch runs, returning `null` (not staff) rather
+  than creating one.
+- **`getCurrentPortalActor()` (`lib/os/auth/portal-session.ts`) never
+  creates a `ClientMembership` out of nothing.** A `ClientMembership` row
+  only ever comes from staff sending an invite
+  (`inviteClientUserAction`, gated by `client:managePortalAccess`). On
+  first portal sign-in it *claims* a pending invite (matches by email,
+  case-insensitive, where `userId IS NULL`, and attaches the signed-in
+  user's id) — it does not fall back to treating an unmatched signed-in
+  user as a client.
+
+The two checks are asymmetric on purpose: the internal side actively
+*refuses* an identity it would otherwise auto-create; the portal side
+simply never auto-creates one in the first place; a signed-in Supabase user
+who is neither an internal `Membership` nor a `ClientMembership` (pending
+or claimed) resolves to `null` on both sides — signed in to nothing,
+everywhere in the app.
+
+This separation also shows up in `middleware.ts`: an earlier version
+bounced any authenticated session straight from `/os/login` to
+`/os/dashboard`. That's unsafe once a Supabase session can belong to
+either identity — bouncing a signed-in client-portal user into
+`/os/dashboard` would immediately bounce them right back out (the guard
+above correctly refuses them), an infinite redirect loop. Middleware can't
+resolve which side a session belongs to itself (Edge runtime, no Prisma
+query); that check now lives in each side's own login/signup page instead,
+which can afford a real DB-backed actor lookup — see the comment in
+`app/os/(auth)/login/page.tsx`.
+
+`ClientRole` (`CLIENT_ADMIN` / `CLIENT_COLLABORATOR`) is a wholly separate
+enum and permission table (`lib/os/auth/portal-rbac.ts`, `canPortal()`)
+from `OrgRole`/`can()` — a client contact is never type-compatible with
+internal staff, so a bug can't accidentally check a client's access against
+the internal permission matrix or vice versa.
+
 ## Tenant isolation
 
 Two independent layers, deliberately not just one:
@@ -74,13 +145,14 @@ Two independent layers, deliberately not just one:
    (there is no query function that omits the `organizationId` parameter).
 
 2. **Row Level Security** (defense-in-depth, for other access paths):
-   four migrations (`20260819092604_enable_row_level_security`,
+   five migrations (`20260819092604_enable_row_level_security`,
    `20260819094215_workflow_engine_rls`, `20260821132500_documents_rls`,
-   `20260821174500_reviews_rls`) enable RLS and add `SELECT` policies on
-   every tenant table (organizations, memberships, clients,
-   client_contacts, audit_events, workflow_templates, task_templates,
-   workflow_instances, tasks, documents, reviews), keyed off `auth.uid()`.
-   This protects any *other* route into the same database —
+   `20260821174500_reviews_rls`, `20260822090500_client_portal_rls`) enable
+   RLS and add `SELECT` policies on every tenant table (organizations,
+   memberships, clients, client_contacts, audit_events, workflow_templates,
+   task_templates, workflow_instances, tasks, documents, reviews,
+   client_memberships, client_approvals), keyed off `auth.uid()`. This
+   protects any *other* route into the same database —
    a browser Supabase client, Supabase's PostgREST auto-API, a future
    integration — none of which this app currently uses for data queries,
    but which would otherwise have no tenant boundary at all if ever added
@@ -115,6 +187,25 @@ Two independent layers, deliberately not just one:
    that runs as the migration-owner role, which is exempt from RLS on
    tables it owns, so the internal lookup doesn't re-trigger the policy.
 
+   `client_memberships`/`client_approvals` reuse this same pattern one
+   level stricter — a parallel `public.current_client_ids()` helper scoped
+   to the specific `Client`(s) a portal user belongs to, never their whole
+   `Organization` (a portal user has no `memberships` row at all, so
+   `current_org_ids()` already correctly returns empty for them — these two
+   tables just needed their own, tighter helper). Re-verified against a
+   real local Postgres instance the same way: two clients seeded under one
+   organization, each with its own `ClientMembership` user — a session
+   claiming client X's user sees exactly client X's `client_memberships`
+   row, not client Y's. Deliberately **not** extended in this migration:
+   RLS policies letting a portal user read `clients`/`workflow_instances`/
+   `tasks`/`documents` via `current_client_ids()` — the portal's actually
+   enforced boundary for those four tables is application-layer scoping by
+   `clientId` (every portal query in `lib/os/queries/portal-work.ts` and
+   the `getDocumentForPortalClient`/`getDocumentsForPortalClient` functions
+   in `lib/os/queries/documents.ts` takes `clientId` directly, the same
+   "app-layer is primary, RLS is defense-in-depth" split as the rest of
+   this section), not an oversight — see `/docs/decision-log.md`.
+
 ## Document storage
 
 Files (bucket `documents` in Supabase Storage) are a third access surface,
@@ -126,13 +217,30 @@ distinct from both layers in "Tenant isolation" above:
   `requestDocumentUploadAction`, download URLs via the
   `/os/documents/[id]/download` route handler (5-minute expiry). A client
   never holds a credential that works against the bucket generally, only a
-  single-object, time-boxed one.
+  single-object, time-boxed one. The Client Portal's own upload/download
+  path (`requestPortalDocumentUploadAction`,
+  `/portal/documents/[id]/download`) is a parallel mirror of this, scoped
+  by `clientId` instead of `organizationId` — see "Client Portal identity
+  separation" above for why that's the boundary that matters there.
 - **RBAC is checked before every signed URL is minted**, same as any other
   write/read: `document:upload` for the upload path, `document:view` for
-  download — see `lib/os/auth/rbac.ts`. Org scoping is enforced the same
-  way as `getClientById` — `getDocumentById(organizationId, id)` returns
-  `null` for another org's document, and the download route 404s on `null`
-  rather than ever redirecting to that object's signed URL.
+  download — see `lib/os/auth/rbac.ts` (internal) /
+  `lib/os/auth/portal-rbac.ts` (portal). Scoping is enforced the same way
+  as `getClientById` — `getDocumentById(organizationId, id)` returns `null`
+  for another org's document (`getDocumentForPortalClient(clientId, id)`
+  returns `null` for another client's, on the portal side), and the
+  download route 404s on `null` rather than ever redirecting to that
+  object's signed URL.
+- **A client can only ever delete a document they themselves uploaded.**
+  `Document.uploadedByClientMembershipId` (nullable, `SetNull` on
+  membership removal) attributes a client-uploaded document to the
+  specific `ClientMembership` that uploaded it;
+  `deletePortalDocumentAction` checks this before any delete, so a client
+  can correct their own mistaken upload but can never remove a document
+  staff delivered to them, or one a different person at their own company
+  uploaded. `document:delete` in `portal-rbac.ts` only gates whether a
+  role can delete *anything* — this per-document ownership check is
+  separate and stronger.
 - **The `documents` Postgres table (file metadata, not bytes) has an RLS
   `SELECT` policy** (`prisma/migrations/20260821132500_documents_rls/`),
   same defense-in-depth posture as every other tenant table — see "Tenant
@@ -154,10 +262,18 @@ distinct from both layers in "Tenant isolation" above:
 application code updates or deletes rows from it. Written today for:
 `USER_SIGNED_UP`, `MEMBERSHIP_ROLE_CHANGED`, `CLIENT_CREATED`,
 `DOCUMENT_UPLOADED`, `DOCUMENT_DELETED`, `TASK_REVIEWED` (metadata records
-the outcome — approved or changes requested). Extended per phase (the enum,
-`AuditAction`, has room for `MEMBERSHIP_DEACTIVATED`, `CLIENT_UPDATED`,
-`CLIENT_LIFECYCLE_CHANGED` already reserved for near-term use). Not yet
-exposed in a UI (Read-only/Auditor role has `audit:view` permission
+the outcome — approved or changes requested), and, for the Client Portal:
+`CLIENT_PORTAL_INVITE_SENT` (and re-sent/reactivated invites),
+`CLIENT_PORTAL_ACCESS_CLAIMED` (first sign-in claiming a pending invite),
+`CLIENT_PORTAL_ACCESS_REVOKED`, and `CLIENT_APPROVAL_SUBMITTED` (metadata
+records the outcome, same shape as `TASK_REVIEWED`). Extended per phase
+(the enum, `AuditAction`, has room for `MEMBERSHIP_DEACTIVATED`,
+`CLIENT_UPDATED`, `CLIENT_LIFECYCLE_CHANGED` already reserved for near-term
+use). A client-portal action's `actorLabel` is `client:<email>` rather than
+an `actorMembershipId` — see the `AuditEvent.actorLabel` comment in
+`prisma/schema.prisma` — since a `ClientMembership` isn't a `Membership`
+and the audit trail's actor foreign key only ever points at the latter.
+Not yet exposed in a UI (Read-only/Auditor role has `audit:view` permission
 granted, waiting on a screen) — Phase 1/2 backlog item, see
 `/docs/implementation-plan.md`.
 
@@ -176,6 +292,16 @@ minimum 10 characters, upper, lower, and a digit.
 The brief asks for "MFA-capable" — Supabase Auth supports TOTP MFA natively;
 enabling it is a Phase 1/2-scoped follow-up (needs a settings UI for
 enrollment), not a platform limitation.
+
+**Client Portal accounts are invite-only, never self-serve.** There is no
+`/portal/signup` — a `ClientMembership` row only ever comes from
+`inviteClientUserAction`. The invite email (Supabase Auth
+`inviteUserByEmail`) carries a link to `/portal/auth/callback`, which
+exchanges its code for a session and always sends a first-time claimant to
+`/portal/set-password` (mandatory, not skippable — an invited user has no
+password yet) before they can reach `/portal/work`. See
+`/docs/setup.md` "Client Portal invite emails" for the one Supabase Redirect
+URL setting this needs.
 
 ## Secrets
 

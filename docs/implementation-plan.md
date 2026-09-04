@@ -143,6 +143,36 @@ Phase 1 is now feature-complete against this plan.
     approver combined); add a distinct approver step if CFOIP's real
     workflow needs that third gate, not preemptively.
 
+- **Client Portal ships read access to Work/Documents and task approval —
+  not the full client-facing surface the brief eventually wants.**
+  Deliberately deferred, not silently dropped:
+  - **No client-facing Requests, Meetings, or Billing views.** Those
+    modules don't exist internally yet either (see the unchecked Phase 2
+    items above) — the portal will grow into them once each ships.
+  - **No portal notifications.** A client isn't emailed when a task
+    reaches `APPROVED` and is waiting on them, or when staff responds to a
+    change request — they'd need to notice it by checking `/portal/work`.
+    The invite email itself is the only email this slice sends. A real
+    notification system (email digests, or in-app) is real, separate work.
+  - **No client-portal password reset flow.** `/portal/set-password` only
+    runs once, right after an invite link; a client who forgets their
+    password afterward has no self-serve "forgot password" page yet —
+    staff would need to revoke and re-invite them as a workaround. Add a
+    dedicated reset flow before this is CFOIP's only onboarding path for a
+    real client.
+  - **No self-serve portal team management for clients.** Only staff can
+    invite a client user (`client:managePortalAccess`); a Client Admin
+    can't invite a colleague at their own company without asking staff to
+    do it. Matches the "invite-only, never self-serve" decision in
+    `/docs/decision-log.md`, but is a real friction point worth revisiting
+    if it comes up in practice.
+  - **`ClientContact` (Client 360's existing contact list) and
+    `ClientMembership` (portal login access) are two separate, unlinked
+    records for what's often the same person** — inviting someone to the
+    portal doesn't create or update a `ClientContact` row, or vice versa.
+    Fine for a first slice; worth reconciling if staff start expecting one
+    to drive the other.
+
 New entities this phase still needs beyond what's built (not yet in
 `schema.prisma`): `Engagement`, `ServicePackage` (replacing the
 `ServiceBucket` enum — see `/docs/decision-log.md`), `ChecklistTemplate` +
@@ -153,9 +183,19 @@ New entities this phase still needs beyond what's built (not yet in
 
 ## Phase 2 — Service control — **in progress**
 
-- [ ] Client portal (new client-facing role model — see
-      `/docs/data-model.md` "memberships" for why this isn't just reusing
-      `OrgRole`)
+- [x] **Client portal** (`/portal`) — new client-facing role model
+      (`ClientMembership`/`ClientRole`, wholly separate from
+      `Membership`/`OrgRole` — see `/docs/data-model.md` "memberships" for
+      why this isn't just reusing `OrgRole`), invite-only provisioning by
+      staff from a client's 360 page, client sign-in on the same domain/
+      session as `/os` but a fully separate identity (see
+      `/docs/security.md` "Client Portal identity separation"), read
+      access to the client's own Work and Documents, upload/self-delete on
+      Documents, and — the "include client approval now" scope — approving
+      or requesting changes on a task once it's passed internal Quality
+      review (`TaskStatus.APPROVED` → `DELIVERED`/`IN_PROGRESS`, the same
+      status-reuse approach Quality took, no new `TaskStatus` values
+      needed). See "Simplifications" below for what's deferred.
 - [ ] Ad hoc requests (`/requests`) — SLA clocks, triage, scope approval
 - [x] **Quality review/approval** (`/quality`) — preparer/reviewer
       segregation of duties, layered onto the existing `Task` lifecycle
@@ -201,11 +241,12 @@ still the other gating item, not done.
 
 ## Immediate next slice (recommendation)
 
-Quality's first slice (segregation-of-duties review on tasks) is live.
-Client portal, Ad hoc requests, Meetings & decisions and Capacity planning
-remain in Phase 2 — Client portal is the architecturally biggest of these
-(new client-facing role model) and unlocks parts of the others, so it's the
-natural next pick, though Requests could ship first with staff logging
-requests on a client's behalf if client login isn't ready yet. Before
-onboarding real client financial documents through Documents at any
-volume, close the virus-scanning gap noted above.
+Quality's first slice (segregation-of-duties review on tasks) and Client
+Portal (client sign-in, Work/Documents visibility, task approval) are both
+live. Ad hoc requests, Meetings & decisions and Capacity planning remain in
+Phase 2 — Requests is the natural next pick now that client login exists
+(a request can be raised by staff on a client's behalf *or* by the client
+themselves through the portal, rather than staff-only). Before onboarding
+real client financial documents through Documents at any volume, close the
+virus-scanning gap noted above — now more pressing with clients able to
+upload their own files through the portal, not just staff.
