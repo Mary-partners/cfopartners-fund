@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { setPasswordSchema, type SetPasswordInput } from "@/lib/os/validation/portal-auth";
 import { createClient } from "@/lib/os/supabase/client";
 import { Button } from "@/components/os/ui/button";
-import { Input } from "@/components/os/ui/input";
+import { PasswordInput } from "@/components/os/ui/password-input";
 import { Label } from "@/components/os/ui/label";
 
 export function SetPasswordForm({ email }: { email: string }) {
@@ -46,7 +46,7 @@ export function SetPasswordForm({ email }: { email: string }) {
 
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="password">Password</Label>
-        <Input id="password" type="password" autoComplete="new-password" {...register("password")} />
+        <PasswordInput id="password" autoComplete="new-password" {...register("password")} />
         {errors.password ? (
           <p className="text-xs text-red-700">{errors.password.message}</p>
         ) : (
