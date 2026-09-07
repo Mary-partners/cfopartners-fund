@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireActor } from "@/lib/os/auth/session";
+import { getAccessibleClientIds } from "@/lib/os/auth/client-access";
 import { can } from "@/lib/os/auth/rbac";
 import {
   getReviewQueue,
@@ -34,11 +35,12 @@ export default async function QualityPage() {
     );
   }
 
+  const accessibleClientIds = await getAccessibleClientIds(actor);
   const [queue, recentReviews, clientApprovalQueue, recentClientApprovals] = await Promise.all([
-    getReviewQueue(actor.organizationId),
-    getRecentReviews(actor.organizationId),
-    getClientApprovalQueue(actor.organizationId),
-    getRecentClientApprovals(actor.organizationId),
+    getReviewQueue(actor.organizationId, accessibleClientIds),
+    getRecentReviews(actor.organizationId, accessibleClientIds),
+    getClientApprovalQueue(actor.organizationId, accessibleClientIds),
+    getRecentClientApprovals(actor.organizationId, accessibleClientIds),
   ]);
 
   return (

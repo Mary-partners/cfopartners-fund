@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireActor } from "@/lib/os/auth/session";
+import { getAccessibleClientIds } from "@/lib/os/auth/client-access";
 import { can } from "@/lib/os/auth/rbac";
 import { getDocumentList } from "@/lib/os/queries/documents";
 import { getClientOptions } from "@/lib/os/queries/clients";
@@ -28,9 +29,10 @@ export default async function DocumentsPage() {
     );
   }
 
+  const accessibleClientIds = await getAccessibleClientIds(actor);
   const [documents, clients] = await Promise.all([
-    getDocumentList(actor.organizationId),
-    getClientOptions(actor.organizationId),
+    getDocumentList(actor.organizationId, accessibleClientIds),
+    getClientOptions(actor.organizationId, accessibleClientIds),
   ]);
 
   return (

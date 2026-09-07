@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireActor } from "@/lib/os/auth/session";
+import { getAccessibleClientIds } from "@/lib/os/auth/client-access";
 import { can } from "@/lib/os/auth/rbac";
 import { db } from "@/lib/os/db";
 import { getRequestInbox, getRecentlyResolvedRequests } from "@/lib/os/queries/requests";
@@ -28,11 +29,12 @@ export default async function RequestsPage() {
 
   const canTriage = can(actor.membership.role, "request:triage");
   const canResolve = can(actor.membership.role, "request:resolve");
+  const accessibleClientIds = await getAccessibleClientIds(actor);
 
   const [inbox, resolved, clients, members] = await Promise.all([
-    getRequestInbox(actor.organizationId),
-    getRecentlyResolvedRequests(actor.organizationId),
-    canTriage ? getClientOptions(actor.organizationId) : Promise.resolve([]),
+    getRequestInbox(actor.organizationId, accessibleClientIds),
+    getRecentlyResolvedRequests(actor.organizationId, accessibleClientIds),
+    canTriage ? getClientOptions(actor.organizationId, accessibleClientIds) : Promise.resolve([]),
     canTriage
       ? db.membership.findMany({
           where: { organizationId: actor.organizationId, isActive: true },

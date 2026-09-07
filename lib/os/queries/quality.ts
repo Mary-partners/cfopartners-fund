@@ -2,10 +2,17 @@ import "server-only";
 
 import { db } from "@/lib/os/db";
 
+function wiScope(organizationId: string, accessibleClientIds: string[] | null) {
+  return {
+    organizationId,
+    ...(accessibleClientIds !== null ? { clientId: { in: accessibleClientIds } } : {}),
+  };
+}
+
 /** Every task across the portfolio currently awaiting review. */
-export async function getReviewQueue(organizationId: string) {
+export async function getReviewQueue(organizationId: string, accessibleClientIds: string[] | null) {
   return db.task.findMany({
-    where: { workflowInstance: { organizationId }, status: "UNDER_REVIEW" },
+    where: { workflowInstance: wiScope(organizationId, accessibleClientIds), status: "UNDER_REVIEW" },
     orderBy: { dueDate: "asc" },
     include: {
       workflowInstance: {
@@ -23,9 +30,9 @@ export async function getReviewQueue(organizationId: string) {
  * app/os/(app)/quality/page.tsx) — only a client's own ClientApproval
  * action can move these forward.
  */
-export async function getClientApprovalQueue(organizationId: string) {
+export async function getClientApprovalQueue(organizationId: string, accessibleClientIds: string[] | null) {
   return db.task.findMany({
-    where: { workflowInstance: { organizationId }, status: "APPROVED" },
+    where: { workflowInstance: wiScope(organizationId, accessibleClientIds), status: "APPROVED" },
     orderBy: { dueDate: "asc" },
     include: {
       workflowInstance: {
@@ -36,9 +43,13 @@ export async function getClientApprovalQueue(organizationId: string) {
   });
 }
 
-export async function getRecentClientApprovals(organizationId: string, limit = 20) {
+export async function getRecentClientApprovals(
+  organizationId: string,
+  accessibleClientIds: string[] | null,
+  limit = 20,
+) {
   return db.clientApproval.findMany({
-    where: { task: { workflowInstance: { organizationId } } },
+    where: { task: { workflowInstance: wiScope(organizationId, accessibleClientIds) } },
     orderBy: { createdAt: "desc" },
     take: limit,
     include: {
@@ -56,9 +67,9 @@ export async function getRecentClientApprovals(organizationId: string, limit = 2
   });
 }
 
-export async function getRecentReviews(organizationId: string, limit = 20) {
+export async function getRecentReviews(organizationId: string, accessibleClientIds: string[] | null, limit = 20) {
   return db.review.findMany({
-    where: { task: { workflowInstance: { organizationId } } },
+    where: { task: { workflowInstance: wiScope(organizationId, accessibleClientIds) } },
     orderBy: { createdAt: "desc" },
     take: limit,
     include: {

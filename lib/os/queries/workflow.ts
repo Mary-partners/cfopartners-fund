@@ -2,8 +2,12 @@ import "server-only";
 
 import { db } from "@/lib/os/db";
 
-/** Every query here takes organizationId and filters by it — see the note
- * at the top of src/lib/queries/clients.ts for what this is and isn't. */
+/**
+ * Every query here takes organizationId and filters by it — see the note
+ * at the top of lib/os/queries/clients.ts for what this is and isn't. The
+ * client-scoped queries (everything below the template functions) also take
+ * `accessibleClientIds` — see lib/os/auth/client-access.ts.
+ */
 
 export async function getWorkflowTemplates(organizationId: string) {
   return db.workflowTemplate.findMany({
@@ -27,9 +31,9 @@ export async function getActiveWorkflowTemplates(organizationId: string) {
   });
 }
 
-export async function getWorkflowInstances(organizationId: string) {
+export async function getWorkflowInstances(organizationId: string, accessibleClientIds: string[] | null) {
   return db.workflowInstance.findMany({
-    where: { organizationId },
+    where: { organizationId, ...(accessibleClientIds !== null ? { clientId: { in: accessibleClientIds } } : {}) },
     orderBy: { periodStart: "desc" },
     include: {
       client: { select: { id: true, name: true } },
@@ -38,9 +42,17 @@ export async function getWorkflowInstances(organizationId: string) {
   });
 }
 
-export async function getWorkflowInstanceById(organizationId: string, id: string) {
+export async function getWorkflowInstanceById(
+  organizationId: string,
+  id: string,
+  accessibleClientIds: string[] | null,
+) {
   return db.workflowInstance.findFirst({
-    where: { id, organizationId },
+    where: {
+      id,
+      organizationId,
+      ...(accessibleClientIds !== null ? { clientId: { in: accessibleClientIds } } : {}),
+    },
     include: {
       client: { select: { id: true, name: true } },
       workflowTemplate: { select: { id: true, name: true } },
@@ -55,7 +67,14 @@ export async function getWorkflowInstanceById(organizationId: string, id: string
   });
 }
 
-export async function getWorkflowInstancesForClient(organizationId: string, clientId: string) {
+export async function getWorkflowInstancesForClient(
+  organizationId: string,
+  clientId: string,
+  accessibleClientIds: string[] | null,
+) {
+  if (accessibleClientIds !== null && !accessibleClientIds.includes(clientId)) {
+    return [];
+  }
   return db.workflowInstance.findMany({
     where: { organizationId, clientId },
     orderBy: { periodStart: "desc" },
@@ -64,9 +83,15 @@ export async function getWorkflowInstancesForClient(organizationId: string, clie
 }
 
 /** Every task across the portfolio with a due date, for the Calendar view. */
-export async function getUpcomingTasks(organizationId: string) {
+export async function getUpcomingTasks(organizationId: string, accessibleClientIds: string[] | null) {
   return db.task.findMany({
-    where: { workflowInstance: { organizationId }, status: { not: "DELIVERED" } },
+    where: {
+      workflowInstance: {
+        organizationId,
+        ...(accessibleClientIds !== null ? { clientId: { in: accessibleClientIds } } : {}),
+      },
+      status: { not: "DELIVERED" },
+    },
     orderBy: { dueDate: "asc" },
     include: {
       workflowInstance: {

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireActor } from "@/lib/os/auth/session";
+import { getAccessibleClientIds } from "@/lib/os/auth/client-access";
 import { getWorkflowInstances, getActiveWorkflowTemplates } from "@/lib/os/queries/workflow";
 import { getClientList } from "@/lib/os/queries/clients";
 import { can } from "@/lib/os/auth/rbac";
@@ -14,10 +15,11 @@ export const metadata: Metadata = { title: "Work" };
 
 export default async function WorkPage() {
   const actor = await requireActor();
+  const accessibleClientIds = await getAccessibleClientIds(actor);
   const [instances, templates, clients] = await Promise.all([
-    getWorkflowInstances(actor.organizationId),
+    getWorkflowInstances(actor.organizationId, accessibleClientIds),
     getActiveWorkflowTemplates(actor.organizationId),
-    getClientList(actor.organizationId),
+    getClientList(actor.organizationId, accessibleClientIds),
   ]);
   const canInstantiate = can(actor.membership.role, "workflow:instantiate");
 

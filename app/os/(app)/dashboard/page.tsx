@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { requireActor } from "@/lib/os/auth/session";
+import { getAccessibleClientIds } from "@/lib/os/auth/client-access";
 import { getPortfolioStats, getClientList } from "@/lib/os/queries/clients";
 import { StatCard } from "@/components/os/stat-card";
 import { LifecycleBadge, SERVICE_BUCKET_LABEL } from "@/components/os/status-badge";
@@ -10,9 +11,10 @@ export const metadata: Metadata = { title: "Command Centre" };
 
 export default async function DashboardPage() {
   const actor = await requireActor();
+  const accessibleClientIds = await getAccessibleClientIds(actor);
   const [stats, clients] = await Promise.all([
-    getPortfolioStats(actor.organizationId),
-    getClientList(actor.organizationId),
+    getPortfolioStats(actor.organizationId, accessibleClientIds),
+    getClientList(actor.organizationId, accessibleClientIds),
   ]);
 
   const recentClients = clients.slice(0, 5);

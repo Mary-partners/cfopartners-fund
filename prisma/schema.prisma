@@ -90,6 +90,8 @@ enum AuditAction {
   PORTFOLIO_DIGEST_SENT
   STAFF_INVITE_SENT
   STAFF_INVITE_CLAIMED
+  CLIENT_ACCESS_GRANTED
+  CLIENT_ACCESS_REVOKED
 }
 
 enum ClientRole {
@@ -222,18 +224,20 @@ model Membership {
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  portfolioLeadFor     Client[]           @relation("PortfolioLead")
-  relationshipOwnerFor Client[]           @relation("RelationshipOwner")
+  portfolioLeadFor     Client[]            @relation("PortfolioLead")
+  relationshipOwnerFor Client[]            @relation("RelationshipOwner")
   auditEvents          AuditEvent[]
-  assignedTasks        Task[]             @relation("TaskAssignee")
-  uploadedDocuments    Document[]         @relation("DocumentUploadedBy")
-  reviewsGiven         Review[]           @relation("ReviewReviewer")
-  reviewsReceived      Review[]           @relation("ReviewPreparer")
-  clientInvitesSent    ClientMembership[] @relation("ClientInviteSentBy")
-  requestsRaised       Request[]          @relation("RequestRaisedBy")
-  requestsAssigned     Request[]          @relation("RequestAssignee")
-  meetingsLogged       Meeting[]          @relation("MeetingLoggedBy")
-  decisionsOwned       Decision[]         @relation("DecisionOwner")
+  assignedTasks        Task[]              @relation("TaskAssignee")
+  uploadedDocuments    Document[]          @relation("DocumentUploadedBy")
+  reviewsGiven         Review[]            @relation("ReviewReviewer")
+  reviewsReceived      Review[]            @relation("ReviewPreparer")
+  clientInvitesSent    ClientMembership[]  @relation("ClientInviteSentBy")
+  requestsRaised       Request[]           @relation("RequestRaisedBy")
+  requestsAssigned     Request[]           @relation("RequestAssignee")
+  meetingsLogged       Meeting[]           @relation("MeetingLoggedBy")
+  decisionsOwned       Decision[]          @relation("DecisionOwner")
+  clientAccessGrants   ClientAccessGrant[] @relation("ClientAccessGrantee")
+  clientAccessGranted  ClientAccessGrant[] @relation("ClientAccessGrantor")
 
   @@unique([organizationId, userId])
   @@unique([organizationId, email])
@@ -269,6 +273,7 @@ model Client {
   portfolioLead     Membership?  @relation("PortfolioLead", fields: [portfolioLeadId], references: [id])
   relationshipOwner Membership?  @relation("RelationshipOwner", fields: [relationshipOwnerId], references: [id])
 
+  accessGrants      ClientAccessGrant[]
   contacts          ClientContact[]
   workflowInstances WorkflowInstance[]
   documents         Document[]
@@ -279,6 +284,28 @@ model Client {
   @@index([organizationId, lifecycleStage])
   @@index([organizationId, serviceBucket])
   @@map("clients")
+}
+
+/// An explicit grant of internal visibility into one Client, for the roles
+/// that don't see the whole portfolio by default (see
+/// lib/os/auth/client-access.ts — Managing Partner/Practice Admin/Portfolio
+/// Lead skip this entirely and see every client). Being a client's
+/// portfolioLead or relationshipOwner also grants visibility without a row
+/// here; this table is for everyone else staffed on the client.
+model ClientAccessGrant {
+  id                    String   @id @default(uuid()) @db.Uuid
+  clientId              String   @db.Uuid
+  membershipId          String   @db.Uuid
+  grantedByMembershipId String?  @db.Uuid
+  createdAt             DateTime @default(now())
+
+  client     Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  membership Membership  @relation("ClientAccessGrantee", fields: [membershipId], references: [id], onDelete: Cascade)
+  grantedBy  Membership? @relation("ClientAccessGrantor", fields: [grantedByMembershipId], references: [id], onDelete: SetNull)
+
+  @@unique([clientId, membershipId])
+  @@index([membershipId])
+  @@map("client_access_grants")
 }
 
 model ClientContact {

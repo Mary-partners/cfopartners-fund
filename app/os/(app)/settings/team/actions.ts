@@ -8,7 +8,7 @@ import { requireActor } from "@/lib/os/auth/session";
 import { can, OrgRole } from "@/lib/os/auth/rbac";
 import { recordAuditEvent } from "@/lib/os/audit";
 import { getSupabaseAdmin } from "@/lib/os/supabase/admin";
-import { inviteStaffMemberSchema } from "@/lib/os/validation/staff";
+import { inviteStaffMemberSchema, setClientAccessSchema } from "@/lib/os/validation/staff";
 
 const changeRoleSchema = z.object({
   membershipId: z.uuid(),
@@ -89,6 +89,62 @@ function currentOrigin() {
 }
 
 /**
+ * Replaces membershipId's full set of ClientAccessGrant rows with
+ * clientIds, diffing against what's already there so only the actual
+ * change gets an audit event — not a delete-everything-then-recreate that
+ * would log a grant/revoke pair for every client left untouched.
+ * clientIds is trusted to already be validated against the org (every
+ * caller below does this) — not re-checked here, so this stays a plain
+ * diff-and-write instead of a second DB round trip on every call.
+ */
+async function replaceClientAccessGrants(
+  organizationId: string,
+  membershipId: string,
+  clientIds: string[],
+  grantedByMembershipId: string,
+) {
+  const existing = await db.clientAccessGrant.findMany({
+    where: { membershipId },
+    select: { id: true, clientId: true },
+  });
+  const existingIds = new Set(existing.map((g) => g.clientId));
+  const nextIds = new Set(clientIds);
+
+  const toAdd = clientIds.filter((id) => !existingIds.has(id));
+  const toRemove = existing.filter((g) => !nextIds.has(g.clientId));
+
+  if (toAdd.length > 0) {
+    await db.clientAccessGrant.createMany({
+      data: toAdd.map((clientId) => ({ clientId, membershipId, grantedByMembershipId })),
+    });
+    for (const clientId of toAdd) {
+      await recordAuditEvent({
+        organizationId,
+        actorMembershipId: grantedByMembershipId,
+        action: "CLIENT_ACCESS_GRANTED",
+        targetType: "Client",
+        targetId: clientId,
+        metadata: { membershipId },
+      });
+    }
+  }
+
+  if (toRemove.length > 0) {
+    await db.clientAccessGrant.deleteMany({ where: { id: { in: toRemove.map((g) => g.id) } } });
+    for (const g of toRemove) {
+      await recordAuditEvent({
+        organizationId,
+        actorMembershipId: grantedByMembershipId,
+        action: "CLIENT_ACCESS_REVOKED",
+        targetType: "Client",
+        targetId: g.clientId,
+        metadata: { membershipId },
+      });
+    }
+  }
+}
+
+/**
  * Invites a new internal staff member with a manager-chosen role from the
  * start, instead of the only previous path (they self-serve sign up at
  * /os/signup as a Preparer/Analyst, then someone promotes them here).
@@ -109,11 +165,18 @@ export async function inviteStaffMemberAction(
     email: formData.get("email"),
     displayName: formData.get("displayName") || undefined,
     role: formData.get("role"),
+    clientIds: formData.getAll("clientIds"),
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message, fieldErrors: fieldErrorsFrom(parsed.error.issues) };
   }
-  const { email, displayName, role } = parsed.data;
+  const { email, displayName, role, clientIds } = parsed.data;
+
+  const validClients = await db.client.findMany({
+    where: { id: { in: clientIds }, organizationId: actor.organizationId },
+    select: { id: true },
+  });
+  const validClientIds = validClients.map((c) => c.id);
 
   const existing = await db.membership.findUnique({
     where: { organizationId_email: { organizationId: actor.organizationId, email } },
@@ -136,6 +199,8 @@ export async function inviteStaffMemberAction(
       data: { organizationId: actor.organizationId, email, displayName: displayName ?? null, role },
     });
   }
+
+  await replaceClientAccessGrants(actor.organizationId, membership.id, validClientIds, actor.membership.id);
 
   // Only send an invite email for someone who has never actually claimed
   // this access (no userId yet) — reactivating someone who already has
@@ -161,8 +226,56 @@ export async function inviteStaffMemberAction(
     action: "STAFF_INVITE_SENT",
     targetType: "Membership",
     targetId: membership.id,
-    metadata: { email, role },
+    metadata: { email, role, clientCount: validClientIds.length },
   });
+
+  revalidatePath("/os/settings/team");
+  return {};
+}
+
+export type SetClientAccessState = { error?: string };
+
+/**
+ * Edits an existing team member's client access after the fact — invite
+ * time isn't the only moment this changes; someone gets staffed onto a new
+ * client, or rolled off one, throughout their time on the team.
+ */
+export async function setMemberClientAccessAction(
+  _prevState: SetClientAccessState,
+  formData: FormData,
+): Promise<SetClientAccessState> {
+  const actor = await requireActor();
+  if (!can(actor.membership.role, "membership:changeRole")) {
+    return { error: "You don't have permission to manage client access." };
+  }
+
+  const parsed = setClientAccessSchema.safeParse({
+    membershipId: formData.get("membershipId"),
+    clientIds: formData.getAll("clientIds"),
+  });
+  if (!parsed.success) {
+    return { error: "Invalid request." };
+  }
+  const { membershipId, clientIds } = parsed.data;
+
+  const target = await db.membership.findFirst({
+    where: { id: membershipId, organizationId: actor.organizationId },
+  });
+  if (!target) {
+    return { error: "Member not found." };
+  }
+
+  const validClients = await db.client.findMany({
+    where: { id: { in: clientIds }, organizationId: actor.organizationId },
+    select: { id: true },
+  });
+
+  await replaceClientAccessGrants(
+    actor.organizationId,
+    target.id,
+    validClients.map((c) => c.id),
+    actor.membership.id,
+  );
 
   revalidatePath("/os/settings/team");
   return {};

@@ -12,11 +12,15 @@ import { getTeamCapacity } from "@/lib/os/queries/capacity";
  * truth for them.
  */
 export async function getPortfolioDigestData(organizationId: string) {
+  // Digest recipients are always the org-wide roles (Managing Partner /
+  // Portfolio Lead — see app/api/cron/portfolio-digest/route.ts), so this
+  // never needs client scoping; null means "no restriction". See
+  // lib/os/auth/client-access.ts.
   const [operational, quality, requests, portfolio, capacity] = await Promise.all([
-    getOperationalStats(organizationId),
-    getQualityStats(organizationId),
-    getRequestStats(organizationId),
-    getPortfolioStats(organizationId),
+    getOperationalStats(organizationId, null),
+    getQualityStats(organizationId, null),
+    getRequestStats(organizationId, null),
+    getPortfolioStats(organizationId, null),
     getTeamCapacity(organizationId),
   ]);
 

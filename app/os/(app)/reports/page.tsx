@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { requireActor } from "@/lib/os/auth/session";
+import { getAccessibleClientIds } from "@/lib/os/auth/client-access";
 import { can } from "@/lib/os/auth/rbac";
 import { getOperationalStats, getQualityStats, getRequestStats } from "@/lib/os/queries/reports";
 import { getPortfolioStats } from "@/lib/os/queries/clients";
@@ -15,11 +16,12 @@ export default async function ReportsPage() {
   const canViewQuality = can(actor.membership.role, "quality:view");
   const canViewRequests = can(actor.membership.role, "request:view");
 
+  const accessibleClientIds = await getAccessibleClientIds(actor);
   const [operational, quality, requests, portfolio] = await Promise.all([
-    getOperationalStats(actor.organizationId),
-    canViewQuality ? getQualityStats(actor.organizationId) : Promise.resolve(null),
-    canViewRequests ? getRequestStats(actor.organizationId) : Promise.resolve(null),
-    getPortfolioStats(actor.organizationId),
+    getOperationalStats(actor.organizationId, accessibleClientIds),
+    canViewQuality ? getQualityStats(actor.organizationId, accessibleClientIds) : Promise.resolve(null),
+    canViewRequests ? getRequestStats(actor.organizationId, accessibleClientIds) : Promise.resolve(null),
+    getPortfolioStats(actor.organizationId, accessibleClientIds),
   ]);
 
   return (

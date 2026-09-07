@@ -11,16 +11,23 @@ const MEETING_INCLUDE = {
   },
 };
 
-export async function getMeetingsForOrg(organizationId: string, limit = 30) {
+export async function getMeetingsForOrg(organizationId: string, accessibleClientIds: string[] | null, limit = 30) {
   return db.meeting.findMany({
-    where: { organizationId },
+    where: { organizationId, ...(accessibleClientIds !== null ? { clientId: { in: accessibleClientIds } } : {}) },
     orderBy: { heldAt: "desc" },
     take: limit,
     include: MEETING_INCLUDE,
   });
 }
 
-export async function getMeetingsForClient(organizationId: string, clientId: string) {
+export async function getMeetingsForClient(
+  organizationId: string,
+  clientId: string,
+  accessibleClientIds: string[] | null,
+) {
+  if (accessibleClientIds !== null && !accessibleClientIds.includes(clientId)) {
+    return [];
+  }
   return db.meeting.findMany({
     where: { organizationId, clientId },
     orderBy: { heldAt: "desc" },

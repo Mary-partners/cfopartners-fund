@@ -4,7 +4,14 @@ import { db } from "@/lib/os/db";
 
 const UPLOADER_SELECT = { select: { displayName: true, email: true } } as const;
 
-export async function getDocumentsForClient(organizationId: string, clientId: string) {
+export async function getDocumentsForClient(
+  organizationId: string,
+  clientId: string,
+  accessibleClientIds: string[] | null,
+) {
+  if (accessibleClientIds !== null && !accessibleClientIds.includes(clientId)) {
+    return [];
+  }
   return db.document.findMany({
     where: { organizationId, clientId },
     orderBy: { createdAt: "desc" },
@@ -12,9 +19,17 @@ export async function getDocumentsForClient(organizationId: string, clientId: st
   });
 }
 
-export async function getDocumentList(organizationId: string) {
+// A document with no clientId ("General") isn't scoped to any client, so it
+// carries nothing to leak — scoping still lets a restricted role see it.
+function clientOrGeneralScope(accessibleClientIds: string[] | null) {
+  return accessibleClientIds === null
+    ? {}
+    : { OR: [{ clientId: null }, { clientId: { in: accessibleClientIds } }] };
+}
+
+export async function getDocumentList(organizationId: string, accessibleClientIds: string[] | null) {
   return db.document.findMany({
-    where: { organizationId },
+    where: { organizationId, ...clientOrGeneralScope(accessibleClientIds) },
     orderBy: { createdAt: "desc" },
     include: {
       uploadedBy: UPLOADER_SELECT,
@@ -23,9 +38,13 @@ export async function getDocumentList(organizationId: string) {
   });
 }
 
-export async function getDocumentById(organizationId: string, documentId: string) {
+export async function getDocumentById(
+  organizationId: string,
+  documentId: string,
+  accessibleClientIds: string[] | null,
+) {
   return db.document.findFirst({
-    where: { id: documentId, organizationId },
+    where: { id: documentId, organizationId, ...clientOrGeneralScope(accessibleClientIds) },
   });
 }
 

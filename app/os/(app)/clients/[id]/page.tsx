@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireActor } from "@/lib/os/auth/session";
+import { getAccessibleClientIds } from "@/lib/os/auth/client-access";
 import { can } from "@/lib/os/auth/rbac";
 import { CLIENT_ROLE_LABELS } from "@/lib/os/auth/portal-rbac";
 import { getClientById } from "@/lib/os/queries/clients";
@@ -45,7 +46,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = params;
   const actor = await requireActor();
-  const client = await getClientById(actor.organizationId, id);
+  const accessibleClientIds = await getAccessibleClientIds(actor);
+  const client = await getClientById(actor.organizationId, id, accessibleClientIds);
   return { title: client?.name ?? "Client" };
 }
 
@@ -56,22 +58,24 @@ export default async function ClientDetailPage({
 }) {
   const { id } = params;
   const actor = await requireActor();
-  // Scoped to actor.organizationId — a client belonging to another tenant
-  // resolves to null here, never a cross-tenant record. Verified against a
-  // real Postgres instance for real, not just by inspection — see the RLS
-  // section of /docs/security.md.
-  const client = await getClientById(actor.organizationId, id);
+  const accessibleClientIds = await getAccessibleClientIds(actor);
+  // Scoped to actor.organizationId AND accessibleClientIds — a client
+  // belonging to another tenant, or one this actor isn't staffed on,
+  // resolves to null here, never a cross-tenant or out-of-scope record.
+  // Verified against a real Postgres instance for real, not just by
+  // inspection — see the RLS section of /docs/security.md.
+  const client = await getClientById(actor.organizationId, id, accessibleClientIds);
 
   if (!client) {
     notFound();
   }
 
-  const workflowInstances = await getWorkflowInstancesForClient(actor.organizationId, client.id);
+  const workflowInstances = await getWorkflowInstancesForClient(actor.organizationId, client.id, accessibleClientIds);
   const canViewDocuments = can(actor.membership.role, "document:view");
   const canUploadDocuments = can(actor.membership.role, "document:upload");
   const canDeleteDocuments = can(actor.membership.role, "document:delete");
   const documents = canViewDocuments
-    ? await getDocumentsForClient(actor.organizationId, client.id)
+    ? await getDocumentsForClient(actor.organizationId, client.id, accessibleClientIds)
     : [];
 
   const canManagePortalAccess = can(actor.membership.role, "client:managePortalAccess");
@@ -81,11 +85,15 @@ export default async function ClientDetailPage({
 
   const canViewRequests = can(actor.membership.role, "request:view");
   const canTriageRequests = can(actor.membership.role, "request:triage");
-  const requests = canViewRequests ? await getRequestsForClient(actor.organizationId, client.id) : [];
+  const requests = canViewRequests
+    ? await getRequestsForClient(actor.organizationId, client.id, accessibleClientIds)
+    : [];
 
   const canViewMeetings = can(actor.membership.role, "meeting:view");
   const canManageMeetings = can(actor.membership.role, "meeting:manage");
-  const meetings = canViewMeetings ? await getMeetingsForClient(actor.organizationId, client.id) : [];
+  const meetings = canViewMeetings
+    ? await getMeetingsForClient(actor.organizationId, client.id, accessibleClientIds)
+    : [];
 
   return (
     <div className="flex flex-col gap-6">

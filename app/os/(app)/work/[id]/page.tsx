@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireActor } from "@/lib/os/auth/session";
+import { getAccessibleClientIds } from "@/lib/os/auth/client-access";
 import { getWorkflowInstanceById } from "@/lib/os/queries/workflow";
 import { db } from "@/lib/os/db";
 import { can } from "@/lib/os/auth/rbac";
@@ -21,7 +22,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = params;
   const actor = await requireActor();
-  const instance = await getWorkflowInstanceById(actor.organizationId, id);
+  const accessibleClientIds = await getAccessibleClientIds(actor);
+  const instance = await getWorkflowInstanceById(actor.organizationId, id, accessibleClientIds);
   return { title: instance?.name ?? "Work" };
 }
 
@@ -32,8 +34,9 @@ export default async function WorkflowInstanceDetailPage({
 }) {
   const { id } = params;
   const actor = await requireActor();
+  const accessibleClientIds = await getAccessibleClientIds(actor);
   const [instance, members] = await Promise.all([
-    getWorkflowInstanceById(actor.organizationId, id),
+    getWorkflowInstanceById(actor.organizationId, id, accessibleClientIds),
     db.membership.findMany({
       where: { organizationId: actor.organizationId, isActive: true },
       select: { id: true, displayName: true, email: true },

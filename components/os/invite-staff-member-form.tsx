@@ -1,16 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import { useFormState } from "react-dom";
 import { inviteStaffMemberAction, type InviteStaffState } from "@/app/os/(app)/settings/team/actions";
 import { ROLE_LABELS, OrgRole } from "@/lib/os/auth/rbac";
+import { ORG_WIDE_ROLE_VALUES } from "@/lib/os/auth/client-access-shared";
+import { ClientAccessChecklist } from "@/components/os/client-access-checklist";
 import { SubmitButton } from "@/components/os/ui/submit-button";
 import { Input } from "@/components/os/ui/input";
 import { Label } from "@/components/os/ui/label";
 
 const initialState: InviteStaffState = {};
 
-export function InviteStaffMemberForm() {
+export function InviteStaffMemberForm({ clients }: { clients: { id: string; name: string }[] }) {
   const [state, formAction] = useFormState(inviteStaffMemberAction, initialState);
+  const [role, setRole] = useState<OrgRole>(OrgRole.PREPARER_ANALYST);
+  const isOrgWide = ORG_WIDE_ROLE_VALUES.has(role);
 
   return (
     <form action={formAction} className="flex flex-col gap-3">
@@ -36,15 +41,33 @@ export function InviteStaffMemberForm() {
         <select
           id="staffRole"
           name="role"
-          defaultValue={OrgRole.PREPARER_ANALYST}
+          value={role}
+          onChange={(event) => setRole(event.currentTarget.value as OrgRole)}
           className="h-10 rounded-md border border-ink/20 bg-white px-3 text-sm text-ink-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
-          {Object.values(OrgRole).map((role) => (
-            <option key={role} value={role}>
-              {ROLE_LABELS[role]}
+          {Object.values(OrgRole).map((r) => (
+            <option key={r} value={r}>
+              {ROLE_LABELS[r]}
             </option>
           ))}
         </select>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <Label>Clients they can access</Label>
+        {isOrgWide ? (
+          <p className="text-xs text-ink-2/50">
+            {ROLE_LABELS[role]} sees every client in the portfolio — nothing to pick.
+          </p>
+        ) : (
+          <>
+            <ClientAccessChecklist clients={clients} defaultCheckedIds={[]} />
+            <p className="text-xs text-ink-2/50">
+              Only these clients&apos; work, documents, requests and meetings will be visible to them. You can
+              change this any time from the list below.
+            </p>
+          </>
+        )}
       </div>
 
       <SubmitButton pendingLabel="Sending invite…" size="sm" className="self-start">

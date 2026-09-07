@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireActor } from "@/lib/os/auth/session";
+import { getAccessibleClientIds } from "@/lib/os/auth/client-access";
 import { getUpcomingTasks } from "@/lib/os/queries/workflow";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/os/ui/card";
 import { TaskStatusBadge } from "@/components/os/workflow-status-badge";
@@ -36,7 +37,8 @@ function bucketize(tasks: Awaited<ReturnType<typeof getUpcomingTasks>>): Bucket[
 
 export default async function CalendarPage() {
   const actor = await requireActor();
-  const tasks = await getUpcomingTasks(actor.organizationId);
+  const accessibleClientIds = await getAccessibleClientIds(actor);
+  const tasks = await getUpcomingTasks(actor.organizationId, accessibleClientIds);
   const buckets = bucketize(tasks);
 
   return (

@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { can } from "@/lib/os/auth/rbac";
 import { requireActor } from "@/lib/os/auth/session";
+import { getAccessibleClientIds } from "@/lib/os/auth/client-access";
 import { getDocumentById } from "@/lib/os/queries/documents";
 import { createDownloadUrl } from "@/lib/os/storage";
 
@@ -16,7 +17,8 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const document = await getDocumentById(actor.organizationId, params.id);
+  const accessibleClientIds = await getAccessibleClientIds(actor);
+  const document = await getDocumentById(actor.organizationId, params.id, accessibleClientIds);
   if (!document) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }

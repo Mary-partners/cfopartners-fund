@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireActor } from "@/lib/os/auth/session";
+import { getAccessibleClientIds } from "@/lib/os/auth/client-access";
 import { getClientList } from "@/lib/os/queries/clients";
 import { can } from "@/lib/os/auth/rbac";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/os/ui/card";
@@ -11,7 +12,8 @@ export const metadata: Metadata = { title: "Clients" };
 
 export default async function ClientsPage() {
   const actor = await requireActor();
-  const clients = await getClientList(actor.organizationId);
+  const accessibleClientIds = await getAccessibleClientIds(actor);
+  const clients = await getClientList(actor.organizationId, accessibleClientIds);
   const canCreate = can(actor.membership.role, "client:create");
 
   return (

@@ -11,10 +11,23 @@ import type { TaskStatus } from "@/generated/prisma/enums";
  * yet (Phase 3), and faking a number from data that doesn't exist would be
  * worse than not showing the section at all. See
  * /docs/implementation-plan.md "Reporting" for what's deferred and why.
+ *
+ * `accessibleClientIds` is `null` for org-wide roles, otherwise the
+ * specific clients that actor may see — see lib/os/auth/client-access.ts. A
+ * scoped role's Reports page reflects only their own clients, same as every
+ * other client-scoped page.
  */
-export async function getOperationalStats(organizationId: string) {
+
+function wiScope(organizationId: string, accessibleClientIds: string[] | null) {
+  return {
+    organizationId,
+    ...(accessibleClientIds !== null ? { clientId: { in: accessibleClientIds } } : {}),
+  };
+}
+
+export async function getOperationalStats(organizationId: string, accessibleClientIds: string[] | null) {
   const tasks = await db.task.findMany({
-    where: { workflowInstance: { organizationId } },
+    where: { workflowInstance: wiScope(organizationId, accessibleClientIds) },
     select: { status: true, dueDate: true },
   });
 
@@ -26,7 +39,7 @@ export async function getOperationalStats(organizationId: string) {
 
   const instances = await db.workflowInstance.groupBy({
     by: ["status"],
-    where: { organizationId },
+    where: wiScope(organizationId, accessibleClientIds),
     _count: { _all: true },
   });
 
@@ -38,9 +51,9 @@ export async function getOperationalStats(organizationId: string) {
   };
 }
 
-export async function getQualityStats(organizationId: string) {
+export async function getQualityStats(organizationId: string, accessibleClientIds: string[] | null) {
   const reviews = await db.review.findMany({
-    where: { task: { workflowInstance: { organizationId } } },
+    where: { task: { workflowInstance: wiScope(organizationId, accessibleClientIds) } },
     select: { outcome: true },
   });
   const approved = reviews.filter((r) => r.outcome === "APPROVED").length;
@@ -54,9 +67,12 @@ export async function getQualityStats(organizationId: string) {
   };
 }
 
-export async function getRequestStats(organizationId: string) {
+export async function getRequestStats(organizationId: string, accessibleClientIds: string[] | null) {
   const requests = await db.request.findMany({
-    where: { organizationId },
+    where: {
+      organizationId,
+      ...(accessibleClientIds !== null ? { clientId: { in: accessibleClientIds } } : {}),
+    },
     select: { status: true, slaDueAt: true, resolvedAt: true },
   });
   const resolved = requests.filter((r) => r.status === "COMPLETED" || r.status === "DECLINED");

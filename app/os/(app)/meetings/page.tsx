@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireActor } from "@/lib/os/auth/session";
+import { getAccessibleClientIds } from "@/lib/os/auth/client-access";
 import { can } from "@/lib/os/auth/rbac";
 import { db } from "@/lib/os/db";
 import { getMeetingsForOrg } from "@/lib/os/queries/meetings";
@@ -27,10 +28,11 @@ export default async function MeetingsPage() {
   }
 
   const canManage = can(actor.membership.role, "meeting:manage");
+  const accessibleClientIds = await getAccessibleClientIds(actor);
 
   const [meetings, clients, members] = await Promise.all([
-    getMeetingsForOrg(actor.organizationId),
-    canManage ? getClientOptions(actor.organizationId) : Promise.resolve([]),
+    getMeetingsForOrg(actor.organizationId, accessibleClientIds),
+    canManage ? getClientOptions(actor.organizationId, accessibleClientIds) : Promise.resolve([]),
     canManage
       ? db.membership.findMany({
           where: { organizationId: actor.organizationId, isActive: true },
