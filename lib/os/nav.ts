@@ -12,6 +12,7 @@ import {
   Workflow,
   Settings,
   MessagesSquare,
+  Compass,
 } from "lucide-react";
 
 export type NavItem = {
@@ -25,6 +26,7 @@ export type NavItem = {
 
 export const NAV_ITEMS: NavItem[] = [
   { href: "/os/dashboard", label: "Command Centre", icon: LayoutDashboard, implemented: true, phase: "Phase 1" },
+  { href: "/os/ai-cfo", label: "AI CFO", icon: Compass, implemented: false, phase: "Phase 4 (AI CFO)" },
   { href: "/os/clients", label: "Clients", icon: Building2, implemented: true, phase: "Phase 1" },
   { href: "/os/work", label: "Work", icon: ListChecks, implemented: true, phase: "Phase 1" },
   { href: "/os/requests", label: "Requests", icon: Inbox, implemented: true, phase: "Phase 2" },
