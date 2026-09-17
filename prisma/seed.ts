@@ -252,6 +252,89 @@ async function main() {
     instancesCreated += 1;
   }
   console.log(`Seeded ${instancesCreated} workflow instances.`);
+
+  await seedMaterialityThresholds(org.id);
+}
+
+/**
+ * CFOIP's default KES materiality/escalation configuration for a client
+ * reporting in KES — decision #5 in /docs/decision-log.md. `clientId: null`
+ * means these are the organization-wide defaults; a client-specific
+ * override is a separate row with `clientId` set, added later once a
+ * client needs different thresholds (a different currency, a different
+ * risk appetite).
+ *
+ * Only CRITICAL/HIGH/MEDIUM rows are seeded for FINANCIAL_EXCEPTION and
+ * BUDGET_VARIANCE — LOW and INFORMATIONAL are residual tiers ("didn't
+ * cross MEDIUM's threshold") with no independent number of their own, so
+ * there's nothing meaningful to store for them.
+ *
+ * FINANCIAL_EXCEPTION and BUDGET_VARIANCE combine their percent/absolute
+ * thresholds differently — "either" (OR) for financial exceptions, "both"
+ * (AND) for budget/forecast variances (unless the variance itself creates
+ * a cash/compliance/going-concern risk, which escalates regardless). That
+ * combination rule is category-specific business logic, not a per-row
+ * property, so it belongs in the evaluator function that reads this table
+ * (lib/os/finance/materiality.ts — not built yet, this is schema/data
+ * only), not in the schema itself.
+ *
+ * CASH_RUNWAY doesn't have a currency amount at all — `absoluteThreshold`
+ * here is weeks of runway (the upper bound of each tier), not money, and
+ * `benchmark` is set to "RUNWAY_WEEKS" rather than the default "REVENUE" to
+ * make that unit unambiguous to anything reading the row later.
+ */
+async function seedMaterialityThresholds(organizationId: string) {
+  const rows: {
+    category: "FINANCIAL_EXCEPTION" | "BUDGET_VARIANCE" | "CASH_RUNWAY";
+    riskRating: "CRITICAL" | "HIGH" | "MEDIUM";
+    percentThreshold: number | null;
+    absoluteThreshold: number | null;
+    benchmark?: string;
+  }[] = [
+    // A. Financial exception severity — percent of average monthly revenue, or absolute KES.
+    { category: "FINANCIAL_EXCEPTION", riskRating: "CRITICAL", percentThreshold: 0.1, absoluteThreshold: 1_000_000 },
+    { category: "FINANCIAL_EXCEPTION", riskRating: "HIGH", percentThreshold: 0.05, absoluteThreshold: 250_000 },
+    { category: "FINANCIAL_EXCEPTION", riskRating: "MEDIUM", percentThreshold: 0.01, absoluteThreshold: 50_000 },
+
+    // B. Budget/forecast variance — both thresholds must be met (see comment above).
+    { category: "BUDGET_VARIANCE", riskRating: "CRITICAL", percentThreshold: 0.2, absoluteThreshold: 500_000 },
+    { category: "BUDGET_VARIANCE", riskRating: "HIGH", percentThreshold: 0.1, absoluteThreshold: 250_000 },
+    { category: "BUDGET_VARIANCE", riskRating: "MEDIUM", percentThreshold: 0.05, absoluteThreshold: 50_000 },
+
+    // C. Cash-runway escalation — weeks of runway, upper bound of each tier.
+    { category: "CASH_RUNWAY", riskRating: "CRITICAL", percentThreshold: null, absoluteThreshold: 8, benchmark: "RUNWAY_WEEKS" },
+    { category: "CASH_RUNWAY", riskRating: "HIGH", percentThreshold: null, absoluteThreshold: 13, benchmark: "RUNWAY_WEEKS" },
+    { category: "CASH_RUNWAY", riskRating: "MEDIUM", percentThreshold: null, absoluteThreshold: 26, benchmark: "RUNWAY_WEEKS" },
+  ];
+
+  for (const row of rows) {
+    // Not db.materialityThreshold.upsert() by the compound unique key:
+    // Prisma's typed compound-unique `where` shorthand doesn't accept a
+    // literal `null` for the nullable `clientId` column it's built from
+    // (findFirst's plain filter does) — so this looks up the org-default
+    // row by hand instead.
+    const existing = await db.materialityThreshold.findFirst({
+      where: { organizationId, clientId: null, category: row.category, riskRating: row.riskRating },
+      select: { id: true },
+    });
+
+    const data = {
+      percentThreshold: row.percentThreshold,
+      absoluteThreshold: row.absoluteThreshold,
+      currency: "KES",
+      benchmark: row.benchmark ?? "REVENUE",
+    };
+
+    if (existing) {
+      await db.materialityThreshold.update({ where: { id: existing.id }, data });
+    } else {
+      await db.materialityThreshold.create({
+        data: { organizationId, clientId: null, category: row.category, riskRating: row.riskRating, ...data },
+      });
+    }
+  }
+
+  console.log(`Seeded ${rows.length} org-wide default materiality thresholds.`);
 }
 
 main()

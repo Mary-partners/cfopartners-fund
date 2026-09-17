@@ -15,5 +15,6 @@ export default defineConfig({
     // this on port 5432, distinct from the pooled DATABASE_URL (port 6543)
     // the app uses at runtime.
     url: process.env["DIRECT_URL"],
+    shadowDatabaseUrl: process.env["SHADOW_DATABASE_URL"],
   },
 });

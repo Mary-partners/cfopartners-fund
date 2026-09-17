@@ -90,6 +90,27 @@ enum AuditAction {
   PORTFOLIO_DIGEST_SENT
   STAFF_INVITE_SENT
   STAFF_INVITE_CLAIMED
+  REPORTING_PERIOD_CREATED
+  DOCUMENT_EXTRACTION_STARTED
+  DOCUMENT_EXTRACTION_COMPLETED
+  DOCUMENT_EXTRACTION_FAILED
+  DOCUMENT_EXTRACTION_REVIEWED
+  CFO_REVIEW_CREATED
+  CFO_REVIEW_STATUS_CHANGED
+  REVIEW_FINDING_CREATED
+  REVIEW_FINDING_STATUS_CHANGED
+  RISK_CREATED
+  RISK_STATUS_CHANGED
+  CONTROL_CREATED
+  CONTROL_STATUS_CHANGED
+  ACTION_ITEM_CREATED
+  ACTION_ITEM_STATUS_CHANGED
+  COMPLIANCE_DEADLINE_CREATED
+  MATERIALITY_THRESHOLD_UPDATED
+  APPROVAL_DECISION_RECORDED
+  AGENT_RUN_STARTED
+  AGENT_RUN_COMPLETED
+  AGENT_RUN_FAILED
 }
 
 enum ClientRole {
@@ -168,6 +189,111 @@ enum DecisionStatus {
   DONE
 }
 
+// --- AI CFO (Phase 4) — financial diagnostic domain ------------------------
+// Foundation schema only: no AI provider is wired up yet (see
+// /docs/decision-log.md "AI CFO foundation"). These tables exist so the
+// deterministic calculation engine (lib/os/finance/) and, later, the
+// document-extraction and agent-orchestration workflows have somewhere to
+// write structured, sourced data — never a bare number with no evidence
+// trail. Same tenant-isolation and RLS posture as every other table.
+
+enum RiskRating {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+  INFORMATIONAL
+}
+
+enum DocumentExtractionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  NEEDS_REVIEW
+}
+
+// The financial-diagnostic review's own lifecycle — distinct from
+// TaskStatus/ReviewOutcome, which govern one delivery-workflow Task. A
+// CfoReview covers a whole engagement period's diagnostic, with its own
+// multi-stage approval chain up to the Managing Partner.
+enum CfoReviewStatus {
+  DRAFT
+  AI_REVIEW_COMPLETE
+  FINANCE_REVIEW_REQUIRED
+  RETURNED_FOR_CORRECTION
+  SENIOR_REVIEW_REQUIRED
+  MANAGING_PARTNER_APPROVAL_REQUIRED
+  APPROVED
+  RELEASED_TO_CLIENT
+  ARCHIVED
+}
+
+enum FindingStatus {
+  OPEN
+  UNDER_REVIEW
+  RETURNED_FOR_CORRECTION
+  APPROVED
+  RESOLVED
+  ESCALATED
+}
+
+enum RiskStatus {
+  OPEN
+  MITIGATING
+  CLOSED
+}
+
+enum ControlStatus {
+  EFFECTIVE
+  WEAK
+  MISSING
+}
+
+enum ActionItemStatus {
+  OPEN
+  IN_PROGRESS
+  DONE
+}
+
+enum DeadlineStatus {
+  OPEN
+  DONE
+}
+
+// Percent and absolute thresholds are configured separately per
+// decision #5 — a category groups the rows that share a shape (both a %
+// and an absolute figure per RiskRating tier).
+enum MaterialityCategory {
+  FINANCIAL_EXCEPTION
+  BUDGET_VARIANCE
+  CASH_RUNWAY
+}
+
+enum ApprovalDecision {
+  APPROVED
+  REJECTED
+  RETURNED
+}
+
+enum AgentType {
+  ORCHESTRATOR
+  DOCUMENT
+  FINANCIAL_CONTROLLER
+  FPA
+  REPORTING
+  RISK_CONTROLS
+}
+
+enum AgentRunStatus {
+  QUEUED
+  RUNNING
+  AWAITING_REVIEW
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
 // ---------------------------------------------------------------------------
 // Models
 // ---------------------------------------------------------------------------
@@ -193,6 +319,21 @@ model Organization {
   requests          Request[]
   meetings          Meeting[]
 
+  reportingPeriods      ReportingPeriod[]
+  documentExtractions   DocumentExtraction[]
+  financialAccounts     FinancialAccount[]
+  financialPeriodValues FinancialPeriodValue[]
+  financialMetrics      FinancialMetric[]
+  cfoReviews            CfoReview[]
+  reviewFindings        ReviewFinding[]
+  risks                 Risk[]
+  controls              Control[]
+  actionItems           ActionItem[]
+  complianceDeadlines   ComplianceDeadline[]
+  materialityThresholds MaterialityThreshold[]
+  approvals             Approval[]
+  agentRuns             AgentRun[]
+
   @@map("organizations")
 }
 
@@ -217,6 +358,14 @@ model Membership {
   // Team & Capacity has to work with: workload (assigned open tasks) is
   // measured; capacity is declared. Null until someone sets it.
   weeklyCapacityHours Int?
+  // Per decision #4 (role mapping): a Senior CFO Reviewer (PORTFOLIO_LEAD)
+  // may release routine reports to a client only where the Managing
+  // Partner has explicitly delegated that authority — this flag is that
+  // delegation, set by a Managing Partner/Practice Admin, not something a
+  // reviewer can grant themselves. Meaningless (ignored) for roles that
+  // already carry release authority unconditionally (Managing Partner) or
+  // never carry it at all (Finance Associate and below).
+  canReleaseReports   Boolean  @default(false)
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
@@ -234,6 +383,14 @@ model Membership {
   requestsAssigned     Request[]          @relation("RequestAssignee")
   meetingsLogged       Meeting[]          @relation("MeetingLoggedBy")
   decisionsOwned       Decision[]         @relation("DecisionOwner")
+
+  documentExtractionsReviewed DocumentExtraction[] @relation("DocumentExtractionReviewedBy")
+  cfoReviewsCreated           CfoReview[]          @relation("CfoReviewCreatedBy")
+  reviewFindingsOwned         ReviewFinding[]      @relation("ReviewFindingOwner")
+  risksOwned                  Risk[]               @relation("RiskOwner")
+  actionItemsOwned            ActionItem[]         @relation("ActionItemOwner")
+  approvalsGiven              Approval[]           @relation("ApprovalApprover")
+  agentRunsTriggered          AgentRun[]           @relation("AgentRunTriggeredBy")
 
   @@unique([organizationId, userId])
   @@unique([organizationId, email])
@@ -275,6 +432,18 @@ model Client {
   clientMemberships ClientMembership[]
   requests          Request[]
   meetings          Meeting[]
+
+  reportingPeriods      ReportingPeriod[]
+  financialAccounts     FinancialAccount[]
+  financialPeriodValues FinancialPeriodValue[]
+  financialMetrics      FinancialMetric[]
+  cfoReviews            CfoReview[]
+  risks                 Risk[]
+  controls              Control[]
+  actionItems           ActionItem[]
+  complianceDeadlines   ComplianceDeadline[]
+  materialityThresholds MaterialityThreshold[]
+  agentRuns             AgentRun[]
 
   @@index([organizationId, lifecycleStage])
   @@index([organizationId, serviceBucket])
@@ -472,6 +641,10 @@ model Document {
   uploadedBy                 Membership?       @relation("DocumentUploadedBy", fields: [uploadedByMembershipId], references: [id], onDelete: SetNull)
   uploadedByClientMembership ClientMembership? @relation(fields: [uploadedByClientMembershipId], references: [id], onDelete: SetNull)
 
+  extractions             DocumentExtraction[]
+  sourceForPeriodValues   FinancialPeriodValue[]
+  sourceForReviewFindings ReviewFinding[]
+
   @@index([organizationId, clientId])
   @@index([organizationId, createdAt])
   @@index([taskId])
@@ -628,4 +801,422 @@ model Decision {
   @@index([meetingId])
   @@index([ownerMembershipId, status])
   @@map("decisions")
+}
+
+// --- AI CFO models -----------------------------------------------------
+
+/// A client's financial reporting period (e.g. "March 2026", or an audited
+/// FY). Anchors everything downstream — extracted figures, calculated
+/// metrics, and diagnostic reviews all reference one, so "which period is
+/// this number for" is never ambiguous or re-derived differently in two
+/// places.
+model ReportingPeriod {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  clientId       String   @db.Uuid
+  label          String
+  periodStart    DateTime
+  periodEnd      DateTime
+  currency       String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  client       Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  documentExtractions   DocumentExtraction[]
+  financialPeriodValues FinancialPeriodValue[]
+  financialMetrics      FinancialMetric[]
+  cfoReviews            CfoReview[]
+
+  @@index([organizationId, clientId])
+  @@index([clientId, periodStart])
+  @@map("reporting_periods")
+}
+
+/// One attempt to classify and structurally extract data from an uploaded
+/// Document. Kept separate from Document (which just represents the file)
+/// so a failed or re-run extraction never loses the history of what was
+/// tried — retries create new rows, they don't overwrite the last attempt.
+/// `structuredData`/`sourceLocations` carry the raw extracted values with
+/// their provenance (page/sheet/cell/row); FinancialPeriodValue rows are
+/// the normalized, reviewed result once a human has signed off on an
+/// extraction.
+model DocumentExtraction {
+  id                     String                   @id @default(uuid()) @db.Uuid
+  organizationId         String                   @db.Uuid
+  documentId             String                   @db.Uuid
+  reportingPeriodId      String?                  @db.Uuid
+  status                 DocumentExtractionStatus @default(PENDING)
+  documentType           String? // e.g. "trial_balance", "bank_statement" — free-form, the Document Agent's own classification vocabulary, not a closed enum yet
+  extractedCompany       String?
+  extractedCurrency      String?
+  structuredData         Json?
+  confidence             Float? // 0..1
+  model                  String?
+  promptVersion          String?
+  errorMessage           String?
+  reviewedByMembershipId String?                  @db.Uuid
+  reviewedAt             DateTime?
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  document        Document         @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  reportingPeriod ReportingPeriod? @relation(fields: [reportingPeriodId], references: [id], onDelete: SetNull)
+  reviewedBy      Membership?      @relation("DocumentExtractionReviewedBy", fields: [reviewedByMembershipId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, documentId])
+  @@index([reportingPeriodId])
+  @@map("document_extractions")
+}
+
+enum FinancialAccountCategory {
+  REVENUE
+  COST_OF_SALES
+  OPERATING_EXPENSE
+  ASSET
+  LIABILITY
+  EQUITY
+  OTHER
+}
+
+/// A normalized chart-of-accounts entry for one client — the taxonomy
+/// FinancialPeriodValue amounts are recorded against, since every client's
+/// own bookkeeping uses different account names/codes.
+model FinancialAccount {
+  id             String                   @id @default(uuid()) @db.Uuid
+  organizationId String                   @db.Uuid
+  clientId       String                   @db.Uuid
+  code           String?
+  name           String
+  category       FinancialAccountCategory
+  createdAt      DateTime                 @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  client       Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  periodValues FinancialPeriodValue[]
+
+  @@index([organizationId, clientId])
+  @@map("financial_accounts")
+}
+
+/// One normalized, sourced figure: this account, this period, this amount
+/// — with `sourceDocumentId`/`sourceLocation` so a report or a reviewer can
+/// always trace a number back to the page/sheet/cell/row it came from.
+/// Never derive FinancialMetric values from anything except rows in this
+/// table plus other FinancialMetric rows — a metric with no traceable
+/// FinancialPeriodValue behind it is exactly the "unsupported assumption
+/// presented as fact" the product spec prohibits.
+model FinancialPeriodValue {
+  id                 String   @id @default(uuid()) @db.Uuid
+  organizationId     String   @db.Uuid
+  clientId           String   @db.Uuid
+  reportingPeriodId  String   @db.Uuid
+  financialAccountId String   @db.Uuid
+  amount             Decimal  @db.Decimal(18, 2)
+  currency           String
+  sourceDocumentId   String?  @db.Uuid
+  sourceLocation     Json? // { page, sheet, cell, row } — whichever apply to the source file type
+  createdAt          DateTime @default(now())
+
+  organization     Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  client           Client           @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  reportingPeriod  ReportingPeriod  @relation(fields: [reportingPeriodId], references: [id], onDelete: Cascade)
+  financialAccount FinancialAccount @relation(fields: [financialAccountId], references: [id], onDelete: Cascade)
+  sourceDocument   Document?        @relation(fields: [sourceDocumentId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, clientId, reportingPeriodId])
+  @@index([financialAccountId])
+  @@map("financial_period_values")
+}
+
+/// One output of the deterministic calculation engine (lib/os/finance/) —
+/// `metricKey` matches that module's function names (e.g.
+/// "CASH_RUNWAY_MONTHS"), `formula`/`inputsJson`/`warnings` are copied
+/// straight from the CalculationResult it came from, so a stored metric is
+/// exactly as auditable as a freshly-computed one.
+model FinancialMetric {
+  id                String   @id @default(uuid()) @db.Uuid
+  organizationId    String   @db.Uuid
+  clientId          String   @db.Uuid
+  reportingPeriodId String   @db.Uuid
+  metricKey         String
+  value             Decimal? @db.Decimal(18, 4)
+  formula           String
+  inputsJson        Json
+  warnings          Json?
+  calculatedAt      DateTime @default(now())
+
+  organization    Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  client          Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  reportingPeriod ReportingPeriod @relation(fields: [reportingPeriodId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, clientId, reportingPeriodId])
+  @@index([reportingPeriodId, metricKey])
+  @@map("financial_metrics")
+}
+
+/// A financial-diagnostic review covering one Client/ReportingPeriod — the
+/// approval-lifecycle object the CFO Inbox and Approval Centre operate on.
+/// Distinct from the existing Review model (task-level preparer/reviewer
+/// QA on one delivery Task) — this is a whole-engagement diagnostic with
+/// its own multi-stage approval chain up to the Managing Partner.
+model CfoReview {
+  id                    String          @id @default(uuid()) @db.Uuid
+  organizationId        String          @db.Uuid
+  clientId              String          @db.Uuid
+  reportingPeriodId     String          @db.Uuid
+  type                  String // e.g. "financial_diagnostic", "monthly_close"
+  status                CfoReviewStatus @default(DRAFT)
+  createdByMembershipId String?         @db.Uuid
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  organization    Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  client          Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  reportingPeriod ReportingPeriod @relation(fields: [reportingPeriodId], references: [id], onDelete: Cascade)
+  createdBy       Membership?     @relation("CfoReviewCreatedBy", fields: [createdByMembershipId], references: [id], onDelete: SetNull)
+
+  findings ReviewFinding[]
+
+  @@index([organizationId, clientId])
+  @@index([status])
+  @@map("cfo_reviews")
+}
+
+/// One finding within a CfoReview — the structured shape the product spec
+/// requires for every finding: category, evidence, source, amount, risk
+/// rating, confidence, recommended action, owner, target date, status. See
+/// lib/os/finance/ for how `amount`/confidence-bearing figures should be
+/// computed, and MaterialityThreshold for how `riskRating` is meant to be
+/// assigned consistently rather than picked by feel.
+model ReviewFinding {
+  id                String        @id @default(uuid()) @db.Uuid
+  organizationId    String        @db.Uuid
+  cfoReviewId       String        @db.Uuid
+  category          String
+  finding           String
+  evidence          String?
+  sourceDocumentId  String?       @db.Uuid
+  sourceLocation    Json?
+  amount            Decimal?      @db.Decimal(18, 2)
+  currency          String?
+  riskRating        RiskRating
+  confidence        Float // 0..1
+  recommendedAction String?
+  ownerMembershipId String?       @db.Uuid
+  targetDate        DateTime?
+  status            FindingStatus @default(OPEN)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  cfoReview      CfoReview    @relation(fields: [cfoReviewId], references: [id], onDelete: Cascade)
+  sourceDocument Document?    @relation(fields: [sourceDocumentId], references: [id], onDelete: SetNull)
+  owner          Membership?  @relation("ReviewFindingOwner", fields: [ownerMembershipId], references: [id], onDelete: SetNull)
+
+  risks   Risk[]
+  actions ActionItem[]
+
+  @@index([organizationId, cfoReviewId])
+  @@index([riskRating, status])
+  @@map("review_findings")
+}
+
+model Risk {
+  id                String     @id @default(uuid()) @db.Uuid
+  organizationId    String     @db.Uuid
+  clientId          String     @db.Uuid
+  category          String
+  description       String
+  riskRating        RiskRating
+  status            RiskStatus @default(OPEN)
+  ownerMembershipId String?    @db.Uuid
+  sourceFindingId   String?    @db.Uuid
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  organization  Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  client        Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  owner         Membership?    @relation("RiskOwner", fields: [ownerMembershipId], references: [id], onDelete: SetNull)
+  sourceFinding ReviewFinding? @relation(fields: [sourceFindingId], references: [id], onDelete: SetNull)
+
+  actions ActionItem[]
+
+  @@index([organizationId, clientId])
+  @@index([riskRating, status])
+  @@map("risks")
+}
+
+model Control {
+  id             String        @id @default(uuid()) @db.Uuid
+  organizationId String        @db.Uuid
+  clientId       String        @db.Uuid
+  description    String
+  status         ControlStatus @default(EFFECTIVE)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  client       Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, clientId])
+  @@map("controls")
+}
+
+/// An action-tracker item — the "who/what/when" the product spec requires
+/// for every finding, risk, or ad hoc follow-up. `sourceFindingId`/
+/// `sourceRiskId` are optional so an action can also stand alone.
+model ActionItem {
+  id                String           @id @default(uuid()) @db.Uuid
+  organizationId    String           @db.Uuid
+  clientId          String           @db.Uuid
+  description       String
+  ownerMembershipId String?          @db.Uuid
+  targetDate        DateTime?
+  status            ActionItemStatus @default(OPEN)
+  sourceFindingId   String?          @db.Uuid
+  sourceRiskId      String?          @db.Uuid
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  organization  Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  client        Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  owner         Membership?    @relation("ActionItemOwner", fields: [ownerMembershipId], references: [id], onDelete: SetNull)
+  sourceFinding ReviewFinding? @relation(fields: [sourceFindingId], references: [id], onDelete: SetNull)
+  sourceRisk    Risk?          @relation(fields: [sourceRiskId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, clientId])
+  @@index([ownerMembershipId, status])
+  @@map("action_items")
+}
+
+/// A statutory/compliance deadline for the Command Centre's "upcoming
+/// compliance deadlines" panel — distinct from Request.slaDueAt (an
+/// internal SLA) and Task.dueDate (planned delivery work).
+model ComplianceDeadline {
+  id             String         @id @default(uuid()) @db.Uuid
+  organizationId String         @db.Uuid
+  clientId       String         @db.Uuid
+  description    String
+  category       String
+  dueDate        DateTime
+  status         DeadlineStatus @default(OPEN)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  client       Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, clientId])
+  @@index([dueDate])
+  @@map("compliance_deadlines")
+}
+
+/// Configurable escalation thresholds — see decision #5 in
+/// /docs/decision-log.md for the CFOIP default KES configuration this
+/// table is seeded with. `clientId` null means an organization-wide
+/// default; a row with `clientId` set overrides it for that one client.
+/// Percent and absolute thresholds are stored separately per row — the
+/// severity is triggered by whichever is crossed first (see
+/// lib/os/finance/materiality.ts, built once this schema lands).
+model MaterialityThreshold {
+  id                String              @id @default(uuid()) @db.Uuid
+  organizationId    String              @db.Uuid
+  clientId          String?             @db.Uuid
+  category          MaterialityCategory
+  riskRating        RiskRating
+  percentThreshold  Decimal?            @db.Decimal(7, 4)
+  absoluteThreshold Decimal?            @db.Decimal(18, 2)
+  currency          String
+  benchmark         String              @default("REVENUE") // what the percent threshold is a percent OF, when revenue isn't reliable
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  client       Client?      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, clientId, category, riskRating])
+  @@map("materiality_thresholds")
+}
+
+/// A generic approval-decision log — many entity types need one (findings,
+/// reviews, reports later), so this is a single append-only table keyed by
+/// (targetType, targetId) rather than a bespoke approvals table per entity.
+model Approval {
+  id                   String           @id @default(uuid()) @db.Uuid
+  organizationId       String           @db.Uuid
+  targetType           String
+  targetId             String
+  decision             ApprovalDecision
+  approverMembershipId String           @db.Uuid
+  riskRatingAtDecision RiskRating?
+  comments             String?
+  createdAt            DateTime         @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  approver     Membership   @relation("ApprovalApprover", fields: [approverMembershipId], references: [id])
+
+  @@index([organizationId, targetType, targetId])
+  @@map("approvals")
+}
+
+/// One orchestrator run of an AI CFO workflow (e.g. the financial
+/// diagnostic) for one client. `model`/`modelVersion`/`promptVersion`/
+/// `workflowVersion` are recorded on every run per the product spec's
+/// output-control requirements — never inferred after the fact from
+/// whatever the current code happens to be.
+model AgentRun {
+  id                      String         @id @default(uuid()) @db.Uuid
+  organizationId          String         @db.Uuid
+  clientId                String         @db.Uuid
+  workflowType            String
+  status                  AgentRunStatus @default(QUEUED)
+  triggeredByMembershipId String?        @db.Uuid
+  model                   String?
+  modelVersion            String?
+  promptVersion           String?
+  workflowVersion         String?
+  startedAt               DateTime?
+  completedAt             DateTime?
+  inputTokens             Int?
+  outputTokens            Int?
+  errorMessage            String?
+  createdAt               DateTime       @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  client       Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  triggeredBy  Membership?  @relation("AgentRunTriggeredBy", fields: [triggeredByMembershipId], references: [id], onDelete: SetNull)
+
+  steps AgentStep[]
+
+  @@index([organizationId, clientId])
+  @@index([status])
+  @@map("agent_runs")
+}
+
+/// One step within an AgentRun — one specialist agent's turn (see
+/// /docs/decision-log.md "AI CFO agent architecture" for the
+/// orchestrator/specialist split). `input`/`output` are the step's own
+/// structured payload, not a full LLM transcript — token-level detail
+/// belongs in provider-side logs, not this table.
+model AgentStep {
+  id           String         @id @default(uuid()) @db.Uuid
+  agentRunId   String         @db.Uuid
+  agentType    AgentType
+  stepName     String
+  input        Json?
+  output       Json?
+  status       AgentRunStatus @default(QUEUED)
+  startedAt    DateTime?
+  completedAt  DateTime?
+  errorMessage String?
+  createdAt    DateTime       @default(now())
+
+  agentRun AgentRun @relation(fields: [agentRunId], references: [id], onDelete: Cascade)
+
+  @@index([agentRunId])
+  @@map("agent_steps")
 }

@@ -34,7 +34,22 @@ export type Permission =
   | "meeting:view"
   | "meeting:manage"
   | "team:view"
-  | "team:manageCapacity";
+  | "team:manageCapacity"
+  // --- AI CFO (Phase 4) — none of these are enforced by any action yet,
+  // since no AI CFO action exists to gate. Added now, alongside the schema,
+  // so the role/permission plumbing and the tables it will govern land
+  // together — see decision #4 in /docs/decision-log.md for the mapping
+  // this matrix is built from.
+  | "aicfo:view" // CFO Inbox, Financial Reviews, findings, risks, actions for accessible clients
+  | "aicfo:viewAgentActivity" // Agent Activity — model/prompt/cost detail, a narrower audience than aicfo:view
+  | "aicfo:uploadClassify" // upload source documents, trigger classification/extraction
+  | "aicfo:draftReports"
+  | "aicfo:approveLowMedium" // final approval of Low/Medium findings
+  | "aicfo:recommendHighCritical" // Senior CFO Reviewer recommends; does not finally approve
+  | "aicfo:approveHighCritical" // Managing Partner only, per decision #5's approval routing
+  | "aicfo:returnForCorrection"
+  | "aicfo:releaseReports" // Managing Partner unconditionally; Portfolio Lead only if Membership.canReleaseReports is also set — see that field's comment
+  | "aicfo:configureThresholds";
 
 const ALL_INTERNAL_PERMISSIONS: Permission[] = [
   "client:view",
@@ -63,6 +78,16 @@ const ALL_INTERNAL_PERMISSIONS: Permission[] = [
   "meeting:manage",
   "team:view",
   "team:manageCapacity",
+  "aicfo:view",
+  "aicfo:viewAgentActivity",
+  "aicfo:uploadClassify",
+  "aicfo:draftReports",
+  "aicfo:approveLowMedium",
+  "aicfo:recommendHighCritical",
+  "aicfo:approveHighCritical",
+  "aicfo:returnForCorrection",
+  "aicfo:releaseReports",
+  "aicfo:configureThresholds",
 ];
 
 /**
@@ -97,6 +122,10 @@ const ROLE_PERMISSIONS: Record<OrgRole, ReadonlySet<Permission>> = {
     "meeting:manage",
     "team:view",
     "team:manageCapacity",
+    // View-only — the spec's approval chain names Managing Partner and
+    // Senior CFO Reviewer, not Practice Administrator; see decision #4.
+    "aicfo:view",
+    "aicfo:viewAgentActivity",
   ]),
   [OrgRole.PORTFOLIO_LEAD]: new Set([
     "client:view",
@@ -118,6 +147,20 @@ const ROLE_PERMISSIONS: Record<OrgRole, ReadonlySet<Permission>> = {
     "meeting:view",
     "meeting:manage",
     "team:view",
+    // Senior CFO Reviewer, per decision #4: full working access, final
+    // approval on Low/Medium findings, recommends (doesn't finally decide)
+    // High/Critical, can return work for correction, and can release
+    // routine reports only where Membership.canReleaseReports is also
+    // set — see that field's comment. Cannot configure materiality
+    // thresholds or approve High/Critical — those stay Managing-Partner-only.
+    "aicfo:view",
+    "aicfo:viewAgentActivity",
+    "aicfo:uploadClassify",
+    "aicfo:draftReports",
+    "aicfo:approveLowMedium",
+    "aicfo:recommendHighCritical",
+    "aicfo:returnForCorrection",
+    "aicfo:releaseReports",
   ]),
   [OrgRole.RELATIONSHIP_MANAGER]: new Set([
     "client:view",
@@ -162,6 +205,13 @@ const ROLE_PERMISSIONS: Record<OrgRole, ReadonlySet<Permission>> = {
     "request:view",
     "meeting:view",
     "team:view",
+    // Finance Associate, per decision #4: uploads/classifies, drafts
+    // reports and actions, responds to exceptions — never approves or
+    // releases. No aicfo:viewAgentActivity — that's operational/cost
+    // detail for reviewers, not part of a Finance Associate's job.
+    "aicfo:view",
+    "aicfo:uploadClassify",
+    "aicfo:draftReports",
   ]),
   [OrgRole.INDEPENDENT_REVIEWER]: new Set([
     "client:view",
@@ -189,6 +239,14 @@ const ROLE_PERMISSIONS: Record<OrgRole, ReadonlySet<Permission>> = {
     "request:view",
     "meeting:view",
     "team:view",
+    // Auditor / External Reviewer, per decision #4: read-only by default.
+    // Time-bound, client/period-scoped access is a separate, not-yet-built
+    // mechanism (see /docs/decision-log.md "AI CFO foundation" — deferred
+    // until ClientAccessGrant, built on claude/client-access-scoping,
+    // merges and can carry an expiry). This permission alone does not grant
+    // that scoping; it only says the role *can* see AI CFO material once
+    // scoped access exists.
+    "aicfo:view",
   ]),
 };
 
