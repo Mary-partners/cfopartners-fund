@@ -581,3 +581,65 @@ that's already fully tested by existing code.
 cascades away everything under it (clients, work, requests, memberships),
 and the session.ts change is a pure generalization: every real Membership
 still resolves to the same `cfoip` org it always did.
+
+## Founder Diagnostic automation
+
+**Context**: asked to remove the need to visit the external Notion form
+("The Founder Diagnostic" / "Founder Intelligence Database") to take the
+diagnostic, and to show results immediately instead of waiting for a
+human review. Investigated the live Notion instrument in full (40
+questions across 9 sections, Q1-Q40) and every related internal doc
+(Diagnostic Framework — Master Synthesis; the older Launch & Operations
+Playbook; Founder-Friendly Question Copy for Q15/16/30-39) before building
+anything, since this produces advisory-sounding output real founders will
+act on.
+
+**Finding that mattered**: there is no documented, current scoring
+formula. The seven Operational Maturity pillars (Financial Clarity,
+Revenue Quality, Operations, Team Capacity, Governance, Capital
+Readiness, Advisory Urgency) and the Founder Archetype are, today, scored
+by a human reading each submission. A full rubric exists only for an
+*older*, superseded 30-question/6-pillar instrument. The Capital Fit
+layer (Q30-39 → Capital Segment, Recommended/Unsuitable Capital
+Structures) is different: it has an explicit "Profile A-E" heuristic in
+the Master Synthesis doc, stated there as a first draft for Mary/Alex/
+Esther to refine against real submissions.
+
+**Decisions** (confirmed via AskUserQuestion before building):
+1. **Scoring**: adapt the old 30-question rubric's method — score each
+   select answer by its option's position, best to worst — onto the
+   current 40 questions, using the Q-to-pillar grouping the Master
+   Synthesis doc states explicitly where it does (Team Capacity = Q4+Q10,
+   Capital Readiness = Q15-17) and a reasoned best-effort grouping for
+   the rest (see lib/diagnostic/scoring.ts's top comment for the full
+   mapping). This is explicitly a first draft, same as their own Capital
+   Fit heuristic — review and adjust the pillar/question groupings and
+   the band thresholds (7-10 / 11-15 / 16-19 / 20-21, reused from the
+   Notion schema's own "Overall Readiness" field) against real
+   submissions.
+2. **Storage**: submissions are stored only in this app's own Postgres
+   (`DiagnosticSubmission`, not tied to an Organization — this is
+   pre-client, top-of-funnel data), not written back to the Notion
+   database. This means the Notion-based daily review workflow no longer
+   sees new submissions; the on-site staff pipeline at `/os/diagnostic`
+   (gated by new `diagnostic:view`/`diagnostic:review` permissions —
+   Managing Partner, Practice Admin, Portfolio Lead, Relationship
+   Manager) replaces it for anything submitted from now on. The Notion
+   database and its history are untouched.
+
+**What's genuinely automated vs. first-draft**: the 40-question form, all
+identity/consent capture, and the gap/founder-flag tags are a faithful,
+non-judgmental port of existing content and direct answer-reporting — not
+drafts. The Capital Fit segment is a direct transcription of Notion's own
+documented heuristic. The seven pillar scores, Total Score, and Archetype
+are the one piece that's a first draft standing in for a scoring method
+that doesn't exist yet in writing — flagged in the UI copy itself ("this
+read is instant and automated — a full review... follows within 24
+hours") and in the internal `/os/diagnostic/[id]` page's heading, so
+nobody mistakes it for an established rubric.
+
+**Reversible?** Yes. The scoring mapping lives in one file
+(lib/diagnostic/scoring.ts) with no schema dependency on its specific
+thresholds — refining it is a code change, not a migration. Submissions
+already collected keep their originally-computed scores unless
+explicitly recomputed.

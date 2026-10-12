@@ -104,15 +104,13 @@ export function RoomFinder() {
             Explore {ROOM_NAMES[winner]}
             <ArrowRight className="h-4 w-4" />
           </Link>
-          <a
+          <Link
             href={DIAGNOSTIC_URL}
-            target="_blank"
-            rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3.5 text-[0.92rem] font-semibold text-white transition-all hover:bg-accent-2"
           >
             Take the full diagnostic
             <ArrowRight className="h-4 w-4" />
-          </a>
+          </Link>
         </div>
         <button
           type="button"
