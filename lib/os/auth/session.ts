@@ -45,6 +45,16 @@ export type CurrentActor = {
  * to Preparer/Analyst until a Managing Partner or Practice Administrator
  * promotes them from Settings -> Team. This keeps the "log in or create an
  * account" flow self-serve without an open invite/admin bootstrap problem.
+ *
+ * Checks for an existing Membership by userId ALONE (across any
+ * organization) before falling back to the practice's one default org —
+ * this is what lets a second, fully isolated Organization (the seeded demo
+ * environment, see lib/os/demo/seed.ts) exist at all. Every real staff
+ * Membership today already lives under the default "cfoip" org, so this
+ * changes nothing for them; it only stops assuming that org is the only
+ * one a signed-in user could belong to. Cross-org data access is still
+ * impossible either way, since every query in the app scopes by the
+ * returned organizationId (see /docs/security.md).
  */
 export async function getOrCreateCurrentActor(): Promise<CurrentActor | null> {
   const supabase = await createClient();
@@ -56,13 +66,27 @@ export async function getOrCreateCurrentActor(): Promise<CurrentActor | null> {
     return null;
   }
 
+  const existingMembership = await db.membership.findFirst({
+    where: { userId: user.id },
+  });
+  if (existingMembership) {
+    return {
+      userId: user.id,
+      email: user.email,
+      organizationId: existingMembership.organizationId,
+      membership: {
+        id: existingMembership.id,
+        role: existingMembership.role,
+        isActive: existingMembership.isActive,
+      },
+    };
+  }
+
   const organization = await getOrCreateDefaultOrganization();
 
-  let membership = await db.membership.findFirst({
-    where: { organizationId: organization.id, userId: user.id },
-  });
+  let membership: NonNullable<Awaited<ReturnType<typeof db.membership.findFirst>>> | null = null;
 
-  if (!membership) {
+  {
     // Security-critical: a client-portal user (ClientMembership, no
     // internal Membership) must never be silently upgraded to internal
     // staff just by visiting /os. Without this check, a client contact

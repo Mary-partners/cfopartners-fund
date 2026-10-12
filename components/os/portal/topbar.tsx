@@ -1,5 +1,8 @@
 import { CLIENT_ROLE_LABELS, type ClientRole } from "@/lib/os/auth/portal-rbac";
 import { Badge } from "@/components/os/ui/badge";
+import { ProductTour, PORTAL_TOUR_STEPS } from "@/components/os/product-tour";
+import { AskAnythingButton } from "@/components/os/ask-anything-button";
+import { submitPortalAskAnythingAction } from "@/app/portal/(app)/support/actions";
 
 export function PortalTopbar({
   email,
@@ -12,7 +15,11 @@ export function PortalTopbar({
 }) {
   return (
     <header className="flex h-16 items-center justify-between border-b border-ink/10 bg-white px-6">
-      <span className="text-sm font-medium text-ink">{clientName}</span>
+      <div className="flex items-center gap-3">
+        <span className="text-sm font-medium text-ink">{clientName}</span>
+        <ProductTour steps={PORTAL_TOUR_STEPS} storageKey="cfoip-portal-tour-seen" />
+        <AskAnythingButton action={submitPortalAskAnythingAction} />
+      </div>
       <div className="flex items-center gap-3">
         <Badge tone="gold">{CLIENT_ROLE_LABELS[role]}</Badge>
         <span className="text-sm text-ink-2/70">{email}</span>

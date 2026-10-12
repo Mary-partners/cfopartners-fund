@@ -543,3 +543,41 @@ had no external security or legal review. Get one before onboarding a real
 client's financial data, not before "launch" in some vaguer sense — the
 distinction matters because Phase 1 (Client 360, no real financial documents
 yet) is lower-stakes than Phase 2 (client portal, real document exchange).
+
+## Demo environment: a second Organization, not a scoped role
+
+**Context**: asked for shareable login credentials so people can explore
+CFOIP OS. The practice's real data lives in one single Organization row
+(`cfoip`) that `lib/os/auth/session.ts` used to hardcode as the only org a
+signed-in user could ever belong to — so a "demo" internal login using any
+existing role would have landed in that same org and seen every real
+client, since per-client visibility scoping (`claude/client-access-scoping`)
+was still awaiting its own test-and-approve cycle at the time.
+
+**Decision**: generalized `getOrCreateCurrentActor` to resolve a signed-in
+user's organization from their own Membership row (looked up by userId
+alone, across any org) before falling back to the practice's one default
+org for brand-new signups. This unlocks a second, fully isolated
+"CFOIP Demo Practice" organization (`lib/os/demo/seed.ts`, slug
+`cfoip-demo`) seeded with synthetic clients, work, requests, a meeting and
+materiality thresholds — with its own staff login (Managing Partner role,
+sees everything *within that org*) and its own Client Portal login. Every
+query in the app already scopes strictly by `organizationId` (proven by
+`tenant-isolation.integration.test.ts`), so this reuses that same boundary
+rather than depending on the newer, not-yet-merged per-client scoping.
+Settings → Demo environment (Managing Partner/Practice Admin only) seeds or
+re-seeds it on demand and displays both logins' credentials once, in the
+browser — never emailed, logged, or passed through chat. The portfolio
+digest cron excludes this org by slug so its login doesn't get weekly mail.
+
+**Why not wait for client-access-scoping instead**: that branch scopes
+*which clients* a role can see within one org; it doesn't create a second
+org, and merging it early just to unblock a demo would have meant merging
+a confidentiality-sensitive feature before its own explicit test-then-
+approve step — a bigger risk than adding an org-level isolation boundary
+that's already fully tested by existing code.
+
+**Reversible?** Yes — deleting the "CFOIP Demo Practice" Organization row
+cascades away everything under it (clients, work, requests, memberships),
+and the session.ts change is a pure generalization: every real Membership
+still resolves to the same `cfoip` org it always did.

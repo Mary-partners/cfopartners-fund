@@ -1,10 +1,16 @@
 import { ROLE_LABELS, type OrgRole } from "@/lib/os/auth/rbac";
 import { Badge } from "@/components/os/ui/badge";
+import { ProductTour } from "@/components/os/product-tour";
+import { AskAnythingButton } from "@/components/os/ask-anything-button";
+import { submitAskAnythingAction } from "@/app/os/(app)/support/actions";
 
 export function Topbar({ email, role }: { email: string; role: OrgRole }) {
   return (
     <header className="flex h-16 items-center justify-between border-b border-ink/10 bg-white px-6">
-      <div />
+      <div className="flex items-center gap-2">
+        <ProductTour />
+        <AskAnythingButton action={submitAskAnythingAction} />
+      </div>
       <div className="flex items-center gap-3">
         <Badge tone="gold">{ROLE_LABELS[role]}</Badge>
         <span className="text-sm text-ink-2/70">{email}</span>

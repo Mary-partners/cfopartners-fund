@@ -4,6 +4,7 @@ import { OrgRole } from "@/lib/os/auth/rbac";
 import { getPortfolioDigestData } from "@/lib/os/queries/digest";
 import { sendOsEmail } from "@/lib/os/email";
 import { recordAuditEvent } from "@/lib/os/audit";
+import { DEMO_ORG_SLUG } from "@/lib/os/demo/seed";
 
 /**
  * Weekly portfolio status digest — see vercel.json's crons entry for the
@@ -23,7 +24,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  const organizations = await db.organization.findMany({ select: { id: true, name: true } });
+  // Excludes the seeded demo environment (lib/os/demo/seed.ts) — its one
+  // Managing Partner membership is a shared demo login, not a real staff
+  // inbox anyone reads.
+  const organizations = await db.organization.findMany({
+    where: { slug: { not: DEMO_ORG_SLUG } },
+    select: { id: true, name: true },
+  });
 
   let sent = 0;
   for (const org of organizations) {

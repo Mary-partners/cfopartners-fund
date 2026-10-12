@@ -3,7 +3,7 @@ import Link from "next/link";
 import { requireActor } from "@/lib/os/auth/session";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/os/ui/card";
 import { Badge } from "@/components/os/ui/badge";
-import { ROLE_LABELS } from "@/lib/os/auth/rbac";
+import { ROLE_LABELS, can } from "@/lib/os/auth/rbac";
 
 export const metadata: Metadata = { title: "Settings" };
 
@@ -72,6 +72,22 @@ export default async function SettingsPage() {
           </Link>
         </CardContent>
       </Card>
+
+      {can(actor.membership.role, "settings:manage") ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Demo environment</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-2">
+            <p className="text-sm text-ink-2/70">
+              Set up a shareable login backed by synthetic data only, for letting people explore the platform.
+            </p>
+            <Link href="/os/settings/demo" className="mt-2 inline-block text-sm font-medium text-ink underline">
+              Go to Demo environment →
+            </Link>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card>
         <CardHeader>

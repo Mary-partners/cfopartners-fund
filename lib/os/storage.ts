@@ -81,3 +81,22 @@ export async function deleteStorageFile(storagePath: string) {
   const { error } = await admin.storage.from(DOCUMENTS_BUCKET).remove([storagePath]);
   if (error) throw error;
 }
+
+/**
+ * Server-side upload for content the app itself generates — currently only
+ * the seeded demo environment's placeholder documents (lib/os/demo/seed.ts).
+ * Every real user upload still goes browser-to-storage via createUploadUrl;
+ * this exists only because a seed run has no browser to sign a URL for.
+ */
+export async function uploadPlaceholderFile(
+  storagePath: string,
+  content: string,
+  mimeType: string,
+): Promise<void> {
+  await ensureDocumentsBucket();
+  const admin = getSupabaseAdmin();
+  const { error } = await admin.storage
+    .from(DOCUMENTS_BUCKET)
+    .upload(storagePath, Buffer.from(content, "utf-8"), { contentType: mimeType, upsert: true });
+  if (error) throw error;
+}
