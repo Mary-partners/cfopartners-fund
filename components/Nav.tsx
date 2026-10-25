@@ -122,7 +122,6 @@ export function Nav() {
           />
           {[
             { href: "/ai-automations", label: "AI Automations" },
-            { href: "/pricing", label: "Pricing" },
             { href: "/blog", label: "Journal" },
             { href: "/resources", label: "Resources" },
             { href: "/contact", label: "Contact" },
@@ -249,7 +248,6 @@ export function Nav() {
           </MobileAccordion>
           {[
             { href: "/ai-automations", label: "AI Automations" },
-            { href: "/pricing", label: "Pricing" },
             { href: "/blog", label: "Journal" },
             { href: "/resources", label: "Resources" },
             { href: "/#institutional", label: "For Institutions" },

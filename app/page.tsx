@@ -29,7 +29,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ROOMS } from "@/lib/rooms";
 import { ServicesShowcase } from "@/components/ServicesShowcase";
-import { TIERS, priceCompact } from "@/lib/pricing";
 import {
   HEADLINE_STATS,
   CORE_BELIEF,
@@ -64,7 +63,6 @@ export default function HomePage() {
       <FinderSection />
       <Insight />
       <CohortSection />
-      <PricingTeaser />
       <Results />
       <Institutional />
       <CaseStudies />
@@ -396,67 +394,6 @@ function Insight() {
 }
 
 // ============================================================
-// PRICING TEASER
-// ============================================================
-function PricingTeaser() {
-  const tiers = TIERS.map((t) => ({
-    name: t.name,
-    price: priceCompact(t),
-    recommended: t.highlighted,
-  }));
-  return (
-    <section id="pricing" className="py-[90px]">
-      <div className="mx-auto max-w-[1180px] px-6">
-        <div className="mb-10 grid items-end gap-8 md:grid-cols-[1.3fr_1fr]">
-          <div>
-            <span className="mb-3 inline-block text-[0.8rem] font-semibold uppercase tracking-[0.1em] text-accent-2">
-              Pricing
-            </span>
-            <h2 className="mb-5 max-w-[820px]">
-              Choose the level of support your business needs next.
-            </h2>
-            <p className="m-0 max-w-[640px] text-[1.1rem] text-ink-2">
-              Six tiers, mapped to where you stand today, from a free
-              diagnostic to a full virtual executive bench. Plus a Portfolio
-              Intelligence Platform for institutions.
-            </p>
-          </div>
-          <div className="flex justify-end">
-            <Button asChild size="lg">
-              <Link href="/pricing">
-                See full pricing <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {tiers.map((t) => (
-            <div
-              key={t.name}
-              className={`flex items-center justify-between rounded-card border bg-white px-5 py-4 ${
-                t.recommended ? "border-2 border-ink" : "border-line"
-              }`}
-            >
-              <div>
-                <div className="font-semibold text-ink">{t.name}</div>
-                {t.recommended && (
-                  <div className="text-[0.7rem] font-semibold uppercase tracking-[0.06em] text-accent-2">
-                    Recommended
-                  </div>
-                )}
-              </div>
-              <div className="font-serif text-[1.1rem] font-semibold text-ink">
-                {t.price}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ============================================================
 // INSTITUTIONAL
 // ============================================================
 const INSTITUTIONAL_FEATURES = [
@@ -495,12 +432,12 @@ function Institutional() {
           </div>
           <Card className="rounded-[20px] border-0 bg-white p-7 text-ink">
             <p className="text-[0.78rem] font-semibold uppercase tracking-[0.08em] text-ink-3">
-              Institutional pricing
+              Institutional partnerships
             </p>
-            <h3 className="mt-3 font-serif text-[2rem] font-bold">Custom</h3>
+            <h3 className="mt-3 font-serif text-[2rem] font-bold">Built around your portfolio</h3>
             <p className="mt-3 text-[0.88rem] leading-6 text-ink-2">
-              Pricing depends on cohort size, platform access, reporting
-              requirements, implementation support, and partner needs.
+              Every partnership is scoped to your cohort size, platform access,
+              reporting requirements, implementation support, and partner needs.
             </p>
             <div className="mt-6 space-y-3">
               {INSTITUTIONAL_FEATURES.map((item) => (
@@ -517,7 +454,7 @@ function Institutional() {
               <a
                 href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Portfolio Intelligence Platform: Institutional enquiry")}`}
               >
-                Request Institutional Pricing
+                Start a Partnership Conversation
                 <ArrowRight className="h-4 w-4" />
               </a>
             </Button>
@@ -1015,10 +952,10 @@ function Services() {
               Take the diagnostic
             </CheckupTrigger>
             <Link
-              href="/pricing"
+              href="/contact"
               className="inline-flex items-center gap-2 rounded-full border-[1.5px] border-white/40 px-[22px] py-[14px] text-[0.95rem] font-semibold text-white transition-all hover:bg-white hover:text-ink"
             >
-              See pricing
+              Talk to us
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>

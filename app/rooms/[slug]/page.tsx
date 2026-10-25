@@ -93,8 +93,8 @@ export default function RoomPage({ params }: { params: { slug: string } }) {
                   Take the free diagnostic
                 </CheckupTrigger>
                 <Button asChild variant="outline">
-                  <Link href="/pricing">
-                    See pricing <ArrowRight className="h-4 w-4" />
+                  <Link href="/contact">
+                    Talk to us <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
               </div>
@@ -108,7 +108,7 @@ export default function RoomPage({ params }: { params: { slug: string } }) {
               </p>
               <p className="text-[0.88rem] text-ink-3">
                 Available with{" "}
-                <Link href="/pricing" className="text-accent-2 hover:text-accent">
+                <Link href="/contact" className="text-accent-2 hover:text-accent">
                   Founder OS Growth
                 </Link>{" "}
                 which unlocks all six AI executive assistants.
@@ -180,21 +180,22 @@ export default function RoomPage({ params }: { params: { slug: string } }) {
         </div>
       </section>
 
-      {/* PRICING CTA */}
+      {/* PLAN CTA */}
       <section className="bg-bg-alt py-[80px]">
         <div className="mx-auto max-w-[820px] px-6 text-center">
           <h2 className="mb-4">
             Unlock {room.shortName} with Founder OS Growth.
           </h2>
           <p className="mx-auto mb-8 max-w-[560px] text-ink-2">
-            KES 65,000 (USD 520) a month opens every Executive Room, every AI assistant,
-            and the full business template library. Or start with the free
-            diagnostic to see which Room your business needs first.
+            Founder OS Growth opens every Executive Room, every AI assistant,
+            and the full business template library. Talk to us about getting
+            started, or take the free diagnostic to see which Room your
+            business needs first.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Button asChild size="lg">
-              <Link href="/pricing">
-                See pricing <ArrowRight className="h-4 w-4" />
+              <Link href="/contact">
+                Talk to us <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
             <CheckupTrigger variant="outline" className="px-7 py-4 text-base">
