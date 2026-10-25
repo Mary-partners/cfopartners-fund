@@ -31,7 +31,7 @@ const FAQ_ITEMS: FAQItem[] = [
   },
   {
     q: "Do you work with accelerators, banks, and investors?",
-    a: "Yes. Our Portfolio Intelligence Platform serves institutions that support many businesses at once: cohort diagnostics, readiness scoring, founder segmentation, and progress tracking. Write to us for institutional pricing.",
+    a: "Yes. Our Portfolio Intelligence Platform serves institutions that support many businesses at once: cohort diagnostics, readiness scoring, founder segmentation, and progress tracking. Write to us to discuss a partnership.",
   },
   {
     q: "What happens after I complete the free diagnostic?",

@@ -70,7 +70,6 @@ scoped entirely under `app/os/`, `components/os/`, `lib/os/`, and
 | Want to change | Where |
 |---|---|
 | Hero copy | `app/page.tsx` |
-| Tier prices | `app/page.tsx` (Tiers section) |
 | Check-Up questions | `lib/checkup-data.ts` |
 | Archetype tiers / scoring bands | `lib/checkup-data.ts` |
 | Brand colours | `tailwind.config.ts` |

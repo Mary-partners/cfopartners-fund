@@ -63,7 +63,6 @@ export function Footer() {
             <FLink href="/#services">Services</FLink>
             <FLink href="/#rooms">Executive Rooms</FLink>
             <FLink href="/ai-automations">AI Automations</FLink>
-            <FLink href="/pricing">Pricing</FLink>
             <FLink href="/blog">Journal</FLink>
             <FLink href="/resources">Free Resources</FLink>
             <FLink href="/#institutional">For Institutions</FLink>
