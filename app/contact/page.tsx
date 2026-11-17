@@ -28,7 +28,7 @@ import {
 } from "@/lib/links";
 
 export const metadata: Metadata = {
-  title: "Contact | CFO Partners",
+  title: "Contact | CFO Innovation Partners",
   description:
     "Get in touch with CFO Innovation Partners. Diagnostic-led advisory and execution support for founders, SMEs, scale-ups, and institutional partners across East Africa.",
 };

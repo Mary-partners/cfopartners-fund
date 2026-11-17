@@ -16,7 +16,7 @@ import { ResourceGate } from "@/components/ResourceGate";
 import { Card } from "@/components/ui/card";
 
 export const metadata: Metadata = {
-  title: "Free Resources | CFO Partners",
+  title: "Free Resources | CFO Innovation Partners",
   description:
     "Practical, free tools for African founders. Start with the KRA Filing Checklist: every filing a Kenyan SME needs to make, month by month.",
 };
@@ -77,7 +77,7 @@ export default function ResourcesPage() {
         <div className="mx-auto max-w-[1180px] px-6">
           <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_1fr]">
             <div>
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-gold-soft px-3.5 py-1.5 text-[0.75rem] font-semibold uppercase tracking-[0.06em] text-accent-2">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-gold-soft px-3.5 py-1.5 text-[0.75rem] font-semibold uppercase tracking-[0.06em] text-ink">
                 <FileText className="h-3.5 w-3.5" />
                 From the CFO Room · PDF · 2 pages
               </div>

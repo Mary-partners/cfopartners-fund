@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Inter, Fraunces } from "next/font/google";
 import "./globals.css";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
@@ -18,22 +19,19 @@ const fraunces = Fraunces({
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.cfopartners.fund"),
   title:
-    "CFO Partners | Executive support platform for African businesses",
+    "CFO Innovation Partners | Financial Leadership & Investment Readiness",
   description:
-    "Your business needs more than advice. It needs an executive system. CFO Partners gives African founders AI-powered executive assistants, practical business tools, diagnostics, and expert support in one platform. Start with the free Business Growth Check-Up.",
+    "Nairobi-based advisory and implementation firm. Fractional CFO services, investment readiness and portfolio financial support for investment funds, accelerators, development partners and growing businesses.",
+  // Title and description are left out of openGraph/twitter here so each
+  // page's own title and description are used for link previews instead of
+  // the homepage's.
   openGraph: {
-    title: "CFO Partners | Executive support for African businesses",
-    description:
-      "Seven Executive Rooms. AI assistants for CFO, COO, CMO, CRO, Board and more. Free Business Growth Check-Up in 10 minutes.",
-    url: "https://www.cfopartners.fund",
-    siteName: "CFO Partners",
+    siteName: "CFO Innovation Partners",
     type: "website",
+    locale: "en_KE",
   },
   twitter: {
     card: "summary_large_image",
-    title: "CFO Partners | Executive support for African businesses",
-    description:
-      "Seven Executive Rooms. AI assistants for CFO, COO, CMO, CRO, Board and more. Free Business Growth Check-Up in 10 minutes.",
   },
 };
 
@@ -47,6 +45,12 @@ export default function RootLayout({
       <body>
         {children}
         <WhatsAppButton />
+        {/* Vercel Web Analytics (cookieless page views). Enabled on the Vercel
+            project; this script only reports on deployed sites. */}
+        <Script id="vercel-analytics-queue" strategy="afterInteractive">
+          {`window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };`}
+        </Script>
+        <Script src="/_vercel/insights/script.js" strategy="afterInteractive" />
       </body>
     </html>
   );

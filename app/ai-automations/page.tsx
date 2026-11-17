@@ -7,7 +7,7 @@ import { AutomationIntake } from "@/components/AutomationIntake";
 import { AutomationCategories } from "@/components/AutomationCategories";
 
 export const metadata: Metadata = {
-  title: "AI Automations | CFO Partners",
+  title: "AI Automations | CFO Innovation Partners",
   description:
     "Tell us what you want to automate, what success looks like, your timeline, and who is involved. We scope it, build it with you, and train your team to run it.",
 };

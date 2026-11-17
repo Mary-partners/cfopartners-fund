@@ -12,7 +12,7 @@ const buttonVariants = cva(
         default:
           "bg-ink text-white hover:bg-ink-2 hover:-translate-y-0.5 hover:shadow-card",
         accent:
-          "bg-accent text-white hover:bg-accent-2 hover:-translate-y-0.5 hover:shadow-card",
+          "bg-accent-2 text-white hover:bg-ink hover:-translate-y-0.5 hover:shadow-card",
         outline:
           "border-[1.5px] border-ink bg-transparent text-ink hover:bg-ink hover:text-white",
         ghost: "bg-transparent text-ink-2 hover:text-ink",

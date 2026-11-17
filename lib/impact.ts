@@ -1,7 +1,9 @@
 /**
- * CFO Innovation Partners Q2 2026 impact data.
- * Source: CFOIP Monitoring, Evaluation and Impact Report Q2 2026.
- * All figures audited against published FY 2026 targets.
+ * Figures and content shown on the public site.
+ *
+ * Every published number needs a source, period, definition and approval
+ * before it goes here. FOUNDER_EXPERIENCE is the owner-approved master set
+ * (confirmed Nov 2026); evidence for each figure is held by CFOIP.
  */
 
 export interface ImpactStat {
@@ -10,45 +12,17 @@ export interface ImpactStat {
   note?: string;
 }
 
-export const HEADLINE_STATS: ImpactStat[] = [
-  { num: "56", label: "Founders served", note: "Q2 2026" },
-  {
-    num: "44%",
-    label: "Women founders",
-    note: "vs ~17% commercial bank benchmark",
-  },
-  { num: "11", label: "Sectors represented" },
-  {
-    num: "16%",
-    label: "Diagnostic-to-paid conversion",
-    note: "vs 8–12% market benchmark",
-  },
-];
-
-export const FOOTER_STATS: ImpactStat[] = [
-  { num: "47", label: "Business Growth Check-Ups completed" },
-  { num: "6", label: "Scale-Up Business Assessments completed" },
-  { num: "~40", label: "Written personalised advisory letters" },
-  { num: "100%", label: "Completed diagnostics routed to a next-step pathway" },
-];
-
-export interface SectorStat {
-  name: string;
-  count: number;
-}
-
-export const SECTORS_Q2_2026: SectorStat[] = [
-  { name: "Agribusiness", count: 7 },
-  { name: "Tech / Digital", count: 5 },
-  { name: "Retail / Wholesale", count: 5 },
-  { name: "Professional Services", count: 4 },
-  { name: "Fashion / Apparel", count: 3 },
-  { name: "Construction / Real Estate", count: 2 },
-  { name: "Manufacturing", count: 2 },
-  { name: "Health / Wellness", count: 2 },
-  { name: "Logistics / Transport", count: 2 },
-  { name: "Food / Beverage", count: 1 },
-  { name: "Creative / Media", count: 1 },
+/**
+ * Founder's professional experience, including work before CFOIP was
+ * established. Always present these as the founder's experience, and the
+ * investment figure as recommendations for consideration, never capital raised.
+ */
+export const FOUNDER_EXPERIENCE: ImpactStat[] = [
+  { num: "12+", label: "Years in SME finance and investment advisory" },
+  { num: "2,000+", label: "Businesses supported across 11 sectors" },
+  { num: "50+", label: "Enterprises recommended for investment consideration (USD 100K–500K)" },
+  { num: "15+", label: "OceanHub Africa portfolio businesses supported" },
+  { num: "800+", label: "SMEs reached through enterprise programmes" },
 ];
 
 export const CORE_BELIEF = {
@@ -141,7 +115,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     story:
       "A woman founder running a five-year manufacturing business at over KES 500,000 monthly revenue, with a fully diversified customer base and a repaid formal loan, completed the Business Growth Check-Up and was classified as a Scaler.",
     outcome:
-      "The advisory letter named the absence of a CRM and the unfiled tax position as the two highest-leverage unlocks. The founder replied within 48 hours, confirmed both as priorities for the next quarter, and was routed into a paid Monthly Membership at the Expert Advisory Panel.",
+      "The advisory letter named the absence of a CRM and the unfiled tax position as the two highest-leverage unlocks. The founder replied within 48 hours, confirmed both as priorities for the next quarter, and moved into ongoing advisory support.",
     pathway: "A",
     pathwayLabel: "Diagnostic → Action → Paid engagement",
   },
@@ -202,66 +176,4 @@ export const FIVE_SEGMENTS = [
     description:
       "Need stronger SME pipeline, better-prepared businesses, evidence-backed enterprise support, and capital readiness improvement.",
   },
-];
-
-/**
- * Track record since 2024. Carried over from the original
- * cfopartners.fund site; figures predate the Q2 2026 cohort.
- */
-export const TRACK_RECORD: ImpactStat[] = [
-  { num: "50+", label: "Companies served", note: "since 2024" },
-  { num: "1,000+", label: "Founders trained" },
-  { num: "$50M+", label: "Capital raised by clients" },
-  { num: "92%", label: "Client retention" },
-];
-
-/**
- * The problem we exist to solve. Startup failure statistics from the
- * original site's research base.
- */
-export const CHALLENGE_STATS: ImpactStat[] = [
-  { num: "89%", label: "of early-stage startups cannot afford a CFO" },
-  { num: "74%", label: "never raise beyond their first round" },
-  { num: "65%", label: "of funding rounds fail on inadequate documentation" },
-  { num: "82%", label: "of founders lack cash runway visibility" },
-];
-
-/** Before and after working with CFO Partners. */
-export interface ResultRow {
-  metric: string;
-  before: string;
-  after: string;
-}
-
-export const RESULTS_TABLE: ResultRow[] = [
-  {
-    metric: "Fundraise close time",
-    before: "9 to 12 months",
-    after: "3 to 5 months",
-  },
-  {
-    metric: "Financial reporting",
-    before: "Manual, monthly",
-    after: "Automated, on time",
-  },
-  {
-    metric: "Cash visibility",
-    before: "2 to 4 weeks behind",
-    after: "Current week",
-  },
-];
-
-/** Sectors we have served across both operating periods. */
-export const SECTORS_SERVED: string[] = [
-  "Fintech",
-  "Agritech",
-  "Healthtech",
-  "Edtech",
-  "E-commerce",
-  "SaaS",
-  "Cleantech",
-  "Logistics",
-  "Manufacturing",
-  "Impact Ventures",
-  "Accelerators",
 ];

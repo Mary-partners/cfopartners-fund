@@ -38,7 +38,7 @@ export function AutomationCategories() {
               aria-pressed={on}
               className={`inline-flex items-center gap-2 rounded-full border-[1.5px] px-5 py-3 text-[0.92rem] font-semibold transition-all ${
                 on
-                  ? "border-accent bg-accent text-white"
+                  ? "border-accent-2 bg-accent-2 text-white"
                   : "border-line bg-white text-ink-2 hover:border-accent hover:text-ink"
               }`}
             >

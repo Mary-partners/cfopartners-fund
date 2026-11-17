@@ -13,7 +13,7 @@ import {
 
 export function Footer() {
   return (
-    <footer className="border-t border-line bg-bg-alt pt-[60px] pb-8 text-[0.88rem] text-ink-3">
+    <footer className="border-t border-line bg-bg-alt pt-[60px] pb-8 text-[0.88rem] text-ink-2">
       <div className="mx-auto max-w-[1180px] px-6">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-12">
           <div className="md:col-span-5">
@@ -21,7 +21,7 @@ export function Footer() {
               href="/"
               className="mb-4 inline-block font-serif text-[1.4rem] font-semibold text-ink"
             >
-              CFO<span className="text-accent">Partners</span>
+              CFO<span className="text-accent-2">Partners</span>
             </Link>
             <p className="mb-5 max-w-[380px] text-[0.92rem] text-ink-2">
               An advisory and execution support firm for African founders,
@@ -122,7 +122,7 @@ export function Footer() {
             <h4 className="mb-1 text-[0.95rem] font-semibold text-ink">
               The CFOIP Journal, by email
             </h4>
-            <p className="m-0 text-[0.85rem] text-ink-3">
+            <p className="m-0 text-[0.85rem] text-ink-2">
               Cohort findings and new free tools, once a month.
             </p>
           </div>
@@ -133,7 +133,15 @@ export function Footer() {
             © {new Date().getFullYear()} CFO Innovation Partners. All rights
             reserved.
           </span>
-          <span>Diagnostic-led advisory · Nairobi, Kenya</span>
+          <span className="flex flex-wrap gap-x-4 gap-y-1">
+            <span>Advisory and implementation · Nairobi, Kenya</span>
+            <Link href="/portal" className="underline-offset-4 hover:text-ink hover:underline">
+              Client portal
+            </Link>
+            <Link href="/os" className="underline-offset-4 hover:text-ink hover:underline">
+              Team login
+            </Link>
+          </span>
         </div>
       </div>
     </footer>
@@ -150,7 +158,7 @@ function FLink({
   return (
     <Link
       href={href}
-      className="block py-1 text-[0.9rem] text-ink-3 hover:text-ink"
+      className="block py-1 text-[0.9rem] text-ink-2 hover:text-ink"
     >
       {children}
     </Link>
