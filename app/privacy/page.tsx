@@ -48,7 +48,7 @@ export default function PrivacyPage() {
           <p>
             Our website is hosted by Vercel. Form submissions are delivered to us
             by email through a form or email delivery service. The Business
-            Growth Check-Up runs on Notion. These providers process data on our
+            Diagnostic runs on the Management Capital Lab platform. These providers process data on our
             behalf and may store it outside Kenya, with safeguards as required by
             the Data Protection Act, 2019.
           </p>

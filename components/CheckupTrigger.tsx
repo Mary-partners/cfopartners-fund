@@ -17,10 +17,9 @@ const variantStyles: Record<NonNullable<Props["variant"]>, string> = {
 };
 
 /**
- * Primary CTA across the site. Sends visitors to the live Business Growth
- * Check-Up hosted on Notion (the canonical diagnostic that generates real
- * submission data). Opens in a new tab so visitors don't lose the marketing
- * page.
+ * Diagnostic CTA. Sends visitors to the Business Diagnostic on the
+ * Management Capital Lab platform. Opens in a new tab so visitors don't
+ * lose the marketing page.
  */
 export function CheckupTrigger({
   children,

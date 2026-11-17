@@ -23,10 +23,10 @@ const nextConfig = {
       { source: "/blog/what-56-founders-taught-us", destination: "/insights", permanent: true },
       { source: "/blog", destination: "/insights", permanent: true },
       { source: "/blog/:slug", destination: "/insights/:slug", permanent: true },
-      // The diagnostic runs on Notion until the on-site version is merged.
+      // The diagnostic runs on the Management Capital Lab platform.
       {
         source: "/diagnostic",
-        destination: "https://cfo-partners.notion.site/bbaec335aee34909978384f0d91ba971?pvs=105",
+        destination: "https://www.managementcapitallab.com/platform/login",
         permanent: false,
       },
     ];

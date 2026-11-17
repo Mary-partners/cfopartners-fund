@@ -3,10 +3,10 @@
  * Edit here once. Every component imports from this file.
  */
 
-// The live Business Growth Check-Up, hosted on Notion.
+// The Business Diagnostic, hosted on the Management Capital Lab platform.
 // Every "Take the Free Check-Up" CTA across the site sends visitors here.
 export const DIAGNOSTIC_URL =
-  "https://cfo-partners.notion.site/bbaec335aee34909978384f0d91ba971?pvs=105";
+  "https://www.managementcapitallab.com/platform/login";
 
 // Contact details.
 export const CONTACT_EMAIL = "partner@cfopartners.fund";
