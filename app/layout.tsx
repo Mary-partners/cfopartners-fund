@@ -3,6 +3,8 @@ import Script from "next/script";
 import { Inter, Fraunces } from "next/font/google";
 import "./globals.css";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { JsonLd } from "@/components/site/JsonLd";
+import { founderSchema, graph, organizationSchema } from "@/lib/schema";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -18,8 +20,11 @@ const fraunces = Fraunces({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.cfopartners.fund"),
-  title:
-    "CFO Innovation Partners | Financial Leadership & Investment Readiness",
+  title: {
+    default:
+      "CFO Innovation Partners | Financial Leadership & Investment Readiness",
+    template: "%s",
+  },
   description:
     "Nairobi-based advisory and implementation firm. Fractional CFO services, investment readiness and portfolio financial support for investment funds, accelerators, development partners and growing businesses.",
   // Title and description are left out of openGraph/twitter here so each
@@ -43,6 +48,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
       <body>
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-ink focus:px-5 focus:py-3 focus:text-white"
+        >
+          Skip to main content
+        </a>
+        <JsonLd data={graph(organizationSchema(), founderSchema())} />
         {children}
         <WhatsAppButton />
         {/* Vercel Web Analytics (cookieless page views). Enabled on the Vercel

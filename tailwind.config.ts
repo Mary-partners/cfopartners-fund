@@ -15,7 +15,7 @@ const config: Config = {
         ink: {
           DEFAULT: "#0F172A",
           2: "#334155",
-          3: "#64748B",
+          3: "#556072",
         },
         line: "#E2DED3",
         accent: {

@@ -41,12 +41,12 @@ export const POSTS: BlogPost[] = [
     body: [
       {
         type: "p",
-        text: "We have been running the Business Growth Check-Up with founders across East Africa for two quarters. A consistent pattern keeps emerging in the responses. When founders are asked what is holding the business back, they name money. But when we look at the structure underneath, at bank accounts, sales records, tax registration, and customer concentration, the real blocker is almost never capital.",
+        text: "In our diagnostic work with founders across East Africa, a consistent pattern keeps emerging. When founders are asked what is holding the business back, they name money. But when we look at the structure underneath, at bank accounts, sales records, tax registration, and customer concentration, the real blocker is almost never capital.",
       },
       {
         type: "quote",
         text: "Capital cannot fix what structure has not built yet.",
-        attribution: "A finding from the CFO Partners diagnostic cohort, Q2 2026",
+        attribution: "From our diagnostic work with founders",
       },
       {
         type: "h2",
@@ -54,7 +54,7 @@ export const POSTS: BlogPost[] = [
       },
       {
         type: "p",
-        text: "Across the 47 Business Growth Check-Ups completed in Q2 2026, three structural patterns repeat regardless of business age, industry, or score band:",
+        text: "Across the Business Growth Check-Ups completed in Q2 2026, three structural patterns repeat regardless of business age, industry, or score band:",
       },
       {
         type: "list",
@@ -70,127 +70,11 @@ export const POSTS: BlogPost[] = [
       },
       {
         type: "p",
-        text: "A capital deployment vehicle calibrated to founders who think they need money, when what they actually need is structure, will under-perform. The CFO Partners diagnostic surfaces the binding constraint before the capital conversation begins, which is why our diagnostic-to-paid conversion sits at 16 per cent against a market benchmark of 8 to 12 per cent.",
+        text: "A capital deployment vehicle calibrated to founders who think they need money, when what they actually need is structure, will under-perform. A diagnostic that surfaces the binding constraint before the capital conversation begins gives founders, lenders and investors a better starting point.",
       },
       {
         type: "p",
         text: "The pipeline is being built one founder, one accelerator, and one institutional partner at a time. Demand for the model is structural, not promotional.",
-      },
-    ],
-  },
-  {
-    slug: "44-percent-women-led",
-    title:
-      "44% women-led: what the Kenyan credit book got wrong about SME readiness",
-    excerpt:
-      "Our Q2 2026 cohort is 44% women-led, against a Kenyan commercial bank SME benchmark of around 17%. Women founders are scoring higher than men on Revenue Clarity, Cost Structure, and Operations. The risk profile of a capital vehicle routed through this pipeline would look materially different.",
-    category: "Cohort Data",
-    date: "2026-06-08",
-    readTime: "5 min read",
-    author: "CFOIP MEL Team",
-    imageGradient: ["#1E40AF", "#B8860B"],
-    imageIcon: "users",
-    body: [
-      {
-        type: "p",
-        text: "The most material finding in our Q2 2026 cohort is not the headline number of 56 founders served. It is the gender composition underneath it.",
-      },
-      {
-        type: "stat",
-        num: "44%",
-        label: "Women founders in the Q2 2026 cohort",
-      },
-      {
-        type: "p",
-        text: "Against a published Kenyan commercial bank SME book benchmark of approximately 17 per cent women-led penetration, the CFOIP pipeline is over-indexing women founders by a factor of more than two and a half. This is not the result of a targeting strategy. It is the result of the diagnostic itself: a structured, low-friction, evidence-led instrument that women founders are choosing to engage with.",
-      },
-      {
-        type: "h2",
-        text: "What the scoring shows",
-      },
-      {
-        type: "p",
-        text: "Women founders in the Q2 2026 cohort score above the cohort mean on three of the six diagnostic pillars:",
-      },
-      {
-        type: "list",
-        items: [
-          "Pillar 1: Revenue Clarity",
-          "Pillar 2: Cost Structure",
-          "Pillar 4: Operations and Systems",
-        ],
-      },
-      {
-        type: "p",
-        text: "Several of the cohort's strongest businesses by score are women-led, including the highest-scoring Scaler-trajectory founder in the cohort. Geographic spread within the women-led segment includes both urban (Nairobi) and peri-urban (Kilifi, rural Kenya) founders.",
-      },
-      {
-        type: "h2",
-        text: "The implication for partners",
-      },
-      {
-        type: "p",
-        text: "This is what we mean when we say diagnostic-led pipeline construction produces a different distribution than open-market origination. The pipeline does not have to be built around demographic targets. The diagnostic does the segmentation work upstream.",
-      },
-    ],
-  },
-  {
-    slug: "three-pathways-to-impact",
-    title:
-      "Three pathways from diagnostic to growth: founder, institutional, systems",
-    excerpt:
-      "Founder, institutional, and systems pathways operate on different timelines and require different MEL methodologies. Here is how we measure what we are actually doing, and why every diagnostic activates one of the three.",
-    category: "Theory of Change",
-    date: "2026-06-05",
-    readTime: "7 min read",
-    author: "CFOIP MEL Team",
-    imageGradient: ["#065F46", "#B8860B"],
-    imageIcon: "compass",
-    body: [
-      {
-        type: "p",
-        text: "Every Business Growth Check-Up activates one of three pathways through the firm. The MEL report calls them Pathway A, B, and C. They sit on different timelines, serve different audiences, and require different measurement methods.",
-      },
-      {
-        type: "h2",
-        text: "Pathway A: the founder",
-      },
-      {
-        type: "p",
-        text: "Diagnostic completed → Archetype identified → Action map issued → At least one action taken → Operating discipline improves → Bankable, investable, partner-ready.",
-      },
-      {
-        type: "p",
-        text: "This is the most common pathway. It is also the most measurable. We track founder reply rates to advisory letters (~60% qualitative), 30-day action taken, separation of personal and business accounts, and conversion to paid advisory engagement.",
-      },
-      {
-        type: "h2",
-        text: "Pathway B: the institution",
-      },
-      {
-        type: "p",
-        text: "Cohort segmentation delivered to partner → Partner routes portfolio through diagnostic → Partner improves SME pipeline quality → Measurable improvement in underwriting, programme, or capital productivity.",
-      },
-      {
-        type: "p",
-        text: "Institutional pathways move slower than founder pathways but produce larger downstream effects. A single bank or accelerator routing its portfolio through CFOIP surfaces tens or hundreds of founder pathways in parallel.",
-      },
-      {
-        type: "h2",
-        text: "Pathway C: the system",
-      },
-      {
-        type: "p",
-        text: "Cohort intelligence published → Segment patterns become visible to the ecosystem → Ecosystem actors recalibrate programme design → Segment-wide capability uplift.",
-      },
-      {
-        type: "p",
-        text: "Pathway C is the longest-running and the hardest to attribute. It is also where the 44% women-led finding belongs: a piece of cohort intelligence that, once visible to the ecosystem, changes how other actors design SME support.",
-      },
-      {
-        type: "quote",
-        text: "Each operates on a different timeline. Each requires different MEL methodology to assess.",
-        attribution: "CFOIP Q2 2026 Impact Report",
       },
     ],
   },
@@ -228,7 +112,7 @@ export const POSTS: BlogPost[] = [
       },
       {
         type: "p",
-        text: "The founder replied within 48 hours. Both items are now her stated priorities for the next quarter. She has been routed into a paid Monthly Membership at the Expert Advisory Panel.",
+        text: "The founder replied within 48 hours. Both items are now her stated priorities for the next quarter. She moved into ongoing advisory support.",
       },
       {
         type: "h2",
@@ -241,59 +125,6 @@ export const POSTS: BlogPost[] = [
       {
         type: "quote",
         text: "The value is not only the report. The value is the business clarity and action pathway that comes from it.",
-        attribution: "CFOIP Company Presentation, June 2026",
-      },
-    ],
-  },
-  {
-    slug: "what-56-founders-taught-us",
-    title:
-      "What 56 founders taught us in Q2 2026",
-    excerpt:
-      "Eight structural insights from the first operating cohort. Founders know revenue better than margins. Sales activity is mistaken for business structure. And affordable senior advisory is a clear market need.",
-    category: "Q2 Review",
-    date: "2026-05-29",
-    readTime: "8 min read",
-    author: "Mary Ndinda, Founder & Managing Partner",
-    imageGradient: ["#1E3A8A", "#B8860B"],
-    imageIcon: "chart",
-    body: [
-      {
-        type: "p",
-        text: "Q2 2026 was our first full operating quarter as CFO Innovation Partners. Fifty-six founders served. Eleven sectors. Two countries. The patterns inside that cohort are sharp enough to publish.",
-      },
-      {
-        type: "h2",
-        text: "Eight things we are seeing",
-      },
-      {
-        type: "list",
-        items: [
-          "Founders know their revenue better than their margins.",
-          "Sales activity is consistently mistaken for business structure.",
-          "Customer concentration is under-recognised as a risk.",
-          "Many founders seek capital before they are operationally ready.",
-          "Scale-ups are constrained by leadership, governance, and execution rhythm.",
-          "Financial records remain the principal readiness gap.",
-          "Founders want practical next steps, not generic training.",
-          "Affordable senior advisory is a clear market need.",
-        ],
-      },
-      {
-        type: "h2",
-        text: "What this means for the model",
-      },
-      {
-        type: "p",
-        text: "We did not start with a product. We started with the business reality. Six quarters of diagnostic data confirm that the support that actually changes founder behaviour is sequential, not modular: diagnose, interpret, recommend, advise, execute, track. Each stage works because the stages before it were delivered with discipline.",
-      },
-      {
-        type: "p",
-        text: "The conversion data confirms the demand. 16 per cent of completed diagnostics convert into paid engagement, against an 8 to 12 per cent benchmark for comparable entrants. The 100 per cent routing rate confirms the model is calibrated, because every diagnostic ends with a named next step.",
-      },
-      {
-        type: "quote",
-        text: "The biggest gaps are structural, not motivational.",
         attribution: "CFOIP Company Presentation, June 2026",
       },
     ],

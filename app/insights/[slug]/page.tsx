@@ -9,6 +9,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckupTrigger } from "@/components/CheckupTrigger";
 import { BlogCover } from "@/components/BlogCover";
+import { JsonLd } from "@/components/site/JsonLd";
+import { articleSchema, breadcrumbSchema, graph } from "@/lib/schema";
 import { POSTS, postFor, allPostSlugs, type BlockType } from "@/lib/blog";
 
 export function generateStaticParams() {
@@ -21,10 +23,13 @@ export function generateMetadata({
   params: { slug: string };
 }): Metadata {
   const post = postFor(params.slug);
-  if (!post) return { title: "Post not found | CFO Innovation Partners" };
+  if (!post) return { title: "Article not found | CFO Innovation Partners" };
+  const path = `/insights/${post.slug}`;
   return {
-    title: `${post.title} | CFO Innovation Partners`,
+    title: `${post.title} | CFOIP`,
     description: post.excerpt,
+    alternates: { canonical: path },
+    openGraph: { type: "article", title: post.title, description: post.excerpt, url: path, publishedTime: post.date },
   };
 }
 
@@ -33,30 +38,48 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
   if (!post) notFound();
   const related = POSTS.filter((p) => p.slug !== post.slug).slice(0, 3);
 
+  const path = `/insights/${post.slug}`;
   return (
-    <main className="min-h-screen bg-bg">
+    <>
+      <JsonLd
+        data={graph(
+          articleSchema({
+            path,
+            headline: post.title,
+            description: post.excerpt,
+            datePublished: post.date,
+            authorName: post.author,
+          }),
+          breadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: "Insights", path: "/insights" },
+            { name: post.title, path },
+          ]),
+        )}
+      />
       <Nav />
+      <main id="main" className="min-h-screen bg-bg">
 
       {/* HEADER */}
       <header className="bg-bg-alt pt-[40px] pb-[60px]">
         <div className="mx-auto max-w-[820px] px-6">
           <Link
-            href="/blog"
-            className="mb-6 inline-flex items-center gap-1.5 text-[0.85rem] text-ink-3 hover:text-ink"
+            href="/insights"
+            className="mb-6 inline-flex items-center gap-1.5 text-[0.85rem] text-ink-2 hover:text-ink"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            Back to journal
+            All insights
           </Link>
           <div className="mb-3 flex flex-wrap items-center gap-2 text-[0.78rem] font-semibold uppercase tracking-[0.08em] text-accent-2">
             <span>{post.category}</span>
-            <span className="text-ink-3">·</span>
-            <span className="text-ink-3">{post.readTime}</span>
+            <span className="text-ink-2">·</span>
+            <span className="text-ink-2">{post.readTime}</span>
           </div>
           <h1 className="mb-5 text-[clamp(1.9rem,4vw,2.8rem)] leading-[1.15]">
             {post.title}
           </h1>
           <p className="mb-5 text-[1.15rem] text-ink-2">{post.excerpt}</p>
-          <div className="text-[0.9rem] text-ink-3">
+          <div className="text-[0.9rem] text-ink-2">
             {post.author} ·{" "}
             {new Date(post.date).toLocaleDateString("en-GB", {
               day: "numeric",
@@ -123,7 +146,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
             {related.map((p) => (
               <Link
                 key={p.slug}
-                href={`/blog/${p.slug}`}
+                href={`/insights/${p.slug}`}
                 className="group block"
               >
                 <Card className="flex h-full flex-col overflow-hidden p-0 transition-all group-hover:-translate-y-0.5 group-hover:shadow-card">
@@ -141,8 +164,9 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
         </div>
       </section>
 
+      </main>
       <Footer />
-    </main>
+    </>
   );
 }
 
@@ -165,7 +189,7 @@ function Block({ block }: { block: BlockType }) {
             &ldquo;{block.text}&rdquo;
           </p>
           {block.attribution && (
-            <footer className="mt-3 text-[0.85rem] text-ink-3">
+            <footer className="mt-3 text-[0.85rem] text-ink-2">
               {block.attribution}
             </footer>
           )}
