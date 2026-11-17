@@ -67,13 +67,27 @@ scoped entirely under `app/os/`, `components/os/`, `lib/os/`, and
 
 ## Editing common things
 
+All public copy is plain data. Change it in one file and the page, its
+metadata and its structured data update together.
+
 | Want to change | Where |
 |---|---|
-| Hero copy | `app/page.tsx` |
-| Check-Up questions | `lib/checkup-data.ts` |
-| Archetype tiers / scoring bands | `lib/checkup-data.ts` |
+| Firm name, description, founding year, profiles | `lib/site.ts` |
+| Founder figures (homepage, About) | `lib/impact.ts` (`FOUNDER_EXPERIENCE`) |
+| Homepage sections | `app/page.tsx` |
+| Service pages (10) | `lib/content/services-business.ts`, `lib/content/services-institutional.ts` |
+| Audience pages (3) | `lib/content/audiences.ts` |
+| About and Our Approach | `lib/content/pages.ts` |
+| Insights articles | `lib/blog.ts` |
+| Enquiry form fields | `lib/enquiry.ts` |
+| Redirects from old URLs | `next.config.mjs` |
 | Brand colours | `tailwind.config.ts` |
-| Fonts | `app/layout.tsx` |
+
+Writing rules for public copy are at the top of `lib/content/types.ts`: no
+fees, no financing guarantees, and only approved, attributed figures.
+
+Enquiries post to `/api/enquiry` and are emailed via `lib/notify.ts`. Set
+`ENQUIRY_WEBHOOK_URL` to also forward them to a CRM or spreadsheet.
 
 ## License
 

@@ -1,20 +1,17 @@
 import type { MetadataRoute } from "next";
 import { POSTS } from "@/lib/blog";
-import { allRoomSlugs } from "@/lib/rooms";
+import { AUDIENCES, SERVICES } from "@/lib/content";
 
 const SITE = "https://www.cfopartners.fund";
 
-// Public marketing pages only. /os and /portal are private and excluded.
+// Public, indexable pages only. /os, /portal and /case-studies (noindex
+// until approved case studies exist) are excluded.
 export default function sitemap(): MetadataRoute.Sitemap {
-  const pages = ["", "/contact", "/ai-automations", "/resources", "/blog"].map(
+  const pages = ["", "/about", "/our-approach", "/insights", "/resources", "/contact", "/privacy"].map(
     (path) => ({ url: `${SITE}${path}` }),
   );
-  const rooms = allRoomSlugs().map((slug) => ({
-    url: `${SITE}/rooms/${slug}`,
-  }));
-  const posts = POSTS.map((p) => ({
-    url: `${SITE}/blog/${p.slug}`,
-    lastModified: p.date,
-  }));
-  return [...pages, ...rooms, ...posts];
+  const audiences = AUDIENCES.map((a) => ({ url: `${SITE}/${a.slug}` }));
+  const services = SERVICES.map((s) => ({ url: `${SITE}/${s.slug}` }));
+  const posts = POSTS.map((p) => ({ url: `${SITE}/insights/${p.slug}`, lastModified: p.date }));
+  return [...pages, ...audiences, ...services, ...posts];
 }

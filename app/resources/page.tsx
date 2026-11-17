@@ -16,7 +16,8 @@ import { ResourceGate } from "@/components/ResourceGate";
 import { Card } from "@/components/ui/card";
 
 export const metadata: Metadata = {
-  title: "Free Resources | CFO Innovation Partners",
+  title: "Free Resources for SMEs | CFO Innovation Partners",
+  alternates: { canonical: "/resources" },
   description:
     "Practical, free tools for African founders. Start with the KRA Filing Checklist: every filing a Kenyan SME needs to make, month by month.",
 };
@@ -52,8 +53,9 @@ const UPCOMING = [
 
 export default function ResourcesPage() {
   return (
-    <main className="min-h-screen bg-bg">
+    <>
       <Nav />
+      <main id="main" className="min-h-screen bg-bg">
 
       {/* HEADER */}
       <header className="border-b border-line bg-bg-alt py-[60px]">
@@ -181,17 +183,18 @@ export default function ResourcesPage() {
               Take the free diagnostic
             </CheckupTrigger>
             <Link
-              href="/rooms/cfo"
+              href="/fractional-cfo-services"
               className="inline-flex items-center gap-2 rounded-full border-[1.5px] border-ink px-[22px] py-[14px] text-[0.95rem] font-semibold text-ink transition-all hover:bg-ink hover:text-white"
             >
-              Explore the CFO Room
+              Fractional CFO services
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
       </section>
 
+      </main>
       <Footer />
-    </main>
+    </>
   );
 }

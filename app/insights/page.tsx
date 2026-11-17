@@ -9,29 +9,32 @@ import { BlogCover } from "@/components/BlogCover";
 import { POSTS } from "@/lib/blog";
 
 export const metadata: Metadata = {
-  title: "Journal | CFO Innovation Partners",
+  title: "Insights on SME Finance & Investment Readiness | CFOIP",
   description:
-    "Diagnostic insights, cohort findings, and the operating beliefs behind the CFO Innovation Partners model. Published as we learn them.",
+    "Practical articles from CFO Innovation Partners on SME finance, investment readiness, portfolio financial performance, enterprise development and technical assistance.",
+  alternates: { canonical: "/insights" },
 };
 
 export default function BlogIndexPage() {
   const [featured, ...rest] = POSTS;
   return (
-    <main className="min-h-screen bg-bg">
+    <>
       <Nav />
+      <main id="main" className="min-h-screen bg-bg">
 
       {/* HEADER */}
       <header className="border-b border-line bg-bg-alt py-[60px]">
         <div className="mx-auto max-w-[1180px] px-6">
           <span className="mb-3 inline-block text-[0.8rem] font-semibold uppercase tracking-[0.1em] text-accent-2">
-            The CFOIP Journal
+            Insights &amp; Research
           </span>
           <h1 className="mb-4 max-w-[820px]">
-            Diagnostic insights, cohort findings, and operating beliefs.
+            Insights on SME finance, investment readiness and portfolio performance.
           </h1>
           <p className="m-0 max-w-[720px] text-[1.1rem] text-ink-2">
-            What we are learning from running structured diagnostics with
-            African founders, SMEs, and scale-ups. Published as we learn it.
+            Practical articles for founders, investment teams and programme
+            managers, written from our advisory and diagnostic work in Kenya
+            and East Africa.
           </p>
         </div>
       </header>
@@ -40,7 +43,7 @@ export default function BlogIndexPage() {
       <section className="py-[60px]">
         <div className="mx-auto max-w-[1180px] px-6">
           <Link
-            href={`/blog/${featured.slug}`}
+            href={`/insights/${featured.slug}`}
             className="group grid items-center gap-10 lg:grid-cols-[1.2fr_1fr]"
           >
             <BlogCover
@@ -83,7 +86,7 @@ export default function BlogIndexPage() {
             {rest.map((post) => (
               <Link
                 key={post.slug}
-                href={`/blog/${post.slug}`}
+                href={`/insights/${post.slug}`}
                 className="group block"
               >
                 <Card className="flex h-full flex-col overflow-hidden p-0 transition-all group-hover:-translate-y-0.5 group-hover:shadow-card">
@@ -118,8 +121,7 @@ export default function BlogIndexPage() {
         <div className="mx-auto max-w-[820px] px-6 text-center">
           <h2 className="mb-4 text-white">Read the next one in your inbox.</h2>
           <p className="mx-auto mb-8 max-w-[560px] text-slate-300">
-            One email a month with what we are learning from the cohort, plus
-            every new free tool as it ships.
+            One email a month with new articles and practical tools.
           </p>
           <div className="mx-auto max-w-[520px] text-left">
             <NewsletterSignup source="blog-index" variant="dark" />
@@ -127,7 +129,8 @@ export default function BlogIndexPage() {
         </div>
       </section>
 
+      </main>
       <Footer />
-    </main>
+    </>
   );
 }
