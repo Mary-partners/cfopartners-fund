@@ -40,14 +40,16 @@ export async function POST(request: Request) {
 
   if (e.kind === "institutional") {
     await notify({
-      subject: `Institutional enquiry: ${e.organisation} (${e.support})`,
+      subject: `Institutional enquiry: ${e.organisation} (${e.offer})`,
       lines: [
         ["Organisation", e.organisation],
         ["Contact", e.name],
         ["Email", e.email],
         ["Organisation type", e.orgType],
-        ["Country", e.country],
+        ["Countries of operation", e.country],
+        ["How they want to start", e.offer],
         ["Support required", e.support],
+        ["Finance capacity in companies", e.capacity],
         ["Portfolio or cohort size", e.size ?? ""],
         ["Expected start", e.start],
         ["Budget range", e.budget ?? ""],
@@ -63,7 +65,9 @@ export async function POST(request: Request) {
         ["Sector", e.sector],
         ["Country", e.country],
         ["Stage", e.stage],
-        ["Support required", e.support],
+        ["Main challenge", e.challenge],
+        ["Interested in", e.support],
+        ["Timeline", e.timeline],
         ["Contact", e.name],
         ["Email", e.email],
         ["Phone", e.phone ?? ""],

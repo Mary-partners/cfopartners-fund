@@ -20,10 +20,13 @@ const TABS: { kind: EnquiryKind; label: string; note: string }[] = [
 /** Two enquiry forms behind an accessible tab switch; ?enquiry=sme preselects. */
 export function ContactForms() {
   const [active, setActive] = useState<EnquiryKind>("institutional");
+  const [offer, setOffer] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    const q = new URLSearchParams(window.location.search).get("enquiry");
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get("enquiry");
     if (q === "sme" || q === "institutional") setActive(q);
+    setOffer(params.get("offer") ?? undefined);
   }, []);
 
   function onKey(e: React.KeyboardEvent<HTMLButtonElement>) {
@@ -66,7 +69,8 @@ export function ContactForms() {
           hidden={active !== t.kind}
         >
           <p className="mb-4 text-[0.95rem] text-ink-2">{t.note}</p>
-          <EnquiryForm kind={t.kind} />
+          {/* Remount once the offer is read so the select picks up the default. */}
+          <EnquiryForm key={`${t.kind}-${offer ?? ""}`} kind={t.kind} defaultOffer={offer} />
         </div>
       ))}
     </div>

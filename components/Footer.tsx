@@ -24,6 +24,8 @@ const COLUMNS: { title: string; links: [string, string][] }[] = [
   {
     title: "Services",
     links: [
+      ["/portfolio-finance-system", "Portfolio Finance System"],
+      ["/90-day-financial-performance-system", "90-Day Financial Performance System"],
       ["/fractional-cfo-services", "Fractional CFO Services"],
       ["/investment-readiness", "Investment Readiness"],
       ["/access-to-finance-advisory", "Access to Finance Advisory"],

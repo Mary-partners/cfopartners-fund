@@ -59,6 +59,22 @@ export interface Step {
   detail: string;
 }
 
+/** A packaged offer featured on a service or audience page. */
+export interface FeaturedOffer {
+  title: string;
+  text: string;
+  points?: string[];
+  href: string;
+  cta: string;
+}
+
+/** A buyer question answered with practical deliverables (audience pages). */
+export interface KeyQuestion {
+  q: string;
+  a: string;
+  deliverables: string[];
+}
+
 export interface Evidence {
   title: string;
   text: string;
@@ -106,6 +122,8 @@ export interface ServiceContent {
   cta: { kind: EnquiryKind; label: string };
   /** Shown as a status label where the service includes a digital tool. */
   status?: "Available" | "Delivered within engagements" | "In development";
+  /** A packaged offer that is the usual way to start this service. */
+  featuredOffer?: FeaturedOffer;
 }
 
 export interface AudienceContent {
@@ -126,4 +144,7 @@ export interface AudienceContent {
   faqs: Faq[];
   cta: { kind: EnquiryKind; label: string };
   secondaryCta: { label: string; href: string };
+  featuredOffer?: FeaturedOffer;
+  /** Buyer questions this page answers, each with the deliverables involved. */
+  keyQuestions?: KeyQuestion[];
 }

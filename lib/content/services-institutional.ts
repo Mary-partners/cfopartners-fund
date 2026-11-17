@@ -174,6 +174,12 @@ export const INSTITUTIONAL_SERVICES: ServiceContent[] = [
     ],
     related: ["pre-post-investment-support", "portfolio-intelligence", "fractional-cfo-services"],
     audiences: ["investment-funds"],
+    featuredOffer: {
+      title: "Part of the Portfolio Finance System",
+      text: "This service is one component of our flagship for funds and programmes, which combines portfolio reporting, embedded finance support and risk monitoring. Start with a diagnostic, a 90-day pilot or an ongoing retainer.",
+      href: "/portfolio-finance-system",
+      cta: "Explore the Portfolio Finance System",
+    },
     cta: { kind: "institutional", label: "Discuss a Portfolio Support Mandate" },
     status: "Delivered within engagements",
   },
@@ -351,6 +357,12 @@ export const INSTITUTIONAL_SERVICES: ServiceContent[] = [
     ],
     related: ["portfolio-financial-management", "investment-readiness", "enterprise-development-technical-assistance"],
     audiences: ["investment-funds", "accelerators-development-partners"],
+    featuredOffer: {
+      title: "Part of the Portfolio Finance System",
+      text: "This service is one component of our flagship for funds and programmes, which combines portfolio reporting, embedded finance support and risk monitoring. Start with a diagnostic, a 90-day pilot or an ongoing retainer.",
+      href: "/portfolio-finance-system",
+      cta: "Explore the Portfolio Finance System",
+    },
     cta: { kind: "institutional", label: "Discuss a Portfolio Support Mandate" },
   },
 
@@ -849,6 +861,12 @@ export const INSTITUTIONAL_SERVICES: ServiceContent[] = [
     ],
     related: ["portfolio-financial-management", "pre-post-investment-support", "enterprise-development-technical-assistance"],
     audiences: ["investment-funds", "accelerators-development-partners"],
+    featuredOffer: {
+      title: "Part of the Portfolio Finance System",
+      text: "This service is one component of our flagship for funds and programmes, which combines portfolio reporting, embedded finance support and risk monitoring. Start with a diagnostic, a 90-day pilot or an ongoing retainer.",
+      href: "/portfolio-finance-system",
+      cta: "Explore the Portfolio Finance System",
+    },
     cta: { kind: "institutional", label: "Discuss a Portfolio Support Mandate" },
     status: "Delivered within engagements",
   },

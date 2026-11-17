@@ -10,12 +10,13 @@ export const AUDIENCES: AudienceContent[] = [
     slug: "investment-funds",
     name: "Investment Funds & DFIs",
     seo: {
-      title: "Portfolio Company CFO Support in Africa | CFOIP",
+      title: "Finance Support for Funds & DFIs in East Africa | CFOIP",
       description:
-        "Portfolio financial management, investment readiness and fractional CFO support for funds, DFIs and lenders investing in SMEs in Kenya and East Africa.",
-      primaryKeyword: "portfolio company CFO support Africa",
+        "Embedded CFO support, portfolio reporting and post-investment financial management for funds, DFIs and lenders investing in SMEs in Kenya and East Africa.",
+      primaryKeyword: "finance support for investment funds and DFIs in East Africa",
       secondaryKeywords: [
-        "portfolio financial management",
+        "SME fund portfolio support Kenya",
+        "impact fund portfolio support East Africa",
         "post-investment support East Africa",
         "SME fund portfolio reporting",
         "DFI technical assistance Kenya",
@@ -115,11 +116,54 @@ export const AUDIENCES: AudienceContent[] = [
         a: "Yes. Many funds already run a technical assistance facility or have portfolio managers in place. We can take on a defined part of the work, such as the diagnostic, financial reporting support or fractional CFO capacity for selected companies, and report into your existing structure. We agree roles at the start so companies are not asked for the same information twice. We can also help you decide which companies would benefit most from TA before you commit budget.",
       },
     ],
-    cta: { kind: "institutional", label: "Discuss a Portfolio Support Mandate" },
+    cta: { kind: "institutional", label: "Discuss a Portfolio Finance Pilot" },
     secondaryCta: {
       label: "Explore Our Portfolio Services",
       href: "/portfolio-financial-management",
     },
+    featuredOffer: {
+      title: "Portfolio Finance System",
+      text: "Our flagship for funds: one reporting standard across your companies, embedded finance support where it is needed, and a monthly view of performance, cash runway and risk. Start with a diagnostic, a 90-day pilot or an ongoing retainer.",
+      points: [
+        "Portfolio Diagnostic: 4 to 6 weeks",
+        "90-Day Portfolio Finance Implementation: a defined pilot",
+        "Embedded Portfolio CFO Retainer: ongoing oversight",
+      ],
+      href: "/portfolio-finance-system",
+      cta: "Explore portfolio company CFO support",
+    },
+    keyQuestions: [
+      {
+        q: "How does a fund monitor financial performance across its portfolio?",
+        a: "With one reporting standard that every company follows, checked for quality each month and summarised in a portfolio dashboard with commentary. We set the standard up, help each company meet it, and run the monthly cycle with your team.",
+        deliverables: ["Reporting template and data dictionary", "Monthly data-quality checks", "Portfolio dashboard with analyst commentary", "Quarterly portfolio report"],
+      },
+      {
+        q: "What happens when portfolio companies lack senior finance leadership?",
+        a: "A CFOIP finance associate works inside the company for an agreed number of days each month, running the close, forecasts and board or lender reporting, and building the team so the company can take over.",
+        deliverables: ["Monthly management accounts", "13-week cash forecast", "Board and lender packs", "Finance-function improvement plan"],
+      },
+      {
+        q: "How can reporting be standardised across companies using different accounting systems?",
+        a: "Each company keeps its own system. We map every chart of accounts to one template, define each line in a data dictionary, and help companies produce the standard pack until they can do it alone.",
+        deliverables: ["Chart-of-accounts mapping per company", "Standard monthly reporting pack", "Data dictionary", "Submission calendar"],
+      },
+      {
+        q: "How can a fund identify liquidity and financial management risks early?",
+        a: "By tracking a small set of indicators against agreed thresholds every month: cash runway, covenant headroom, customer concentration, margin trend and receivables ageing. Companies that cross a threshold go onto a watch-list with the drivers and a recommended response.",
+        deliverables: ["Financial risk indicators per company", "Cash-runway watch-list", "Risk tiers across the portfolio", "Recommended responses"],
+      },
+      {
+        q: "What financial support should portfolio companies receive in the first 100 days after investment?",
+        a: "Reporting and covenant monitoring set up from day one, a cash forecast that reflects the new capital, basic controls over its use, and a finance plan the board agrees. We deliver this as a 100-day finance plan.",
+        deliverables: ["100-day finance plan", "Reporting and covenant set-up", "Use-of-funds controls", "Board-approved budget"],
+      },
+      {
+        q: "How can a technical assistance facility prioritise interventions across a portfolio?",
+        a: "Diagnose every company on the same instrument, rank them by financial risk and binding constraint, and fund the interventions that address the highest risks first. Each intervention is logged with an owner, status and result.",
+        deliverables: ["Portfolio diagnostic and scorecards", "Risk segmentation", "Prioritised intervention plan", "Intervention log for donor reporting"],
+      },
+    ],
   },
   {
     slug: "accelerators-development-partners",
@@ -235,6 +279,17 @@ export const AUDIENCES: AudienceContent[] = [
       label: "Explore Technical Assistance Services",
       href: "/enterprise-development-technical-assistance",
     },
+    featuredOffer: {
+      title: "Portfolio Finance System for cohorts",
+      text: "The same framework works for an enterprise cohort or a technical assistance programme: a diagnostic for every business, segmentation by need, hands-on financial management support, capacity building and financing readiness, with cohort-level reporting to your funders.",
+      points: [
+        "Cohort diagnostic and segmentation",
+        "Implementation support and capacity building",
+        "Cohort dashboard and reporting to funders",
+      ],
+      href: "/portfolio-finance-system",
+      cta: "Explore the Portfolio Finance System",
+    },
   },
   {
     slug: "growing-businesses",
@@ -346,5 +401,12 @@ export const AUDIENCES: AudienceContent[] = [
     ],
     cta: { kind: "sme", label: "Book a Financial Strategy Consultation" },
     secondaryCta: { label: "Take the Business Diagnostic", href: "/diagnostic" },
+    featuredOffer: {
+      title: "90-Day Financial Performance System",
+      text: "A fixed-scope way to start: in 90 days we set up reliable reporting, a 13-week cash forecast, profitability and pricing analysis, a budget and a management dashboard, then hand the system to your team.",
+      points: ["Fixed scope and defined deliverables", "Weekly-to-monthly routines your team owns", "Optional fractional CFO afterwards"],
+      href: "/90-day-financial-performance-system",
+      cta: "Explore the 90-Day System",
+    },
   },
 ];

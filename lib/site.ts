@@ -11,6 +11,7 @@ export const ORG = {
   name: "CFO Innovation Partners",
   shortName: "CFOIP",
   foundingYear: "2024",
+  tagline: "The finance partner for African investment portfolios and growing businesses",
   description:
     "CFO Innovation Partners (CFOIP) is a Nairobi-based advisory and implementation firm. We provide fractional CFO support, investment readiness and financial systems implementation for growing SMEs; portfolio financial management and post-investment support for investment funds and DFIs; and enterprise development, technical assistance and programme design for accelerators and development partners.",
   email: CONTACT_EMAIL,

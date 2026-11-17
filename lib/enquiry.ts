@@ -26,8 +26,34 @@ export const INSTITUTIONAL_SUPPORT = [
   "Not sure yet",
 ] as const;
 
+export const INSTITUTIONAL_OFFERS = [
+  "Portfolio Finance System: Portfolio Diagnostic",
+  "Portfolio Finance System: 90-day pilot",
+  "Portfolio Finance System: Embedded retainer",
+  "Individual services",
+  "Not sure yet",
+] as const;
+
+export const FINANCE_CAPACITY = [
+  "Most companies have no dedicated finance staff",
+  "Bookkeepers or accountants only",
+  "Finance managers in some companies",
+  "CFO-level finance leads in most companies",
+  "Not sure",
+] as const;
+
+export const SME_CHALLENGES = [
+  "Cash flow is tight or unpredictable",
+  "Reports are late or unreliable",
+  "Not sure which products or customers make money",
+  "Preparing for a loan or investment",
+  "No senior finance lead",
+  "Something else",
+] as const;
+
 export const SME_SUPPORT = [
-  "Fractional CFO",
+  "90-Day Financial Performance System",
+  "Fractional CFO (monthly)",
   "Investment readiness",
   "Access to finance (debt or grants)",
   "Financial modelling",
@@ -84,8 +110,10 @@ export const institutionalSchema = z.object({
   name: required(120, "your name"),
   email,
   orgType: z.enum(ORG_TYPES, { message: "Please choose an organisation type." }),
-  country: required(80, "a country"),
+  country: required(160, "your countries of operation"),
+  offer: z.enum(INSTITUTIONAL_OFFERS, { message: "Please choose how you would like to start." }),
   support: z.enum(INSTITUTIONAL_SUPPORT, { message: "Please choose the support you need." }),
+  capacity: z.enum(FINANCE_CAPACITY, { message: "Please describe the finance capacity in your companies." }),
   size: text(80).optional(),
   start: z.enum(START_OPTIONS, { message: "Please choose a start date." }),
   budget: z.enum(BUDGET_OPTIONS).optional(),
@@ -100,7 +128,9 @@ export const smeSchema = z.object({
   sector: required(100, "your sector"),
   country: required(80, "a country"),
   stage: z.enum(BUSINESS_STAGES, { message: "Please choose your business stage." }),
-  support: z.enum(SME_SUPPORT, { message: "Please choose the support you need." }),
+  challenge: z.enum(SME_CHALLENGES, { message: "Please choose your main financial challenge." }),
+  support: z.enum(SME_SUPPORT, { message: "Please choose what you are interested in." }),
+  timeline: z.enum(START_OPTIONS, { message: "Please choose a timeline." }),
   name: required(120, "your name"),
   email,
   phone: text(40).optional(),

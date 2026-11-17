@@ -17,6 +17,11 @@ const AUDIENCE_LINKS: NavLink[] = [
   { href: "/growing-businesses", label: "Growing Businesses", note: "Founders and finance leads" },
 ];
 
+const OFFER_LINKS: NavLink[] = [
+  { href: "/portfolio-finance-system", label: "Portfolio Finance System", note: "For funds and enterprise programmes" },
+  { href: "/90-day-financial-performance-system", label: "90-Day Financial Performance System", note: "For growing businesses" },
+];
+
 const BUSINESS_SERVICES: NavLink[] = [
   { href: "/fractional-cfo-services", label: "Fractional CFO Services" },
   { href: "/investment-readiness", label: "Investment Readiness" },
@@ -131,7 +136,14 @@ export function Nav() {
             <button type="button" className={triggerCls} aria-expanded={open === "services"} aria-controls="menu-services" onClick={() => toggle("services")}>
               Services <ChevronDown className="h-4 w-4" aria-hidden="true" />
             </button>
-            <div id="menu-services" hidden={open !== "services"} className="absolute left-1/2 top-full mt-2 w-[620px] [&:not([hidden])]:grid -translate-x-1/2 grid-cols-2 gap-4 rounded-card border border-line bg-white p-4 shadow-card">
+            <div id="menu-services" hidden={open !== "services"} className="absolute left-1/2 top-full mt-2 w-[640px] [&:not([hidden])]:grid -translate-x-1/2 grid-cols-2 gap-4 rounded-card border border-line bg-white p-4 shadow-card">
+              <div className="col-span-2 rounded-lg bg-bg-alt p-2">
+                <p className="mb-1 px-3 pt-1 text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-ink-2">Flagship offers</p>
+                <div className="grid grid-cols-2 gap-1">
+                  <MenuLinks links={OFFER_LINKS.slice(0, 1)} onNavigate={close} />
+                  <MenuLinks links={OFFER_LINKS.slice(1)} onNavigate={close} />
+                </div>
+              </div>
               <div>
                 <p className="mb-2 px-3 text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-ink-2">For businesses</p>
                 <MenuLinks links={BUSINESS_SERVICES} onNavigate={close} />
@@ -181,6 +193,10 @@ export function Nav() {
           <div>
             <p className="mb-2 px-3 text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-ink-2">Who we serve</p>
             <MenuLinks links={AUDIENCE_LINKS} onNavigate={close} />
+          </div>
+          <div>
+            <p className="mb-2 px-3 text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-ink-2">Flagship offers</p>
+            <MenuLinks links={OFFER_LINKS} onNavigate={close} />
           </div>
           <div>
             <p className="mb-2 px-3 text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-ink-2">Services for businesses</p>

@@ -5,8 +5,11 @@ import { ArrowRight, CheckCircle2 } from "lucide-react";
 import {
   BUDGET_OPTIONS,
   BUSINESS_STAGES,
+  FINANCE_CAPACITY,
+  INSTITUTIONAL_OFFERS,
   INSTITUTIONAL_SUPPORT,
   ORG_TYPES,
+  SME_CHALLENGES,
   SME_SUPPORT,
   START_OPTIONS,
 } from "@/lib/enquiry";
@@ -57,17 +60,19 @@ function Select({
   options,
   describedBy,
   invalid,
+  defaultValue,
 }: {
   id: string;
   options: readonly string[];
   describedBy?: string;
   invalid?: boolean;
+  defaultValue?: string;
 }) {
   return (
     <select
       id={id}
       name={id}
-      defaultValue=""
+      defaultValue={defaultValue && options.includes(defaultValue) ? defaultValue : ""}
       aria-describedby={describedBy}
       aria-invalid={invalid || undefined}
       className={inputCls}
@@ -90,10 +95,11 @@ function Select({
  */
 export function EnquiryForm({
   kind,
-  defaultSupport,
+  defaultOffer,
 }: {
   kind: EnquiryKind;
-  defaultSupport?: string;
+  /** Preselects the offer (institutional) or interest (business). */
+  defaultOffer?: string;
 }) {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [error, setError] = useState<{ field?: string; message: string } | null>(null);
@@ -127,7 +133,9 @@ export function EnquiryForm({
             email: get("email") ?? "",
             orgType: get("orgType"),
             country: get("country") ?? "",
+            offer: get("offer"),
             support: get("support"),
+            capacity: get("capacity"),
             size: get("size"),
             start: get("start"),
             budget: get("budget"),
@@ -141,7 +149,9 @@ export function EnquiryForm({
             sector: get("sector") ?? "",
             country: get("country") ?? "",
             stage: get("stage"),
+            challenge: get("challenge"),
             support: get("support"),
+            timeline: get("timeline"),
             name: get("name") ?? "",
             email: get("email") ?? "",
             phone: get("phone"),
@@ -167,7 +177,7 @@ export function EnquiryForm({
       }
       setStatus("sent");
       track(kind === "institutional" ? "institutional_enquiry" : "sme_enquiry", {
-        support: String(payload.support ?? ""),
+        support: String(("offer" in payload ? payload.offer : payload.support) ?? ""),
       });
     } catch {
       setStatus("error");
@@ -183,12 +193,22 @@ export function EnquiryForm({
         <CheckCircle2 className="mb-3 h-7 w-7 text-accent-2" aria-hidden="true" />
         <h3 className="mb-2 text-[1.2rem]">Thank you. Your enquiry has been sent.</h3>
         <p className="m-0 text-ink-2">
-          We reply within two working days. If it&rsquo;s urgent, email{" "}
+          We&rsquo;ll reply within two working days to set up a 30-minute
+          discovery call. If it&rsquo;s urgent, email{" "}
           <a className="font-semibold text-accent-2 underline" href={`mailto:${CONTACT_EMAIL}`}>
             {CONTACT_EMAIL}
           </a>
           .
         </p>
+        {kind === "sme" && (
+          <p className="mb-0 mt-3 text-ink-2">
+            While you wait, you can{" "}
+            <a className="font-semibold text-accent-2 underline" href="/diagnostic">
+              start the Business Diagnostic
+            </a>
+            .
+          </p>
+        )}
       </div>
     );
   }
@@ -215,16 +235,17 @@ export function EnquiryForm({
           <Field id={`${p}-orgType`} label="Organisation type" error={err("orgType")}>
             {(d) => <Select id={`${p}-orgType`} options={ORG_TYPES} describedBy={d} invalid={!!err("orgType")} />}
           </Field>
-          <Field id={`${p}-country`} label="Country" error={err("country")}>
-            {(d) => <input id={`${p}-country`} name={`${p}-country`} autoComplete="country-name" aria-describedby={d} aria-invalid={!!err("country") || undefined} className={inputCls} />}
+          <Field id={`${p}-country`} label="Countries of operation" error={err("country")} hint="For example, Kenya, Uganda and Rwanda.">
+            {(d) => <input id={`${p}-country`} name={`${p}-country`} aria-describedby={d} aria-invalid={!!err("country") || undefined} className={inputCls} />}
           </Field>
-          <Field id={`${p}-support`} label="Support required" error={err("support")}>
-            {(d) => (
-              <select id={`${p}-support`} name={`${p}-support`} defaultValue={defaultSupport ?? ""} aria-describedby={d} aria-invalid={!!err("support") || undefined} className={inputCls}>
-                <option value="" disabled>Choose one</option>
-                {INSTITUTIONAL_SUPPORT.map((o) => <option key={o} value={o}>{o}</option>)}
-              </select>
-            )}
+          <Field id={`${p}-offer`} label="How would you like to start?" error={err("offer")}>
+            {(d) => <Select id={`${p}-offer`} options={INSTITUTIONAL_OFFERS} describedBy={d} invalid={!!err("offer")} defaultValue={defaultOffer} />}
+          </Field>
+          <Field id={`${p}-support`} label="Main financial support needed" error={err("support")}>
+            {(d) => <Select id={`${p}-support`} options={INSTITUTIONAL_SUPPORT} describedBy={d} invalid={!!err("support")} />}
+          </Field>
+          <Field id={`${p}-capacity`} label="Finance capacity in your companies today" error={err("capacity")}>
+            {(d) => <Select id={`${p}-capacity`} options={FINANCE_CAPACITY} describedBy={d} invalid={!!err("capacity")} />}
           </Field>
           <Field id={`${p}-size`} label="Portfolio or cohort size" optional hint="For example, 12 portfolio companies or a cohort of 40.">
             {(d) => <input id={`${p}-size`} name={`${p}-size`} aria-describedby={d} className={inputCls} />}
@@ -250,13 +271,14 @@ export function EnquiryForm({
           <Field id={`${p}-stage`} label="Business stage" error={err("stage")}>
             {(d) => <Select id={`${p}-stage`} options={BUSINESS_STAGES} describedBy={d} invalid={!!err("stage")} />}
           </Field>
-          <Field id={`${p}-support`} label="Support required" error={err("support")}>
-            {(d) => (
-              <select id={`${p}-support`} name={`${p}-support`} defaultValue={defaultSupport ?? ""} aria-describedby={d} aria-invalid={!!err("support") || undefined} className={inputCls}>
-                <option value="" disabled>Choose one</option>
-                {SME_SUPPORT.map((o) => <option key={o} value={o}>{o}</option>)}
-              </select>
-            )}
+          <Field id={`${p}-challenge`} label="Main financial challenge" error={err("challenge")}>
+            {(d) => <Select id={`${p}-challenge`} options={SME_CHALLENGES} describedBy={d} invalid={!!err("challenge")} />}
+          </Field>
+          <Field id={`${p}-support`} label="What are you interested in?" error={err("support")}>
+            {(d) => <Select id={`${p}-support`} options={SME_SUPPORT} describedBy={d} invalid={!!err("support")} defaultValue={defaultOffer} />}
+          </Field>
+          <Field id={`${p}-timeline`} label="When would you like to start?" error={err("timeline")}>
+            {(d) => <Select id={`${p}-timeline`} options={START_OPTIONS} describedBy={d} invalid={!!err("timeline")} />}
           </Field>
           <Field id={`${p}-name`} label="Your name" error={err("name")}>
             {(d) => <input id={`${p}-name`} name={`${p}-name`} autoComplete="name" aria-describedby={d} aria-invalid={!!err("name") || undefined} className={inputCls} />}

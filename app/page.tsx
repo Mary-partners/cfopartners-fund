@@ -24,7 +24,7 @@ const PATHWAYS = [
       "Limited visibility into how portfolio companies are performing, inconsistent reporting, and thin finance capacity after investment.",
     solution:
       "Pre-investment assessments, standardised portfolio reporting, risk monitoring and fractional CFO support inside your companies.",
-    cta: "Discuss a Portfolio Support Mandate",
+    cta: "Discuss a Portfolio Finance Pilot",
     kind: "institutional",
   },
   {
@@ -108,6 +108,7 @@ export default function HomePage() {
       <main id="main">
         <Hero />
         <Pathways />
+        <Offers />
         <Deliver />
         <Method />
         <Experience />
@@ -127,8 +128,8 @@ function Hero() {
         <div className="grid items-center gap-12 lg:grid-cols-[1.15fr_1fr]">
           <div>
             <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 text-[0.82rem] font-semibold text-ink-2 shadow-sm">
-              <MapPin className="h-4 w-4 text-accent-2" aria-hidden="true" />
-              CFO Innovation Partners · Nairobi, Kenya
+              <MapPin className="h-4 w-4 flex-none text-accent-2" aria-hidden="true" />
+              The finance partner for African investment portfolios and growing businesses
             </span>
             <h1 className="mb-6">
               Financial Leadership. Investment Readiness.{" "}
@@ -236,13 +237,70 @@ function Pathways() {
   );
 }
 
+function Offers() {
+  const offers = [
+    {
+      audience: "For funds & enterprise programmes",
+      name: "Portfolio Finance System",
+      text: "A repeatable framework for strengthening financial management across multiple enterprises: diagnostics, one reporting standard, cash and risk monitoring, a portfolio dashboard and embedded finance support where it is needed.",
+      steps: ["Portfolio Diagnostic", "90-Day Implementation", "Embedded Retainer"],
+      stepsLabel: "Three ways to start",
+      href: "/portfolio-finance-system",
+      cta: "Explore Portfolio Finance Support",
+    },
+    {
+      audience: "For growing businesses",
+      name: "90-Day Financial Performance System",
+      text: "A defined implementation engagement that improves financial visibility, forecasting, management reporting and decision-making, with an optional fractional CFO afterwards.",
+      steps: ["Diagnose", "Cash forecast", "Profitability", "Budget", "Dashboard", "Roadmap"],
+      stepsLabel: "In 90 days",
+      href: "/90-day-financial-performance-system",
+      cta: "Explore the 90-Day System",
+    },
+  ];
+  return (
+    <Section id="offers" tone="alt">
+      <SectionHeading
+        eyebrow="Flagship offers"
+        title="Structured Financial Support. From Diagnosis to Implementation."
+        intro="Two clearly defined ways to start working with us. Both are delivered by our team as advisory and implementation services."
+      />
+      <ul className="m-0 grid list-none gap-5 p-0 lg:grid-cols-2">
+        {offers.map((o) => (
+          <li key={o.href} className="flex flex-col rounded-card border-2 border-ink bg-white p-7">
+            <p className="mb-2 text-[0.8rem] font-semibold uppercase tracking-[0.1em] text-accent-2">{o.audience}</p>
+            <h3 className="mb-3 text-[1.5rem]">
+              <Link href={o.href} className="hover:underline">{o.name}</Link>
+            </h3>
+            <p className="mb-5 text-[0.98rem] leading-7 text-ink-2">{o.text}</p>
+            <p className="mb-2 text-[0.75rem] font-semibold uppercase tracking-[0.06em] text-ink">{o.stepsLabel}</p>
+            <ol className="mb-6 flex list-none flex-wrap gap-2 p-0">
+              {o.steps.map((s, i) => (
+                <li key={s} className="rounded-full border border-line bg-bg-alt px-3 py-1 text-[0.82rem] font-medium text-ink">
+                  {o.stepsLabel === "In 90 days" ? `${i + 1}. ` : ""}{s}
+                </li>
+              ))}
+            </ol>
+            <Link
+              href={o.href}
+              className="mt-auto inline-flex items-center gap-2 self-start rounded-full bg-ink px-6 py-3.5 text-[0.95rem] font-semibold text-white hover:bg-ink-2"
+            >
+              {o.cta} <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </Section>
+  );
+}
+
 function Deliver() {
   return (
-    <Section id="services" tone="alt">
+    <Section id="services">
       <SectionHeading
         eyebrow="What we deliver"
         title="Financial analysis connected to practical implementation"
-        intro="We design systems and programmes as well as advise: the models, reports, controls and dashboards stay with you after the engagement."
+        intro="Not every client needs a 90-day implementation. Each service is also available on its own, and the models, reports, controls and dashboards stay with you after the engagement."
       />
       <ul className="m-0 grid list-none gap-4 p-0 md:grid-cols-2 lg:grid-cols-3">
         {DELIVER.map((d) => (
@@ -267,7 +325,7 @@ function Deliver() {
 
 function Method() {
   return (
-    <Section id="approach">
+    <Section id="approach" tone="alt">
       <SectionHeading
         eyebrow="How we work"
         title="Diagnose. Interpret. Recommend. Advise. Execute. Track."
@@ -310,7 +368,7 @@ function Experience() {
     },
   ];
   return (
-    <Section tone="alt">
+    <Section>
       <SectionHeading
         eyebrow="Experience"
         title="Work our founder has led"
@@ -338,7 +396,7 @@ function Experience() {
 
 function Tools() {
   return (
-    <Section>
+    <Section tone="alt">
       <SectionHeading
         eyebrow="Digital tools"
         title="Tools that support our advisors"
@@ -362,7 +420,7 @@ function Tools() {
 function Insights() {
   const latest = POSTS.slice(0, 3);
   return (
-    <Section tone="alt">
+    <Section>
       <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
         <div className="max-w-[720px]">
           <span className="mb-3 inline-block text-[0.8rem] font-semibold uppercase tracking-[0.1em] text-accent-2">Insights</span>
@@ -399,18 +457,18 @@ function FinalCta() {
         <div className="rounded-card border border-white/15 bg-white/5 p-7">
           <p className="mb-2 text-[0.8rem] font-semibold uppercase tracking-[0.1em] text-accent">For institutions</p>
           <h2 className="mb-3 text-[1.6rem] text-white">Supporting a portfolio or a cohort?</h2>
-          <p className="mb-6 text-slate-300">Tell us about it and we&rsquo;ll scope a mandate with you.</p>
-          <Link href="/contact?enquiry=institutional#enquiry" className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3.5 text-[0.95rem] font-semibold text-ink hover:bg-white">
-            Discuss a Mandate <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          <p className="mb-6 text-slate-300">Start with a diagnostic or a 90-day pilot. Tell us about your portfolio and we&rsquo;ll scope it with you.</p>
+          <Link href="/contact?enquiry=institutional&offer=Portfolio%20Finance%20System%3A%2090-day%20pilot#enquiry" className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3.5 text-[0.95rem] font-semibold text-ink hover:bg-white">
+            Discuss a Portfolio Finance Pilot <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
         </div>
         <div className="rounded-card border border-white/15 bg-white/5 p-7">
           <p className="mb-2 text-[0.8rem] font-semibold uppercase tracking-[0.1em] text-accent">For businesses</p>
           <h2 className="mb-3 text-[1.6rem] text-white">Need a clear view of your numbers?</h2>
-          <p className="mb-6 text-slate-300">Request a financial assessment, or start with the free diagnostic.</p>
+          <p className="mb-6 text-slate-300">Plan your 90 days with us, or start with the diagnostic.</p>
           <div className="flex flex-wrap gap-3">
-            <Link href="/contact?enquiry=sme#enquiry" className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3.5 text-[0.95rem] font-semibold text-ink hover:bg-white">
-              Request a Financial Assessment <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            <Link href="/contact?enquiry=sme&offer=90-Day%20Financial%20Performance%20System#enquiry" className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3.5 text-[0.95rem] font-semibold text-ink hover:bg-white">
+              Discuss Your 90-Day Financial Plan <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
             <a href="/diagnostic" className="inline-flex items-center gap-2 rounded-full border-[1.5px] border-white/50 px-6 py-3.5 text-[0.95rem] font-semibold text-white hover:bg-white hover:text-ink">
               Take the Business Diagnostic

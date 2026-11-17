@@ -174,6 +174,13 @@ export const BUSINESS_SERVICES: ServiceContent[] = [
     related: ["financial-systems", "financial-modelling", "investment-readiness"],
     audiences: ["growing-businesses", "investment-funds"],
     cta: { kind: "sme", label: "Book a Financial Strategy Consultation" },
+    featuredOffer: {
+      title: "Start with the 90-Day Financial Performance System",
+      text: "Most businesses start with a fixed-scope 90-day engagement that sets up reporting, a cash forecast, profitability analysis, a budget and a dashboard. Afterwards you can continue with a fractional CFO for an agreed number of days a month. Businesses that already have reliable systems can start with the monthly retainer directly.",
+      points: ["90 days, fixed scope", "Ten defined deliverables", "Optional monthly fractional CFO afterwards"],
+      href: "/90-day-financial-performance-system",
+      cta: "Explore the 90-Day System",
+    },
   },
 
   // ---------------------------------------------------------------------------

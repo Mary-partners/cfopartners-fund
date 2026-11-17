@@ -22,6 +22,8 @@ import {
 import type {
   AudienceContent,
   Evidence,
+  FeaturedOffer,
+  KeyQuestion,
   ServiceContent,
   Step,
 } from "@/lib/content/types";
@@ -168,6 +170,68 @@ function Process({ steps, intro }: { steps: Step[]; intro: string }) {
   );
 }
 
+function FeaturedOfferBlock({ f }: { f: FeaturedOffer }) {
+  return (
+    <section className="bg-white pt-[56px]">
+      <div className="mx-auto max-w-[1180px] px-6">
+        <div className="grid gap-6 rounded-card border-2 border-ink bg-white p-7 md:grid-cols-[1.4fr_1fr] md:p-9">
+          <div>
+            <span className="mb-2 inline-block text-[0.8rem] font-semibold uppercase tracking-[0.1em] text-accent-2">
+              Flagship offer
+            </span>
+            <h2 className="mb-3 text-[1.6rem]">{f.title}</h2>
+            <p className="m-0 text-[1rem] leading-7 text-ink-2">{f.text}</p>
+          </div>
+          <div className="flex flex-col justify-between gap-5">
+            {f.points && (
+              <ul className="m-0 grid list-none gap-2 p-0">
+                {f.points.map((pt) => (
+                  <li key={pt} className="flex gap-2.5 text-[0.93rem] text-ink-2">
+                    <Check className="mt-1 h-4 w-4 flex-none text-accent-2" aria-hidden="true" />
+                    <span>{pt}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <Link
+              href={f.href}
+              className="inline-flex items-center justify-between gap-2 self-start rounded-full bg-ink px-6 py-3.5 text-[0.95rem] font-semibold text-white hover:bg-ink-2"
+            >
+              {f.cta} <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function KeyQuestions({ items }: { items: KeyQuestion[] }) {
+  return (
+    <Section tone="alt" id="questions">
+      <SectionHeading
+        eyebrow="Questions we answer"
+        title="How we help, question by question"
+        intro="The questions investment and portfolio teams ask us most, and the practical work behind each answer."
+      />
+      <div className="grid gap-5 lg:grid-cols-2">
+        {items.map((k) => (
+          <article key={k.q} className="rounded-card border border-line bg-white p-6">
+            <h3 className="mb-3 text-[1.15rem] leading-snug">{k.q}</h3>
+            <p className="mb-4 text-[0.95rem] leading-7 text-ink-2">{k.a}</p>
+            <p className="mb-2 text-[0.75rem] font-semibold uppercase tracking-[0.06em] text-ink">What we deliver</p>
+            <ul className="m-0 grid gap-1 pl-5 text-[0.92rem] text-ink-2">
+              {k.deliverables.map((d) => (
+                <li key={d}>{d}</li>
+              ))}
+            </ul>
+          </article>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
 function EvidenceBlock({ e }: { e: Evidence }) {
   return (
     <Section>
@@ -248,6 +312,8 @@ function ServicePage({ s }: { s: ServiceContent }) {
           status={s.status}
           aside={<FactCard title="At a glance" facts={s.atAGlance} />}
         />
+
+        {s.featuredOffer && <FeaturedOfferBlock f={s.featuredOffer} />}
 
         <Section>
           <div className="grid gap-12 md:grid-cols-2">
@@ -358,6 +424,8 @@ function AudiencePage({ a }: { a: AudienceContent }) {
           }
         />
 
+        {a.featuredOffer && <FeaturedOfferBlock f={a.featuredOffer} />}
+
         <Section>
           <SectionHeading eyebrow="The problem" title="What we hear most often" />
           <ul className="m-0 grid list-none gap-4 p-0 md:grid-cols-2">
@@ -368,6 +436,8 @@ function AudiencePage({ a }: { a: AudienceContent }) {
             ))}
           </ul>
         </Section>
+
+        {a.keyQuestions && <KeyQuestions items={a.keyQuestions} />}
 
         <ServiceCards services={servicesBySlug(a.services)} eyebrow="Services" title="How we can help" />
 

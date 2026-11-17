@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     template: "%s",
   },
   description:
-    "Nairobi-based advisory and implementation firm. Fractional CFO services, investment readiness and portfolio financial support for investment funds, accelerators, development partners and growing businesses.",
+    "The finance partner for African investment portfolios and growing businesses: embedded CFO support, investment readiness and portfolio financial management, from Nairobi.",
   // Title and description are left out of openGraph/twitter here so each
   // page's own title and description are used for link previews instead of
   // the homepage's.
