@@ -1,6 +1,6 @@
 /**
  * Executive Rooms: the seven business functions that make up the
- * CFO Partners platform. Each room pairs an AI assistant with named
+ * CFO Innovation Partners site. Each room groups the questions, support and
  * tools (templates, calculators, checklists) and an escalation path
  * to human experts when needed.
  *
@@ -338,16 +338,16 @@ export const ROOMS: Room[] = [
     assistant: "Vetted practitioners",
     iconKey: "users",
     blurb:
-      "When AI isn't enough: tax, accounting cleanup, legal, fundraising, credit readiness, strategy workshops, operational implementation. The Sndbx model, rebuilt digitally.",
+      "Specialist support when an engagement needs it: tax and accounting clean-up, legal, credit readiness, strategy workshops and operational implementation.",
     longBlurb:
-      "AI handles the first layer. Sometimes you need a real human: a tax advisor to clean up three years of filings, a lawyer to draft a shareholders' agreement, or a senior CFO to walk you through your first capital raise. The Expert Marketplace gives you direct booking access to vetted East African practitioners, and CFO Partners stands behind every recommendation.",
+      "Some problems need a specialist: a tax advisor to clean up three years of filings, a lawyer to draft a shareholders' agreement, or a senior finance practitioner for your first capital raise. Where an engagement needs one, we arrange the right practitioner as part of the work.",
     prompt:
-      "Book a 45-minute session with a vetted CFO, accountant, or strategist.",
+      "Who should I talk to about cleaning up three years of tax filings?",
     helps: [
       "Tax cleanup & KRA negotiation",
       "Accounting catch-up & audit prep",
       "Legal: contracts, IP, shareholders' agreements",
-      "Fundraising & investor introductions",
+      "Fundraising preparation",
       "Credit readiness & loan applications",
       "Operational implementation sprints",
     ],
@@ -355,19 +355,19 @@ export const ROOMS: Room[] = [
       {
         name: "Tax & Accounting Expert",
         description:
-          "Vetted KRA-fluent accountants for monthly bookkeeping, tax cleanup, and audit preparation.",
+          "Accountants for monthly bookkeeping, tax clean-up and audit preparation.",
         tier: "Expert",
       },
       {
         name: "Legal & Compliance Expert",
         description:
-          "Contracts, IP protection, shareholders' agreements, and employment law, booked by the hour or by the engagement.",
+          "Contracts, IP protection, shareholders' agreements and employment law.",
         tier: "Expert",
       },
       {
         name: "Fundraising Advisor",
         description:
-          "Senior practitioners who have raised from DFIs, banks, and angels in East Africa. Pitch coaching and introductions.",
+          "Preparation for conversations with DFIs, banks and angel investors: materials, pitch practice and data-room readiness.",
         tier: "Expert",
       },
       {

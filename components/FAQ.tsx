@@ -10,7 +10,7 @@ interface FAQItem {
 
 const FAQ_ITEMS: FAQItem[] = [
   {
-    q: "How is CFO Partners different from accounting software?",
+    q: "How is CFO Innovation Partners different from accounting software?",
     a: "Accounting software records what already happened. We help you decide what to do next. Our diagnostics show where the business stands, our advisory names what is blocking growth, and our execution support helps you fix it. Many of our clients use QuickBooks or Zoho alongside us; the two solve different problems.",
   },
   {
@@ -19,7 +19,7 @@ const FAQ_ITEMS: FAQItem[] = [
   },
   {
     q: "My business is pre-revenue. Is this for me?",
-    a: "Yes. The Business Growth Check-Up covers idea-stage and early-revenue businesses, and around a third of our Q2 2026 cohort was at that stage. The earlier you put structure in place, the cheaper it is to build.",
+    a: "Yes. The Business Growth Check-Up covers idea-stage and early-revenue businesses. The earlier you put structure in place, the cheaper it is to build.",
   },
   {
     q: "How long does it take to get started?",
@@ -31,15 +31,11 @@ const FAQ_ITEMS: FAQItem[] = [
   },
   {
     q: "Do you work with accelerators, banks, and investors?",
-    a: "Yes. Our Portfolio Intelligence Platform serves institutions that support many businesses at once: cohort diagnostics, readiness scoring, founder segmentation, and progress tracking. Write to us to discuss a partnership.",
+    a: "Yes. We support funds, lenders, DFIs, accelerators and development partners with financial diagnostics across a portfolio or cohort, investment-readiness assessments, fractional CFO support inside portfolio companies, and portfolio reporting built for each engagement. Write to us to discuss a mandate.",
   },
   {
     q: "What happens after I complete the free diagnostic?",
     a: "You receive your archetype classification, a six-pillar scorecard, and a written recommendation on what to fix first. Every completed diagnostic is routed to a named next step. There is no obligation to buy anything.",
-  },
-  {
-    q: "Can I cancel a subscription?",
-    a: "Yes. Monthly plans can be cancelled at any time and you keep access until the end of the billing period. Sprint and review engagements are one-time purchases with no ongoing commitment.",
   },
 ];
 

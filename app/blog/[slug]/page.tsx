@@ -21,9 +21,9 @@ export function generateMetadata({
   params: { slug: string };
 }): Metadata {
   const post = postFor(params.slug);
-  if (!post) return { title: "Post not found | CFO Partners" };
+  if (!post) return { title: "Post not found | CFO Innovation Partners" };
   return {
-    title: `${post.title} | CFO Partners`,
+    title: `${post.title} | CFO Innovation Partners`,
     description: post.excerpt,
   };
 }

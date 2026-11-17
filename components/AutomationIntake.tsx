@@ -300,7 +300,7 @@ export function AutomationIntake() {
             type="button"
             disabled={!stepValid() || state === "busy"}
             onClick={submit}
-            className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3.5 text-[0.92rem] font-semibold text-white transition-all hover:bg-accent-2 disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex items-center gap-2 rounded-full bg-accent-2 px-6 py-3.5 text-[0.92rem] font-semibold text-white transition-all hover:bg-ink disabled:cursor-not-allowed disabled:opacity-40"
           >
             {state === "busy" ? "Sending..." : "Send my automation brief"}
             <ArrowRight className="h-4 w-4" />

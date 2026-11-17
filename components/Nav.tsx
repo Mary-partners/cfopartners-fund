@@ -103,7 +103,7 @@ export function Nav() {
           onClick={closeAll}
           className="font-serif text-[1.25rem] font-semibold text-ink"
         >
-          CFO<span className="text-accent">Partners</span>
+          CFO<span className="text-accent-2">Partners</span>
         </Link>
 
         {/* DESKTOP */}
@@ -135,13 +135,6 @@ export function Nav() {
               {l.label}
             </Link>
           ))}
-          <Link
-            href="/os"
-            onClick={closeAll}
-            className="rounded-full border-[1.5px] border-ink px-4 py-1.5 text-[0.85rem] font-semibold text-ink transition-colors hover:bg-ink hover:text-white"
-          >
-            Access your OS
-          </Link>
           <CheckupTrigger variant="primary">Free Check-Up</CheckupTrigger>
         </div>
 
@@ -252,7 +245,6 @@ export function Nav() {
             { href: "/resources", label: "Resources" },
             { href: "/#institutional", label: "For Institutions" },
             { href: "/contact", label: "Contact" },
-            { href: "/os", label: "Access your OS" },
           ].map((l) => (
             <Link
               key={l.href}
@@ -360,11 +352,10 @@ function ServicesPanel({ onNavigate }: { onNavigate: () => void }) {
           <Building2 className="h-5 w-5 text-accent" />
           <span>
             <span className="block text-[0.95rem] font-semibold">
-              Portfolio Intelligence Platform
+              Portfolio and programme support
             </span>
-            <span className="block text-[0.82rem] text-white/60">
-              For banks, accelerators, DFIs, foundations, and ecosystem
-              builders
+            <span className="block text-[0.82rem] text-white/70">
+              For funds, lenders, DFIs, accelerators and development partners
             </span>
           </span>
         </span>
@@ -408,7 +399,7 @@ function RoomsPanel({ onNavigate }: { onNavigate: () => void }) {
       </div>
       <div className="mt-4 flex items-center justify-between rounded-2xl border border-line bg-bg-alt px-6 py-3.5">
         <span className="text-[0.88rem] text-ink-2">
-          Each room pairs an AI assistant with named tools and human experts.
+          Each room covers one area of your business, with the questions and support for it.
         </span>
         <Link
           href="/#rooms"

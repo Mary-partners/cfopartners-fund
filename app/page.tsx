@@ -1,7 +1,6 @@
 import {
   ArrowRight,
   BarChart3,
-  Brain,
   Briefcase,
   Building2,
   Check,
@@ -12,7 +11,6 @@ import {
   Megaphone,
   Phone,
   ShieldCheck,
-  Sparkles,
   Users,
   Wrench,
 } from "lucide-react";
@@ -21,8 +19,6 @@ import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { CheckupTrigger } from "@/components/CheckupTrigger";
 import { Reveal } from "@/components/Reveal";
-import { Counter } from "@/components/Counter";
-import { SectorChart } from "@/components/SectorChart";
 import { FAQ } from "@/components/FAQ";
 import { RoomFinder } from "@/components/RoomFinder";
 import { Button } from "@/components/ui/button";
@@ -30,15 +26,11 @@ import { Card } from "@/components/ui/card";
 import { ROOMS } from "@/lib/rooms";
 import { ServicesShowcase } from "@/components/ServicesShowcase";
 import {
-  HEADLINE_STATS,
+  FOUNDER_EXPERIENCE,
   CORE_BELIEF,
   ADVISORY_MODEL,
   CASE_STUDIES,
   MARKET_INSIGHTS,
-  TRACK_RECORD,
-  CHALLENGE_STATS,
-  RESULTS_TABLE,
-  SECTORS_SERVED,
 } from "@/lib/impact";
 import { POSTS } from "@/lib/blog";
 import { BlogCover } from "@/components/BlogCover";
@@ -55,15 +47,11 @@ export default function HomePage() {
       <Nav />
       <Hero />
       <CoreBelief />
-      <Challenge />
-      <Stats />
       <AdvisoryModel />
       <Services />
       <ExecutiveRooms />
       <FinderSection />
       <Insight />
-      <CohortSection />
-      <Results />
       <Institutional />
       <CaseStudies />
       <RunByExperts />
@@ -85,41 +73,44 @@ function Hero() {
         <div className="grid items-center gap-12 lg:grid-cols-[1.15fr_1fr]">
           <div>
             <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 text-[0.82rem] font-semibold text-ink-2 shadow-sm">
-              <Sparkles className="h-4 w-4 text-accent" />
-              The AI-powered executive support platform for African businesses
+              <MapPin className="h-4 w-4 text-accent-2" />
+              CFO Innovation Partners · Nairobi, Kenya
             </span>
             <h1 className="mb-6">
-              Your business needs more than advice.{" "}
-              <span className="text-accent">
-                It needs an executive system.
+              Financial Leadership. Investment Readiness.{" "}
+              <span className="text-accent-2">
+                Stronger African Businesses.
               </span>
             </h1>
             <p className="mb-8 text-[1.1rem] text-ink-2">
-              Most African founders are forced to act as CEO, CFO, COO, CMO,
-              salesperson, accountant, and strategist all at once. CFO
-              Partners gives you AI-powered executive assistants, practical
-              business tools, diagnostics, and expert support in one platform,
-              so you can build a business that is structured, bankable,
-              fundable, and scalable.
+              CFO Innovation Partners works with investment funds,
+              accelerators, development partners and growing businesses to
+              strengthen financial management, prepare enterprises for
+              financing and improve portfolio performance.
             </p>
             <div className="mb-6 flex flex-wrap items-center gap-3">
-              <CheckupTrigger variant="accent">
-                Take the free Business Growth Check-Up
-              </CheckupTrigger>
               <a
-                href="#rooms"
-                className="inline-flex items-center justify-center gap-2 rounded-full border-[1.5px] border-ink bg-transparent px-[22px] py-[14px] text-[0.95rem] font-semibold text-ink transition-all hover:bg-ink hover:text-white"
+                href="#services"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-[22px] py-[14px] text-[0.95rem] font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-ink-2 hover:shadow-card"
               >
-                See the Executive Rooms
+                Explore Our Services
                 <ArrowRight className="h-4 w-4" />
               </a>
+              <a
+                href="#institutional"
+                className="inline-flex items-center justify-center gap-2 rounded-full border-[1.5px] border-ink bg-transparent px-[22px] py-[14px] text-[0.95rem] font-semibold text-ink transition-all hover:bg-ink hover:text-white"
+              >
+                Discuss a Partnership
+              </a>
             </div>
-            <p className="text-[0.88rem] text-ink-3">
-              <strong className="font-semibold text-ink-2">
-                10-minute assessment
-              </strong>{" "}
-              · 6 pillars · No credit card · Get your archetype and tier match
-              instantly
+            <p className="text-[0.92rem] text-ink-2">
+              Running a growing business?{" "}
+              <CheckupTrigger
+                variant="ghost"
+                className="!inline !p-0 font-semibold text-accent-2 underline underline-offset-4 hover:text-ink"
+              >
+                Take the free Business Growth Check-Up
+              </CheckupTrigger>
             </p>
           </div>
 
@@ -136,31 +127,32 @@ function HeroImpactCard() {
     <Card className="rounded-3xl border-2 border-line bg-white p-8 shadow-card">
       <div className="mb-2 flex items-center gap-2 text-[0.75rem] font-semibold uppercase tracking-[0.08em] text-accent-2">
         <BarChart3 className="h-3.5 w-3.5" />
-        Q2 2026 Impact · CFOIP Cohort
+        Founder experience
       </div>
-      <h3 className="mb-6 font-serif text-[1.3rem] leading-tight">
-        A diagnostic-led pipeline with measurable founder outcomes.
-      </h3>
-      <div className="grid grid-cols-2 gap-5">
-        {HEADLINE_STATS.map((s) => (
+      <h2 className="mb-6 font-serif text-[1.3rem] leading-tight">
+        Led by Mary Ndinda, Founder &amp; Managing Partner.
+      </h2>
+      <dl className="grid grid-cols-2 gap-5">
+        {FOUNDER_EXPERIENCE.map((s) => (
           <div key={s.label}>
-            <div className="font-serif text-[2rem] font-semibold leading-none text-ink">
-              {s.num}
-            </div>
-            <div className="mt-1.5 text-[0.85rem] font-medium text-ink-2">
-              {s.label}
-            </div>
-            {s.note && (
-              <div className="mt-0.5 text-[0.72rem] text-ink-3">{s.note}</div>
-            )}
+            <dt className="sr-only">{s.label}</dt>
+            <dd className="m-0">
+              <div className="font-serif text-[2rem] font-semibold leading-none text-ink">
+                {s.num}
+              </div>
+              <div className="mt-1.5 text-[0.85rem] font-medium text-ink-2">
+                {s.label}
+              </div>
+            </dd>
           </div>
         ))}
-      </div>
+      </dl>
       <div className="mt-6 border-t border-line pt-5">
-        <p className="m-0 text-[0.85rem] italic text-ink-3">
-          Q2 2026 actuals from our published Monitoring, Evaluation and Impact
-          Report. The second half of the year traditionally produces higher
-          submission volumes.
+        <p className="m-0 text-[0.8rem] text-ink-2">
+          Figures reflect the founder&rsquo;s professional experience,
+          including work before CFO Innovation Partners was established.
+          Investment recommendations are proposals for investor
+          consideration, not capital raised.
         </p>
       </div>
     </Card>
@@ -195,33 +187,6 @@ function CoreBelief() {
               {CORE_BELIEF.tagline}
             </p>
           </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ============================================================
-// STATS strip
-// ============================================================
-function Stats() {
-  return (
-    <section className="border-b border-line bg-bg-alt py-[60px]">
-      <div className="mx-auto max-w-[1180px] px-6">
-        <div className="grid grid-cols-2 gap-y-9 text-center sm:grid-cols-4 sm:gap-6">
-          {HEADLINE_STATS.map((s) => (
-            <div key={s.label}>
-              <div className="font-serif text-[clamp(2rem,4vw,2.8rem)] font-semibold leading-none text-ink">
-                <Counter value={s.num} />
-              </div>
-              <div className="mt-2 text-[0.95rem] font-medium text-ink-2">
-                {s.label}
-              </div>
-              {s.note && (
-                <div className="mt-1 text-[0.78rem] text-ink-3">{s.note}</div>
-              )}
-            </div>
-          ))}
         </div>
       </div>
     </section>
@@ -286,15 +251,15 @@ function ExecutiveRooms() {
     <section id="rooms" className="bg-bg-alt py-[90px]">
       <div className="mx-auto max-w-[1180px] px-6">
         <span className="mb-3 inline-block text-[0.8rem] font-semibold uppercase tracking-[0.1em] text-accent-2">
-          The platform architecture
+          Focus areas
         </span>
         <h2 className="mb-5 max-w-[820px]">
-          Seven Executive Rooms. One digital business support house.
+          Seven areas of a growing business, one advisory team.
         </h2>
         <p className="mb-[60px] max-w-[760px] text-[1.1rem] text-ink-2">
-          Each room pairs an AI executive assistant with named tools,
-          templates, and human experts. Step into the room your business needs
-          next, guided by your diagnostic.
+          Each Executive Room brings together the questions, practical
+          resources and specialist support for one area of your business.
+          Start with the one your diagnostic points to.
         </p>
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
           {ROOMS.map((r) => {
@@ -319,15 +284,15 @@ function ExecutiveRooms() {
                   <h3 className="mb-2 text-[1.2rem]">{r.name}</h3>
                   <p className="mb-4 text-[0.95rem] text-ink-2">{r.blurb}</p>
                   <div className="rounded-xl border border-line bg-bg-alt p-4">
-                    <div className="mb-1 flex items-center gap-2 text-[0.75rem] font-semibold uppercase tracking-[0.06em] text-ink-3">
-                      <Brain className="h-3.5 w-3.5" /> AI: {r.assistant}
+                    <div className="mb-1 text-[0.75rem] font-semibold uppercase tracking-[0.06em] text-ink-2">
+                      A question we help answer
                     </div>
                     <p className="m-0 font-serif text-[0.95rem] italic leading-snug text-ink">
                       &ldquo;{r.prompt}&rdquo;
                     </p>
                   </div>
-                  <span className="mt-5 inline-flex items-center gap-1 text-[0.85rem] font-semibold text-accent-2 group-hover:text-accent">
-                    {r.tools.length} tools inside
+                  <span className="mt-5 inline-flex items-center gap-1 text-[0.85rem] font-semibold text-accent-2 group-hover:text-ink">
+                    Explore this area
                     <ArrowRight className="h-3.5 w-3.5" />
                   </span>
                 </Card>
@@ -356,20 +321,20 @@ function Insight() {
               The biggest gaps are structural, not motivational.
             </h2>
             <p className="m-0 text-[1.05rem] leading-7 text-slate-300">
-              Eight patterns repeat across the Q2 2026 cohort, regardless of
-              business age, industry, or score band. Each one is structural.
-              None of them are solved by capital alone.
+              Eight patterns we see again and again in our diagnostic and
+              advisory work, across business ages, sectors and stages. Each one
+              is structural. None of them is solved by capital alone.
             </p>
           </div>
           <Card className="border-0 bg-white/5 p-6 backdrop-blur">
             <div className="mb-2 text-[0.75rem] font-semibold uppercase tracking-[0.08em] text-accent">
-              What the data shows
+              What we see
             </div>
             <p className="m-0 font-serif text-[1.3rem] leading-[1.35] text-white">
               &ldquo;Capital cannot fix what structure has not built yet.&rdquo;
             </p>
             <p className="mt-4 text-[0.85rem] text-slate-400">
-              A finding from the CFO Partners diagnostic cohort, Q2 2026
+              From our diagnostic and advisory work with founders
             </p>
           </Card>
         </div>
@@ -397,12 +362,12 @@ function Insight() {
 // INSTITUTIONAL
 // ============================================================
 const INSTITUTIONAL_FEATURES = [
-  "Cohort diagnostics for accelerators and programs",
-  "Portfolio dashboards for banks, DFIs, and foundations",
-  "Readiness scoring and risk segmentation",
-  "Intervention recommendations",
-  "Progress tracking across founder cohorts",
-  "Custom reporting for funders and partners",
+  "Financial diagnostics across a portfolio or cohort",
+  "Investment-readiness assessments before financing",
+  "Fractional CFO support inside portfolio companies",
+  "Standardised financial reporting and risk indicators",
+  "Portfolio reporting dashboards, built and run for each engagement",
+  "Tailored technical assistance and progress tracking",
 ];
 
 function Institutional() {
@@ -416,13 +381,13 @@ function Institutional() {
               For banks, accelerators, DFIs, foundations, and ecosystem builders
             </div>
             <h2 className="font-serif text-[clamp(1.8rem,4vw,3rem)] font-semibold tracking-tight text-white">
-              Portfolio Intelligence Platform
+              Portfolio and programme support
             </h2>
             <p className="mt-5 max-w-[640px] text-[1.05rem] leading-7 text-white/75">
-              Diagnose, segment, support, and track multiple businesses through
-              one portfolio-level intelligence layer. Designed for institutions
-              that need to understand founder readiness, risk, growth gaps, and
-              the right interventions across cohorts.
+              We help funds, lenders, DFIs, accelerators and foundations
+              assess, support and monitor the businesses they back, before and
+              after financing. Our team works inside the companies, and we
+              build the reporting that shows you how each one is performing.
             </p>
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
               <FeaturePill icon={Users} label="Cohort diagnostics" />
@@ -450,11 +415,16 @@ function Institutional() {
                 </div>
               ))}
             </div>
-            <Button asChild size="lg" className="mt-7 w-full" variant="default">
+            <Button
+              asChild
+              size="lg"
+              className="mt-7 h-auto w-full whitespace-normal py-3 text-center"
+              variant="default"
+            >
               <a
-                href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Portfolio Intelligence Platform: Institutional enquiry")}`}
+                href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Portfolio support: Institutional enquiry")}`}
               >
-                Start a Partnership Conversation
+                Discuss a Portfolio Support Mandate
                 <ArrowRight className="h-4 w-4" />
               </a>
             </Button>
@@ -488,19 +458,18 @@ function CaseStudies() {
     <section id="case-studies" className="bg-bg-alt py-[90px]">
       <div className="mx-auto max-w-[1180px] px-6">
         <span className="mb-3 inline-block text-[0.8rem] font-semibold uppercase tracking-[0.1em] text-accent-2">
-          Most significant change · Q2 2026
+          From our diagnostic work · Q2 2026
         </span>
-        <h2 className="mb-5 max-w-[780px]">Founder outcomes from the Q2 2026 cohort.</h2>
+        <h2 className="mb-5 max-w-[780px]">What the diagnostic surfaced for three founders.</h2>
         <p className="mb-[60px] max-w-[720px] text-[1.1rem] text-ink-2">
-          Three vignettes from the Q2 2026 MEL report. Each demonstrates a
-          different pathway (founder, institutional, and systems) through the
-          firm.
+          Three anonymised examples. Each shows what the diagnostic found and
+          the next step that followed.
         </p>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {CASE_STUDIES.map((c) => (
             <Card key={c.story.slice(0, 40)} className="flex flex-col p-7">
               <div className="mb-4 flex items-center gap-2">
-                <span className="rounded-full bg-gold-soft px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.06em] text-accent-2">
+                <span className="rounded-full bg-gold-soft px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.06em] text-ink">
                   {c.archetype}
                 </span>
                 <span className="text-[0.78rem] text-ink-3">
@@ -536,22 +505,22 @@ function RunByExperts() {
     {
       role: "Finance & Capital Readiness",
       bench:
-        "Fractional CFOs and senior finance practitioners with KRA, IFRS, and DFI experience across East and Southern Africa.",
+        "Fractional CFO work: management accounts, forecasting, cash and working capital, financial models and investor or lender preparation.",
     },
     {
       role: "Operations & Systems",
       bench:
-        "Operations leads who have built and scaled SME and scale-up operating systems across agribusiness, manufacturing, and tech.",
+        "Accounting and reporting set-up, internal controls, operating rhythm and practical automation.",
     },
     {
       role: "Governance & Strategy",
       bench:
-        "Board-level advisors and strategy practitioners experienced in growth-stage governance, investor relations, and board-pack discipline.",
+        "Board reporting, governance structures and strategy support for growth-stage businesses.",
     },
     {
-      role: "Sector & Diagnostic Specialists",
+      role: "Enterprise Development",
       bench:
-        "Multi-disciplinary specialists who calibrate our diagnostic instruments and lead Expert Advisory Panel sessions for cohort engagements.",
+        "Diagnostics, segmentation and tailored technical assistance for accelerator and development-partner programmes.",
     },
   ];
   return (
@@ -560,14 +529,14 @@ function RunByExperts() {
         <div className="mb-[60px] grid items-end gap-10 md:grid-cols-[1.2fr_1fr]">
           <div>
             <span className="mb-3 inline-block text-[0.8rem] font-semibold uppercase tracking-[0.1em] text-accent-2">
-              Our team
+              Who leads the work
             </span>
-            <h2 className="mb-5 max-w-[640px]">Run by a team of experts.</h2>
+            <h2 className="mb-5 max-w-[640px]">Senior-led, with specialists matched to each engagement.</h2>
             <p className="m-0 max-w-[620px] text-[1.1rem] text-ink-2">
-              CFO Partners is a multi-disciplinary team of finance, operations,
-              strategy, and governance practitioners with deep experience
-              inside fast-growth African businesses. We do not just consult.
-              we diagnose, design, and execute alongside the founders we serve.
+              CFO Innovation Partners is led by Mary Ndinda, Founder &amp;
+              Managing Partner, who brings 12+ years in SME finance, enterprise
+              development and investment advisory. We diagnose, design and
+              implement alongside the businesses and institutions we serve.
             </p>
           </div>
           <Card className="bg-bg-alt p-6">
@@ -584,8 +553,8 @@ function RunByExperts() {
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           {experts.map((e) => (
             <Card key={e.role} className="p-7">
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-gold-soft px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.06em] text-accent-2">
-                Expert Bench
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-gold-soft px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.06em] text-ink">
+                Practice area
               </div>
               <h3 className="mb-3 text-[1.15rem]">{e.role}</h3>
               <p className="m-0 text-[0.95rem] text-ink-2">{e.bench}</p>
@@ -725,40 +694,6 @@ function ContactSection() {
 
 
 // ============================================================
-// CHALLENGE: the problem we exist to solve
-// ============================================================
-function Challenge() {
-  return (
-    <section className="py-[90px]">
-      <div className="mx-auto max-w-[1180px] px-6">
-        <Reveal>
-          <span className="mb-3 inline-block text-[0.8rem] font-semibold uppercase tracking-[0.1em] text-accent-2">
-            The problem we exist to solve
-          </span>
-          <h2 className="mb-5 max-w-[820px]">
-            Most promising businesses fail on structure, not on ambition.
-          </h2>
-        </Reveal>
-        <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {CHALLENGE_STATS.map((s, i) => (
-            <Reveal key={s.label} delay={i * 100}>
-              <Card className="h-full p-7">
-                <div className="mb-3 font-serif text-[2.6rem] font-semibold leading-none text-accent-2">
-                  <Counter value={s.num} />
-                </div>
-                <p className="m-0 text-[0.95rem] leading-6 text-ink-2">
-                  {s.label}
-                </p>
-              </Card>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ============================================================
 // FINDER: interactive room selector
 // ============================================================
 function FinderSection() {
@@ -786,113 +721,6 @@ function FinderSection() {
             <RoomFinder />
           </Reveal>
         </div>
-      </div>
-    </section>
-  );
-}
-
-// ============================================================
-// COHORT: who we served in Q2 2026 (animated sector chart)
-// ============================================================
-function CohortSection() {
-  return (
-    <section className="bg-bg-alt py-[90px]">
-      <div className="mx-auto max-w-[1180px] px-6">
-        <div className="grid items-start gap-12 lg:grid-cols-[1fr_1.3fr]">
-          <Reveal>
-            <span className="mb-3 inline-block text-[0.8rem] font-semibold uppercase tracking-[0.1em] text-accent-2">
-              Who we serve
-            </span>
-            <h2 className="mb-5">
-              Eleven sectors in the Q2 2026 cohort.
-            </h2>
-            <p className="mb-6 text-[1.05rem] text-ink-2">
-              Agribusiness leads the cohort, followed by tech and retail. The
-              spread matters: the diagnostic works across sectors because it
-              measures structure, not industry knowledge.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {SECTORS_SERVED.map((s) => (
-                <span
-                  key={s}
-                  className="rounded-full border border-line bg-white px-3.5 py-1.5 text-[0.82rem] font-medium text-ink-2"
-                >
-                  {s}
-                </span>
-              ))}
-            </div>
-          </Reveal>
-          <Reveal delay={150}>
-            <Card className="p-7">
-              <div className="mb-5 text-[0.78rem] font-semibold uppercase tracking-[0.08em] text-ink-3">
-                Q2 2026 cohort by sector
-              </div>
-              <SectorChart />
-            </Card>
-          </Reveal>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ============================================================
-// RESULTS: before and after working with us
-// ============================================================
-function Results() {
-  return (
-    <section className="py-[90px]">
-      <div className="mx-auto max-w-[1180px] px-6">
-        <Reveal>
-          <span className="mb-3 inline-block text-[0.8rem] font-semibold uppercase tracking-[0.1em] text-accent-2">
-            Proven results
-          </span>
-          <h2 className="mb-5 max-w-[780px]">
-            What changes when the structure goes in.
-          </h2>
-        </Reveal>
-        <Reveal delay={100}>
-          <div className="mt-8 overflow-hidden rounded-card border border-line bg-white">
-            <div className="grid grid-cols-3 border-b border-line bg-bg-alt px-6 py-4 text-[0.78rem] font-semibold uppercase tracking-[0.06em] text-ink-3">
-              <span>Metric</span>
-              <span>Before</span>
-              <span className="text-accent-2">With CFO Partners</span>
-            </div>
-            {RESULTS_TABLE.map((row) => (
-              <div
-                key={row.metric}
-                className="grid grid-cols-3 items-center border-b border-line px-6 py-5 last:border-0"
-              >
-                <span className="pr-3 text-[0.95rem] font-semibold text-ink">
-                  {row.metric}
-                </span>
-                <span className="pr-3 text-[0.92rem] text-ink-3">
-                  {row.before}
-                </span>
-                <span className="text-[0.95rem] font-semibold text-accent-2">
-                  {row.after}
-                </span>
-              </div>
-            ))}
-          </div>
-        </Reveal>
-        <Reveal delay={200}>
-          <div className="mt-10 grid grid-cols-2 gap-y-8 text-center sm:grid-cols-4">
-            {TRACK_RECORD.map((s) => (
-              <div key={s.label}>
-                <div className="font-serif text-[clamp(1.8rem,3.5vw,2.4rem)] font-semibold leading-none text-ink">
-                  <Counter value={s.num} />
-                </div>
-                <div className="mt-2 text-[0.9rem] text-ink-2">{s.label}</div>
-                {s.note && (
-                  <div className="mt-0.5 text-[0.75rem] text-ink-3">
-                    {s.note}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </Reveal>
       </div>
     </section>
   );

@@ -129,11 +129,6 @@ export const POSTS: BlogPost[] = [
         text: "The implication for partners",
       },
       {
-        type: "quote",
-        text: "A capital deployment vehicle calibrated to women-led businesses surfacing through the CFOIP pathway would carry a materially different risk profile from the prevailing benchmark.",
-        attribution: "CFOIP Q2 2026 Impact Report",
-      },
-      {
         type: "p",
         text: "This is what we mean when we say diagnostic-led pipeline construction produces a different distribution than open-market origination. The pipeline does not have to be built around demographic targets. The diagnostic does the segmentation work upstream.",
       },

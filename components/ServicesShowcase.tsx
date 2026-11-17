@@ -238,7 +238,7 @@ function VisualDiagnostic() {
         );
       })}
       <text x="24" y="322" fontFamily="Inter, sans-serif" fontSize="13" fill={GOLD}>
-        Fix first: Financial Readiness. Recommended path: Business Build Sprint.
+        Fix first: Financial Readiness. Recommended path: guided implementation.
       </text>
     </svg>
   );

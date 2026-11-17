@@ -83,7 +83,7 @@ export function NewsletterSignup({
         <button
           type="submit"
           disabled={state === "busy"}
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-accent px-6 py-3.5 text-[0.92rem] font-semibold text-white transition-all hover:bg-accent-2 disabled:opacity-60"
+          className="inline-flex items-center justify-center gap-2 rounded-full bg-accent-2 px-6 py-3.5 text-[0.92rem] font-semibold text-white transition-all hover:bg-ink disabled:opacity-60"
         >
           {state === "busy" ? "Joining..." : "Join the journal"}
           <ArrowRight className="h-4 w-4" />

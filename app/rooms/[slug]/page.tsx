@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowRight,
-  Brain,
   Briefcase,
   Check,
   Compass,
@@ -20,7 +19,7 @@ import { Footer } from "@/components/Footer";
 import { CheckupTrigger } from "@/components/CheckupTrigger";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ROOMS, allRoomSlugs, roomFor, type TierLabel } from "@/lib/rooms";
+import { ROOMS, allRoomSlugs, roomFor } from "@/lib/rooms";
 
 export function generateStaticParams() {
   return allRoomSlugs().map((slug) => ({ slug }));
@@ -32,9 +31,9 @@ export function generateMetadata({
   params: { slug: string };
 }): Metadata {
   const room = roomFor(params.slug);
-  if (!room) return { title: "Room not found | CFO Partners" };
+  if (!room) return { title: "Room not found | CFO Innovation Partners" };
   return {
-    title: `${room.name} | CFO Partners`,
+    title: `${room.name} | CFO Innovation Partners`,
     description: `${room.role}. ${room.blurb}`,
   };
 }
@@ -47,13 +46,6 @@ const ICON_MAP: Record<string, LucideIcon> = {
   "shield-check": ShieldCheck,
   briefcase: Briefcase,
   users: Users,
-};
-
-const TIER_STYLES: Record<TierLabel, string> = {
-  Free: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  Starter: "bg-bg-alt text-ink-2 border-line",
-  Growth: "bg-gold-soft text-accent-2 border-accent/30",
-  Expert: "bg-ink text-white border-ink",
 };
 
 export default function RoomPage({ params }: { params: { slug: string } }) {
@@ -100,18 +92,11 @@ export default function RoomPage({ params }: { params: { slug: string } }) {
               </div>
             </div>
             <Card className="rounded-2xl bg-white p-8">
-              <div className="mb-2 flex items-center gap-2 text-[0.78rem] font-semibold uppercase tracking-[0.08em] text-ink-3">
-                <Brain className="h-4 w-4" /> AI Assistant: {room.assistant}
+              <div className="mb-2 text-[0.78rem] font-semibold uppercase tracking-[0.08em] text-ink-2">
+                A question we help answer
               </div>
               <p className="my-4 font-serif text-[1.3rem] italic leading-snug text-ink">
                 &ldquo;{room.prompt}&rdquo;
-              </p>
-              <p className="text-[0.88rem] text-ink-3">
-                Available with{" "}
-                <Link href="/contact" className="text-accent-2 hover:text-accent">
-                  Founder OS Growth
-                </Link>{" "}
-                which unlocks all six AI executive assistants.
               </p>
               <div className="mt-6 border-t border-line pt-5">
                 <div className="mb-3 text-[0.78rem] font-semibold uppercase tracking-[0.08em] text-ink-3">
@@ -138,17 +123,17 @@ export default function RoomPage({ params }: { params: { slug: string } }) {
       <section className="py-[90px]">
         <div className="mx-auto max-w-[1180px] px-6">
           <span className="mb-3 inline-block text-[0.8rem] font-semibold uppercase tracking-[0.1em] text-accent-2">
-            Tools inside this room
+            What we work on in this area
           </span>
           <h2 className="mb-5 max-w-[780px]">
             {room.slug === "experts"
-              ? "Vetted human experts, ready to book."
-              : "Practical tools you can use this week."}
+              ? "Specialist support, arranged through CFOIP."
+              : "Practical support for the realities of running a business in East Africa."}
           </h2>
           <p className="mb-[60px] max-w-[720px] text-[1.1rem] text-ink-2">
             {room.slug === "experts"
-              ? "Each expert is vetted by CFO Partners. Book by the hour or by the engagement. We stand behind every recommendation."
-              : "Templates, calculators, and checklists designed for the realities of running a business in East Africa. Built to be used on Tuesday morning, not filed in a folder."}
+              ? "Where an engagement needs a specialist, we arrange the right practitioner as part of the work. Talk to us about what you need."
+              : "These are the areas we help with in advisory engagements. Ready-to-use templates are published on our Resources page as they become available."}
           </p>
           <div className="grid gap-5 md:grid-cols-2">
             {room.tools.map((tool) => (
@@ -156,41 +141,23 @@ export default function RoomPage({ params }: { params: { slug: string } }) {
                 key={tool.name}
                 className="flex flex-col p-7 transition-all hover:-translate-y-0.5 hover:shadow-card"
               >
-                <div className="mb-3 flex items-start justify-between gap-3">
-                  <h3 className="text-[1.15rem]">{tool.name}</h3>
-                  <span
-                    className={`shrink-0 rounded-full border px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.06em] ${TIER_STYLES[tool.tier]}`}
-                  >
-                    {tool.tier === "Expert" ? "On request" : tool.tier}
-                  </span>
-                </div>
+                <h3 className="mb-3 text-[1.15rem]">{tool.name}</h3>
                 <p className="text-[0.95rem] text-ink-2">{tool.description}</p>
-                {tool.tier === "Free" && (
-                  <Link
-                    href="/resources"
-                    className="mt-4 inline-flex items-center gap-1 text-[0.88rem] font-semibold text-accent-2 hover:text-accent"
-                  >
-                    Download free
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
-                )}
               </Card>
             ))}
           </div>
         </div>
       </section>
 
-      {/* PLAN CTA */}
+      {/* CTA */}
       <section className="bg-bg-alt py-[80px]">
         <div className="mx-auto max-w-[820px] px-6 text-center">
           <h2 className="mb-4">
-            Unlock {room.shortName} with Founder OS Growth.
+            Work on {room.shortName} with us.
           </h2>
           <p className="mx-auto mb-8 max-w-[560px] text-ink-2">
-            Founder OS Growth opens every Executive Room, every AI assistant,
-            and the full business template library. Talk to us about getting
-            started, or take the free diagnostic to see which Room your
-            business needs first.
+            Talk to us about support in this area, or take the free diagnostic
+            to see which area your business needs to fix first.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Button asChild size="lg">
