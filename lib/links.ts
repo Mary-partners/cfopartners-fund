@@ -3,10 +3,11 @@
  * Edit here once. Every component imports from this file.
  */
 
-// The live Business Growth Check-Up, hosted on Notion.
-// Every "Take the Free Check-Up" CTA across the site sends visitors here.
-export const DIAGNOSTIC_URL =
-  "https://cfo-partners.notion.site/bbaec335aee34909978384f0d91ba971?pvs=105";
+// The Founder Diagnostic, now taken directly on this site (see
+// app/diagnostic/page.tsx) instead of the external Notion form it used to
+// link to. Every "Take the Free Check-Up" CTA across the site sends
+// visitors here.
+export const DIAGNOSTIC_URL = "/diagnostic";
 
 // Contact details.
 export const CONTACT_EMAIL = "partner@cfopartners.fund";

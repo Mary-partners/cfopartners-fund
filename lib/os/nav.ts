@@ -13,6 +13,7 @@ import {
   Settings,
   MessagesSquare,
   Compass,
+  ClipboardList,
 } from "lucide-react";
 
 export type NavItem = {
@@ -30,6 +31,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/os/clients", label: "Clients", icon: Building2, implemented: true, phase: "Phase 1" },
   { href: "/os/work", label: "Work", icon: ListChecks, implemented: true, phase: "Phase 1" },
   { href: "/os/requests", label: "Requests", icon: Inbox, implemented: true, phase: "Phase 2" },
+  { href: "/os/diagnostic", label: "Diagnostic Leads", icon: ClipboardList, implemented: true, phase: "Phase 2" },
   { href: "/os/quality", label: "Quality", icon: ShieldCheck, implemented: true, phase: "Phase 2" },
   { href: "/os/calendar", label: "Calendar & Deadlines", icon: CalendarClock, implemented: true, phase: "Phase 1" },
   { href: "/os/meetings", label: "Meetings & Decisions", icon: MessagesSquare, implemented: true, phase: "Phase 2" },
