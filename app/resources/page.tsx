@@ -175,12 +175,12 @@ export default function ResourcesPage() {
         <div className="mx-auto max-w-[820px] px-6 text-center">
           <h2 className="mb-4">Want the full picture, not just one tool?</h2>
           <p className="mx-auto mb-7 max-w-[560px] text-ink-2">
-            The free Business Growth Check-Up scores your business across six
-            pillars, including tax compliance, and tells you what to fix first.
+            The Management Capability Assessment gives founders a structured
+            view of how the business is managed and what to strengthen first.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <CheckupTrigger variant="accent">
-              Take the free diagnostic
+              Take the Management Capability Assessment
             </CheckupTrigger>
             <Link
               href="/fractional-cfo-services"

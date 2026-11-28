@@ -3,10 +3,11 @@
  * Edit here once. Every component imports from this file.
  */
 
-// The Business Diagnostic, hosted on the Management Capital Lab platform.
-// Every "Take the Free Check-Up" CTA across the site sends visitors here.
+// The Management Capability Assessment for founders, hosted on the
+// Management Capital Lab platform. Every diagnostic CTA sends visitors here,
+// and /diagnostic redirects here too (see next.config.mjs).
 export const DIAGNOSTIC_URL =
-  "https://www.managementcapitallab.com/platform/login";
+  "https://www.managementcapitallab.com/platform/start";
 
 // Contact details.
 export const CONTACT_EMAIL = "partner@cfopartners.fund";

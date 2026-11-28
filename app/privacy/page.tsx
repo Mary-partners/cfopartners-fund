@@ -31,7 +31,7 @@ export default function PrivacyPage() {
           <ul className="mb-4 list-disc pl-6">
             <li>Details you give us in an enquiry form: your name, organisation, email, phone number (optional), country and a description of what you need.</li>
             <li>Your email address if you sign up for our newsletter or download a resource.</li>
-            <li>Your answers if you complete the Business Growth Check-Up.</li>
+            <li>Your answers if you complete the Management Capability Assessment.</li>
             <li>Anonymous usage statistics, such as pages visited and the site that referred you. Our analytics does not use cookies or identify individual visitors.</li>
           </ul>
 
@@ -47,8 +47,8 @@ export default function PrivacyPage() {
           <h2 className="mb-3 mt-8 text-[1.4rem] text-ink">Who processes it for us</h2>
           <p>
             Our website is hosted by Vercel. Form submissions are delivered to us
-            by email through a form or email delivery service. The Business
-            Diagnostic runs on the Management Capital Lab platform. These providers process data on our
+            by email through a form or email delivery service. The Management
+            Capability Assessment runs on the Management Capital Lab platform. These providers process data on our
             behalf and may store it outside Kenya, with safeguards as required by
             the Data Protection Act, 2019.
           </p>

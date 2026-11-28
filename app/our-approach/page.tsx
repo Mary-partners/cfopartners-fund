@@ -91,7 +91,7 @@ export default function ApproachPage() {
         label="Discuss a Partnership"
         title="See how the method fits your portfolio or business."
         text="We'll walk you through how each stage would work for you, and what it would take."
-        secondary={{ label: "Take the Business Diagnostic", href: "/diagnostic" }}
+        secondary={{ label: "Take the Management Capability Assessment", href: "/diagnostic" }}
       />
       <Footer />
     </>

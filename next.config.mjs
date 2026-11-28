@@ -23,10 +23,12 @@ const nextConfig = {
       { source: "/blog/what-56-founders-taught-us", destination: "/insights", permanent: true },
       { source: "/blog", destination: "/insights", permanent: true },
       { source: "/blog/:slug", destination: "/insights/:slug", permanent: true },
-      // The diagnostic runs on the Management Capital Lab platform.
+      // The Management Capability Assessment runs on the Management Capital
+      // Lab platform. The on-site diagnostic (app/diagnostic) stays in the
+      // codebase but unlinked; see docs/decision-log.md.
       {
         source: "/diagnostic",
-        destination: "https://www.managementcapitallab.com/platform/login",
+        destination: "https://www.managementcapitallab.com/platform/start",
         permanent: false,
       },
     ];

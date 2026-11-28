@@ -17,7 +17,7 @@ const variantStyles: Record<NonNullable<Props["variant"]>, string> = {
 };
 
 /**
- * Diagnostic CTA. Sends visitors to the Business Diagnostic on the
+ * Diagnostic CTA. Sends founders to the Management Capability Assessment on the
  * Management Capital Lab platform. Opens in a new tab so visitors don't
  * lose the marketing page.
  */

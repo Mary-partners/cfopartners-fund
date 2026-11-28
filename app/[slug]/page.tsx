@@ -387,7 +387,7 @@ function ServicePage({ s }: { s: ServiceContent }) {
         }
         secondary={
           s.cta.kind === "sme"
-            ? { label: "Take the Business Diagnostic", href: "/diagnostic" }
+            ? { label: "Take the Management Capability Assessment", href: "/diagnostic" }
             : { label: "See our approach", href: "/our-approach" }
         }
       />

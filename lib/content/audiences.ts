@@ -380,7 +380,7 @@ export const AUDIENCES: AudienceContent[] = [
       },
       {
         q: "What information do you need to get started?",
-        a: "For the first review, we usually ask for your most recent financial statements, management accounts if you have them, bank statements for the last six to twelve months, a list of debtors and creditors, and any budget or forecast. If your records are incomplete, share what you have. Putting records in order is often the first piece of work, and we will tell you what is missing and how to collect it. You can also start with our free online Business Growth Check-Up.",
+        a: "For the first review, we usually ask for your most recent financial statements, management accounts if you have them, bank statements for the last six to twelve months, a list of debtors and creditors, and any budget or forecast. If your records are incomplete, share what you have. Putting records in order is often the first piece of work, and we will tell you what is missing and how to collect it. You can also start with our online Management Capability Assessment.",
       },
       {
         q: "How is the work scoped and priced?",
@@ -400,7 +400,7 @@ export const AUDIENCES: AudienceContent[] = [
       },
     ],
     cta: { kind: "sme", label: "Book a Financial Strategy Consultation" },
-    secondaryCta: { label: "Take the Business Diagnostic", href: "/diagnostic" },
+    secondaryCta: { label: "Take the Management Capability Assessment", href: "/diagnostic" },
     featuredOffer: {
       title: "90-Day Financial Performance System",
       text: "A fixed-scope way to start: in 90 days we set up reliable reporting, a 13-week cash forecast, profitability and pricing analysis, a budget and a management dashboard, then hand the system to your team.",

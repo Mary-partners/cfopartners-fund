@@ -46,7 +46,7 @@ const COLUMNS: { title: string; links: [string, string][] }[] = [
       ["/case-studies", "Case Studies"],
       ["/insights", "Insights"],
       ["/resources", "Resources"],
-      ["/diagnostic", "Business Diagnostic"],
+      ["/diagnostic", "Management Capability Assessment"],
       ["/contact", "Contact"],
     ],
   },

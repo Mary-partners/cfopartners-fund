@@ -112,6 +112,7 @@ enum AuditAction {
   AGENT_RUN_COMPLETED
   AGENT_RUN_FAILED
   DEMO_ENVIRONMENT_SEEDED
+  DIAGNOSTIC_SUBMISSION_REVIEWED
 }
 
 enum ClientRole {
@@ -1220,4 +1221,83 @@ model AgentStep {
 
   @@index([agentRunId])
   @@map("agent_steps")
+}
+
+// --- Founder Diagnostic (public, pre-client) ----------------------------
+// Not tied to an Organization — this is top-of-funnel lead data from
+// anyone on the public site, collected before any client relationship
+// exists. See docs/decision-log.md "Founder Diagnostic automation" for
+// why this replaces the external Notion form, and why the scoring below
+// is explicitly a first draft.
+
+enum DiagnosticReadinessBand {
+  FOUNDATION
+  GROWTH_READINESS
+  SCALE_UP_SUPPORT_NEEDED
+  CAPITAL_ADVISORY_READY
+}
+
+enum FounderArchetype {
+  HUSTLER
+  OPERATOR
+  STABILIZER
+  SCALER
+}
+
+enum DiagnosticLeadTemperature {
+  HOT
+  WARM
+  NURTURE
+  COLD
+}
+
+model DiagnosticSubmission {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now())
+
+  businessName String
+  founderName  String
+  email        String
+  phone        String?
+  location     String?
+  sector       String
+  websiteUrl   String?
+
+  /// Raw Q1-Q40 answers, keyed by question id (see lib/diagnostic/questions.ts)
+  /// — the source of truth. Every computed field below is derived from
+  /// this and can be recomputed if the scoring rules are refined.
+  answers Json
+
+  consentData       Boolean @default(false)
+  consentSharing    Boolean @default(false)
+  consentWithdrawal Boolean @default(false)
+
+  financialClarityScore Int
+  revenueQualityScore   Int
+  operationsScore       Int
+  teamCapacityScore     Int
+  governanceScore       Int
+  capitalReadinessScore Int
+  advisoryUrgencyScore  Int
+  totalScore            Int
+
+  readinessBand DiagnosticReadinessBand
+  archetype     FounderArchetype
+
+  capitalFitSegment               String
+  recommendedCapitalStructures     String[]
+  unsuitableCapitalStructures      String[]
+
+  topGaps                    String[]
+  founderOperatingLayerFlags String[]
+  leadTemperature            DiagnosticLeadTemperature
+  recommendedOffer           String
+
+  reviewedAt    DateTime?
+  reviewerNotes String?
+
+  @@index([createdAt])
+  @@index([readinessBand])
+  @@index([leadTemperature])
+  @@map("diagnostic_submissions")
 }

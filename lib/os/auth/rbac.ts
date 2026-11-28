@@ -49,7 +49,10 @@ export type Permission =
   | "aicfo:approveHighCritical" // Managing Partner only, per decision #5's approval routing
   | "aicfo:returnForCorrection"
   | "aicfo:releaseReports" // Managing Partner unconditionally; Portfolio Lead only if Membership.canReleaseReports is also set — see that field's comment
-  | "aicfo:configureThresholds";
+  | "aicfo:configureThresholds"
+  // --- Founder Diagnostic (public lead-gen form, see lib/diagnostic/) ---
+  | "diagnostic:view" // the lead pipeline: who submitted, their scores/segment, for follow-up
+  | "diagnostic:review"; // mark a submission reviewed, add reviewer notes
 
 const ALL_INTERNAL_PERMISSIONS: Permission[] = [
   "client:view",
@@ -88,6 +91,8 @@ const ALL_INTERNAL_PERMISSIONS: Permission[] = [
   "aicfo:returnForCorrection",
   "aicfo:releaseReports",
   "aicfo:configureThresholds",
+  "diagnostic:view",
+  "diagnostic:review",
 ];
 
 /**
@@ -126,6 +131,8 @@ const ROLE_PERMISSIONS: Record<OrgRole, ReadonlySet<Permission>> = {
     // Senior CFO Reviewer, not Practice Administrator; see decision #4.
     "aicfo:view",
     "aicfo:viewAgentActivity",
+    "diagnostic:view",
+    "diagnostic:review",
   ]),
   [OrgRole.PORTFOLIO_LEAD]: new Set([
     "client:view",
@@ -161,6 +168,8 @@ const ROLE_PERMISSIONS: Record<OrgRole, ReadonlySet<Permission>> = {
     "aicfo:recommendHighCritical",
     "aicfo:returnForCorrection",
     "aicfo:releaseReports",
+    "diagnostic:view",
+    "diagnostic:review",
   ]),
   [OrgRole.RELATIONSHIP_MANAGER]: new Set([
     "client:view",
@@ -176,6 +185,11 @@ const ROLE_PERMISSIONS: Record<OrgRole, ReadonlySet<Permission>> = {
     "meeting:view",
     "meeting:manage",
     "team:view",
+    // Relationship Manager is the role that actually follows up with
+    // founders post-diagnostic — see decision-log.md "Founder Diagnostic
+    // automation".
+    "diagnostic:view",
+    "diagnostic:review",
   ]),
   [OrgRole.SERVICE_LEAD]: new Set([
     "client:view",

@@ -465,13 +465,13 @@ function FinalCta() {
         <div className="rounded-card border border-white/15 bg-white/5 p-7">
           <p className="mb-2 text-[0.8rem] font-semibold uppercase tracking-[0.1em] text-accent">For businesses</p>
           <h2 className="mb-3 text-[1.6rem] text-white">Need a clear view of your numbers?</h2>
-          <p className="mb-6 text-slate-300">Plan your 90 days with us, or start with the diagnostic.</p>
+          <p className="mb-6 text-slate-300">Plan your 90 days with us, or start with the Management Capability Assessment.</p>
           <div className="flex flex-wrap gap-3">
             <Link href="/contact?enquiry=sme&offer=90-Day%20Financial%20Performance%20System#enquiry" className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3.5 text-[0.95rem] font-semibold text-ink hover:bg-white">
               Discuss Your 90-Day Financial Plan <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
             <a href="/diagnostic" className="inline-flex items-center gap-2 rounded-full border-[1.5px] border-white/50 px-6 py-3.5 text-[0.95rem] font-semibold text-white hover:bg-white hover:text-ink">
-              Take the Business Diagnostic
+              Take the Management Capability Assessment
             </a>
           </div>
         </div>

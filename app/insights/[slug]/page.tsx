@@ -113,11 +113,11 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
         <div className="mx-auto max-w-[820px] px-6 text-center">
           <h2 className="mb-4">Want to know where your business stands?</h2>
           <p className="mx-auto mb-6 max-w-[560px] text-ink-2">
-            The Business Growth Check-Up takes about 10 minutes. You get your
-            archetype, six-pillar scorecard, and a recommended next step.
+            Founders can take our Management Capability Assessment for a
+            structured view of how the business is managed and where to start.
           </p>
           <CheckupTrigger variant="primary" className="px-7 py-4 text-base">
-            Take the free diagnostic
+            Take the Management Capability Assessment
             <ArrowRight className="h-4 w-4" />
           </CheckupTrigger>
         </div>

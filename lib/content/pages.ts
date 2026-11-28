@@ -118,10 +118,10 @@ export const ABOUT: AboutContent = {
   ],
   tools: [
     {
-      name: "Business Growth Check-Up",
+      name: "Management Capability Assessment",
       status: "Available",
       detail:
-        "A free online diagnostic for growing businesses. It gives a first view of financial and management readiness and helps us scope a conversation.",
+        "An online assessment for founders, run on the Management Capital Lab platform. It gives a first view of management and financial capability and helps us scope a conversation.",
     },
     {
       name: "Portfolio reporting dashboards",
@@ -296,7 +296,7 @@ export const APPROACH: ApproachContent = {
     },
     {
       q: "How long does the diagnostic stage take?",
-      a: "For a single business, the diagnostic usually takes one to three weeks, depending on how quickly records can be shared and how complete they are. Growing businesses can start with our free online Business Growth Check-Up for a first view. For a portfolio or cohort, timing depends on the number of companies and how quickly each responds. We set a timetable during scoping and report on companies that have not provided the data needed.",
+      a: "For a single business, the diagnostic usually takes one to three weeks, depending on how quickly records can be shared and how complete they are. Founders can start with our online Management Capability Assessment for a first view. For a portfolio or cohort, timing depends on the number of companies and how quickly each responds. We set a timetable during scoping and report on companies that have not provided the data needed.",
     },
     {
       q: "How does the method work for a portfolio or cohort?",

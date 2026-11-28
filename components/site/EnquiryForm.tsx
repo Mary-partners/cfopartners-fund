@@ -204,7 +204,7 @@ export function EnquiryForm({
           <p className="mb-0 mt-3 text-ink-2">
             While you wait, you can{" "}
             <a className="font-semibold text-accent-2 underline" href="/diagnostic">
-              start the Business Diagnostic
+              start the Management Capability Assessment
             </a>
             .
           </p>

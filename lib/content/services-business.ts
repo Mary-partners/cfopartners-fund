@@ -34,7 +34,7 @@ export const BUSINESS_SERVICES: ServiceContent[] = [
       { label: "Cadence", value: "Monthly close and review, weekly cash check-in, quarterly board pack" },
       { label: "Team", value: "A lead fractional CFO supported by a finance analyst" },
       { label: "Where", value: "Nairobi-based, serving Kenya and East Africa on site and remotely" },
-      { label: "How to start", value: "A Financial Strategy Consultation or the free Business Growth Check-Up" },
+      { label: "How to start", value: "A Financial Strategy Consultation or the Management Capability Assessment" },
     ],
     whoFor: [
       "Founders and CEOs of businesses that have outgrown a bookkeeper but cannot yet justify a full-time CFO",
@@ -211,7 +211,7 @@ export const BUSINESS_SERVICES: ServiceContent[] = [
       { label: "Cadence", value: "Weekly working sessions with the founder and finance lead" },
       { label: "Team", value: "A lead advisor and a financial analyst" },
       { label: "Where", value: "Kenya and East Africa, with selected African markets" },
-      { label: "How to start", value: "A Financial Strategy Consultation or the free Business Growth Check-Up" },
+      { label: "How to start", value: "A Financial Strategy Consultation or the Management Capability Assessment" },
     ],
     whoFor: [
       "Founders preparing for a first institutional equity round",
@@ -380,7 +380,7 @@ export const BUSINESS_SERVICES: ServiceContent[] = [
       { label: "Cadence", value: "Weekly working sessions until submission" },
       { label: "Team", value: "A lead advisor and a financial analyst" },
       { label: "Where", value: "Kenya and East Africa, with selected African markets" },
-      { label: "How to start", value: "A Financial Strategy Consultation or the free Business Growth Check-Up" },
+      { label: "How to start", value: "A Financial Strategy Consultation or the Management Capability Assessment" },
     ],
     whoFor: [
       "Businesses applying for a bank or SACCO loan, overdraft or asset finance",
@@ -540,7 +540,7 @@ export const BUSINESS_SERVICES: ServiceContent[] = [
       { label: "Cadence", value: "Weekly review sessions on assumptions and outputs" },
       { label: "Team", value: "A lead modeller with oversight from a senior advisor" },
       { label: "Where", value: "Kenya and East Africa, delivered on site or remotely" },
-      { label: "How to start", value: "A Financial Strategy Consultation or the free Business Growth Check-Up" },
+      { label: "How to start", value: "A Financial Strategy Consultation or the Management Capability Assessment" },
     ],
     whoFor: [
       "Founders preparing for an equity raise or investor due diligence",
@@ -699,7 +699,7 @@ export const BUSINESS_SERVICES: ServiceContent[] = [
       { label: "Cadence", value: "Weekly working sessions and on-site days during implementation" },
       { label: "Team", value: "A lead advisor and a finance systems specialist" },
       { label: "Where", value: "Kenya and East Africa, on site and remotely" },
-      { label: "How to start", value: "A Financial Strategy Consultation or the free Business Growth Check-Up" },
+      { label: "How to start", value: "A Financial Strategy Consultation or the Management Capability Assessment" },
     ],
     whoFor: [
       "Businesses still running finance on spreadsheets, notebooks or a basic invoicing app",
