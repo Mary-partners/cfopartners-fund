@@ -18,7 +18,7 @@ export interface ImpactStat {
  * investment figure as recommendations for consideration, never capital raised.
  */
 export const FOUNDER_EXPERIENCE: ImpactStat[] = [
-  { num: "12+", label: "Years in SME finance and investment advisory" },
+  { num: "12+", label: "Years in SME finance, enterprise development and investment advisory" },
   { num: "2,000+", label: "Businesses supported across 11 sectors" },
   { num: "50+", label: "Enterprises recommended for investment consideration (USD 100K–500K)" },
   { num: "15+", label: "OceanHub Africa portfolio businesses supported" },

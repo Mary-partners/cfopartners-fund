@@ -5,13 +5,30 @@ const nextConfig = {
   // to the contact page instead of a 404.
   async redirects() {
     return [
-      { source: "/pricing", destination: "/contact", permanent: true },
-      // The diagnostic runs on the Management Capital Lab platform, not
-      // the on-site version (still in the codebase at app/diagnostic, but
-      // unlinked — see docs/decision-log.md).
+      { source: "/pricing", destination: "/growing-businesses", permanent: true },
+      // Executive Rooms were retired in the 2026 revamp; each maps to the
+      // service or audience page that now covers its topic.
+      { source: "/rooms/cfo", destination: "/fractional-cfo-services", permanent: true },
+      { source: "/rooms/board", destination: "/fractional-cfo-services", permanent: true },
+      { source: "/rooms/coo", destination: "/financial-systems", permanent: true },
+      { source: "/rooms/cro", destination: "/financial-systems", permanent: true },
+      { source: "/rooms/ceo", destination: "/growing-businesses", permanent: true },
+      { source: "/rooms/cmo", destination: "/growing-businesses", permanent: true },
+      { source: "/rooms/experts", destination: "/about", permanent: true },
+      { source: "/rooms", destination: "/growing-businesses", permanent: true },
+      { source: "/ai-automations", destination: "/financial-systems", permanent: true },
+      // Journal moved to Insights. Retired posts go to the index.
+      { source: "/blog/44-percent-women-led", destination: "/insights", permanent: true },
+      { source: "/blog/three-pathways-to-impact", destination: "/insights", permanent: true },
+      { source: "/blog/what-56-founders-taught-us", destination: "/insights", permanent: true },
+      { source: "/blog", destination: "/insights", permanent: true },
+      { source: "/blog/:slug", destination: "/insights/:slug", permanent: true },
+      // The Management Capability Assessment runs on the Management Capital
+      // Lab platform. The on-site diagnostic (app/diagnostic) stays in the
+      // codebase but unlinked; see docs/decision-log.md.
       {
         source: "/diagnostic",
-        destination: "https://www.managementcapitallab.com/platform/login",
+        destination: "https://www.managementcapitallab.com/platform/start",
         permanent: false,
       },
     ];

@@ -3,11 +3,11 @@
  * Edit here once. Every component imports from this file.
  */
 
-// The Business Diagnostic, hosted on the Management Capital Lab platform
-// (replacing the old Notion form). Every "Take the Free Check-Up" CTA
-// across the site sends visitors here. /diagnostic itself still redirects
-// here too (see next.config.mjs), in case anything links there directly.
-export const DIAGNOSTIC_URL = "https://www.managementcapitallab.com/platform/login";
+// The Management Capability Assessment for founders, hosted on the
+// Management Capital Lab platform. Every diagnostic CTA sends visitors here,
+// and /diagnostic redirects here too (see next.config.mjs).
+export const DIAGNOSTIC_URL =
+  "https://www.managementcapitallab.com/platform/start";
 
 // Contact details.
 export const CONTACT_EMAIL = "partner@cfopartners.fund";
