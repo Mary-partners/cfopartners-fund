@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { DIAGNOSTIC_URL } from "@/lib/links";
 
 interface Props {
@@ -18,9 +17,9 @@ const variantStyles: Record<NonNullable<Props["variant"]>, string> = {
 };
 
 /**
- * Primary CTA across the site. Sends visitors to the Founder Diagnostic,
- * taken directly on this site (app/diagnostic/page.tsx) — no longer an
- * external Notion link, so this stays a same-tab navigation.
+ * Primary CTA across the site. Sends visitors to the Business Diagnostic on
+ * the Management Capital Lab platform. Opens in a new tab so visitors
+ * don't lose the marketing page.
  */
 export function CheckupTrigger({
   children,
@@ -28,11 +27,13 @@ export function CheckupTrigger({
   variant = "primary",
 }: Props) {
   return (
-    <Link
+    <a
       href={DIAGNOSTIC_URL}
+      target="_blank"
+      rel="noopener noreferrer"
       className={`inline-flex items-center justify-center gap-2 rounded-full px-[22px] py-[14px] text-[0.95rem] font-semibold transition-all duration-150 ${variantStyles[variant]} ${className}`}
     >
       {children}
-    </Link>
+    </a>
   );
 }

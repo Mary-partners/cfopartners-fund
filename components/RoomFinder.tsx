@@ -59,7 +59,8 @@ const ROOM_NAMES: Record<RoomSlug, string> = {
 /**
  * A three-question interactive widget that points visitors at the
  * Executive Room that fits them, then hands off to the full diagnostic.
- * Deliberately light: the Notion Check-Up remains the real assessment.
+ * Deliberately light: the Business Diagnostic (Management Capital Lab)
+ * remains the real assessment.
  */
 export function RoomFinder() {
   const [step, setStep] = useState(0);
@@ -94,7 +95,7 @@ export function RoomFinder() {
         <p className="mx-auto mb-6 max-w-[440px] text-[0.95rem] text-ink-2">
           Based on your answers, this is the room where your business has the
           most to gain right now. The full diagnostic will confirm it and give
-          you a complete seven-pillar scorecard.
+          you a complete read on where to focus next.
         </p>
         <div className="flex flex-wrap justify-center gap-3">
           <Link
@@ -104,13 +105,15 @@ export function RoomFinder() {
             Explore {ROOM_NAMES[winner]}
             <ArrowRight className="h-4 w-4" />
           </Link>
-          <Link
+          <a
             href={DIAGNOSTIC_URL}
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-full bg-accent-2 px-6 py-3.5 text-[0.92rem] font-semibold text-white transition-all hover:bg-ink"
           >
             Take the full diagnostic
             <ArrowRight className="h-4 w-4" />
-          </Link>
+          </a>
         </div>
         <button
           type="button"

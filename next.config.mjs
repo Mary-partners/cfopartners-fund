@@ -4,7 +4,17 @@ const nextConfig = {
   // Pricing is no longer published on the site; send old /pricing links
   // to the contact page instead of a 404.
   async redirects() {
-    return [{ source: "/pricing", destination: "/contact", permanent: true }];
+    return [
+      { source: "/pricing", destination: "/contact", permanent: true },
+      // The diagnostic runs on the Management Capital Lab platform, not
+      // the on-site version (still in the codebase at app/diagnostic, but
+      // unlinked — see docs/decision-log.md).
+      {
+        source: "/diagnostic",
+        destination: "https://www.managementcapitallab.com/platform/login",
+        permanent: false,
+      },
+    ];
   },
   // The internal OS and client portal must never appear in search results.
   async headers() {

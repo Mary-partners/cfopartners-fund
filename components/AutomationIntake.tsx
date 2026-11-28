@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   Sparkles,
 } from "lucide-react";
-import Link from "next/link";
 import { DIAGNOSTIC_URL } from "@/lib/links";
 
 interface FormData {
@@ -129,13 +128,15 @@ export function AutomationIntake() {
           are building. Briefs like yours shape it, and you will be among the
           first to run it.
         </p>
-        <Link
+        <a
           href={DIAGNOSTIC_URL}
+          target="_blank"
+          rel="noopener noreferrer"
           className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3.5 text-[0.92rem] font-semibold text-white transition-colors hover:bg-ink-2"
         >
-          Meanwhile, take the Founder Diagnostic
+          Meanwhile, take the Business Diagnostic
           <ArrowRight className="h-4 w-4" />
-        </Link>
+        </a>
       </div>
     );
   }

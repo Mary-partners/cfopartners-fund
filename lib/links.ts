@@ -3,11 +3,11 @@
  * Edit here once. Every component imports from this file.
  */
 
-// The Founder Diagnostic, now taken directly on this site (see
-// app/diagnostic/page.tsx) instead of the external Notion form it used to
-// link to. Every "Take the Free Check-Up" CTA across the site sends
-// visitors here.
-export const DIAGNOSTIC_URL = "/diagnostic";
+// The Business Diagnostic, hosted on the Management Capital Lab platform
+// (replacing the old Notion form). Every "Take the Free Check-Up" CTA
+// across the site sends visitors here. /diagnostic itself still redirects
+// here too (see next.config.mjs), in case anything links there directly.
+export const DIAGNOSTIC_URL = "https://www.managementcapitallab.com/platform/login";
 
 // Contact details.
 export const CONTACT_EMAIL = "partner@cfopartners.fund";
