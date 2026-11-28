@@ -9,6 +9,7 @@ import {
   FACEBOOK_URL,
   INSTAGRAM_URL,
   LINKEDIN_URL,
+  MANAGEMENT_CAPITAL_LAB_URL,
   OFFICE_ADDRESS,
 } from "@/lib/links";
 
@@ -129,6 +130,14 @@ export function Footer() {
             <Link href="/privacy" className="hover:text-ink hover:underline">Privacy</Link>
             <Link href="/portal" className="hover:text-ink hover:underline">Client portal</Link>
             <Link href="/os" className="hover:text-ink hover:underline">Team login</Link>
+            <a
+              href={MANAGEMENT_CAPITAL_LAB_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-ink hover:underline"
+            >
+              Management Capital Lab
+            </a>
           </span>
         </div>
       </div>

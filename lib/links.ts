@@ -9,6 +9,13 @@
 export const DIAGNOSTIC_URL =
   "https://www.managementcapitallab.com/platform/start";
 
+// The Management Capital Lab platform itself (sign-in), for portfolio
+// managers, advisors and reviewers returning to an existing account —
+// distinct from DIAGNOSTIC_URL, which sends a founder straight into a new
+// assessment.
+export const MANAGEMENT_CAPITAL_LAB_URL =
+  "https://www.managementcapitallab.com/platform/login";
+
 // Contact details.
 export const CONTACT_EMAIL = "partner@cfopartners.fund";
 export const CONTACT_PHONE = "+254 748 918 910";
